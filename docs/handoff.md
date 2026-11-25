@@ -2,7 +2,7 @@
 
 Read this first in a new session, then `CLAUDE.md`, `docs/brief.md` (the full brief) and
 `docs/plan.md` (Dan's changes to the brief, approved sources, decisions). Last updated
-25 November 2026, end of stage 3.
+25 November 2026, end of stage 4.
 
 ## Status
 
@@ -11,9 +11,9 @@ Read this first in a new session, then `CLAUDE.md`, `docs/brief.md` (the full br
 | 0 Repo, skeleton, deploy | done, pushed |
 | 1 Design system and layout | done, pushed |
 | 2 English content | done, verified (6 rounds, nothing open), pushed |
-| 3 Report templates | done, reviewed, pushed (check `git log origin/main..` for anything unpushed) |
-| 4 Data and figures | next, waiting for Dan's "ok" |
-| 5 Decap CMS | to do |
+| 3 Report templates | done, reviewed, pushed |
+| 4 Data and figures | done, committed locally, waiting for Dan's check and "ok" before push |
+| 5 Decap CMS | next |
 | 6 Translations, remaining pages | to do |
 | 7 QA and release | to do |
 
@@ -34,37 +34,38 @@ Deadline for the application: 30 November 2026, 23:59.
   screenshots. Subagents start without context: their prompts must be self-contained.
 - Never invent facts, figures, references or DOIs. Unknown = `TODO_SOURCE`.
 
-## Stage 4 plan (data and figures)
+## Stage 4 (data and figures): what was built
 
-From the brief and Dan's decisions:
-
-1. Data: WGMS annual mass-change estimates, version **2026-02-10**, author "World Glacier
-   Monitoring Service (WGMS)", DOI 10.5904/wgms-amce-2026-02-10 (key `wgms2026amce` in
-   `src/data/references.json`), landing page https://wgms.ch/mass_change_estimates/. Terms: open
-   access with correct citation. Store the original file(s) with a citation file in `data/raw/`
-   and a small processed CSV in `data/`. Regions: global, Central Europe, the High Mountain Asia
-   regions (Central Asia, South Asia West, South Asia East), Southern Andes. Chart period
-   **1976 to 2025** (hydrological years). Downloading the data file is not a package install,
-   but say what is downloaded and from where.
-2. Interactive chart: own SVG plus a small TypeScript island, no chart library. Keyboard
-   accessible, visible data table alternative, units, uncertainty if the data has it, source
-   line, CSV download. Load the `dataviz` skill before writing chart code.
-3. Other figures: static SVG generated from the data at build time.
-4. Every figure: `<figure>`, `<figcaption>`, alt text, long description (aria-describedby or
-   details), downloads PNG/SVG/CSV. Captions, alt text and long descriptions are content:
-   content-writer writes them from the data, source-verifier checks the values.
-5. Figures page: filter by chapter, accessible lightbox with native `<dialog>` (focus trap, Esc,
-   return focus).
-6. The two placeholders to replace are the `TODO_FIGURE:` paragraphs in
-   `src/content/en/chapters/chapter-1.md` (about line 27: annual global glacier mass change (Gt)
-   by hydrological year, 1976 to 2025; about line 45: cumulative specific mass change (m w.e.) by
-   hydrological year for Central Europe, Central Asia, South Asia West and South Asia East). The
-   text after the marker is an editorial note for stage 4, not reader text. The
-   `figure-placeholder` plugin hides it and shows "Figure in preparation".
-7. Figure files generated from data will appear automatically on the Downloads page (stage 5).
-   Each entry in the Figures collection will get optional "Replacement PNG / SVG / CSV" fields.
-   Keep the figure metadata in a form Decap can edit later.
-8. Images/figures must pass the `check.ts` rules (alt, figure + figcaption) and the a11y tests.
+- Data: `data/raw/wgms-amce-2026-02-10/` holds (locally only, git-ignored: the terms do not state that redistribution is allowed) the original README, `global.csv` and the region
+  files CEU, ASC, ASW, ASE, SA1, SA2, unchanged, with `SOURCE.md` (citation, rights, download
+  URL and date, SHA-256 of the zip and of each file). The 53 MB zip is not committed.
+  `npm run data` (settings in `data/processing.json`) writes `data/glacier-mass-change.csv`
+  (1976 to 2025, values as in the dataset). `npm run check` FAILs when it is out of date.
+- The Southern Andes exist only as SA1 (Patagonia) and SA2 (Central) in the dataset; both are in
+  the processed file, no combined series (no combined uncertainty in the data). No figure uses
+  them yet.
+- Uncertainty: the dataset gives 1-sigma. Figures and tables show the 95% interval
+  (1.96 sigma), as the chapter text does (Zemp et al.: 408 ± 132 Gt = 1.96 × 67.2). The CSV
+  download has both.
+- Figure metadata: `src/content/<lang>/figures/<id>.yml` (schema in `src/content.config.ts`,
+  flat fields for Decap, optional `replacementPng/Svg/Csv` paths below `public/`). A chapter
+  places a figure with a paragraph `FIGURE: <id>`; `src/plugins/figures.ts` turns it into a slot
+  and `src/pages/[lang]/[page].astro` renders `src/components/figures/Figure.astro` there.
+- Charts: pure SVG renderers in `src/lib/charts/` (bars with 95% whiskers; cumulative lines with
+  legend and direct end labels), built in `src/lib/figures.ts`. Each chart has a wide SVG and a
+  narrow one (shown below 40rem). The bar chart has a `role="slider"` layer (arrow keys,
+  Home/End, Page Up/Down, pointer) with a visible readout. Colours: bars in the report accent;
+  lines in a validated 4-colour categorical order (`SERIES_COLOURS` in `frame.ts`).
+- Files: SVG (per language) and CSV (one per figure) are generated at build by
+  `src/pages/downloads/figures/[file].ts`, under `<base>downloads/figures/`. PNGs are made
+  locally (Cloudflare has no browser): **after changing data, figure metadata or chart code run
+  `npm run build && npm run figures:png && npm run build`** and commit `public/downloads/figures/`
+  and `data/figure-png.json`. `npm run check` FAILs on a missing or stale PNG.
+- Figures page: `src/pages/[lang]/figures.astro` (own route; `[page].astro` skips "figures"):
+  chapter filter (radios, JS only), cards with inline SVG, native `<dialog>` lightbox. a11y
+  tests cover the slider and the lightbox (open, axe while open, Esc, focus return).
+- French: figure YAML and chapter content come in stage 6; the FR Figures page shows the
+  "in preparation" stub with a link to English. FR UI strings exist already.
 
 ## Technical facts and gotchas
 
@@ -97,6 +98,9 @@ From the brief and Dan's decisions:
 ## Open items for later stages
 
 - Stage 5: `check.ts` rule FAIL for any file in `dist/` over 25 MiB (Cloudflare Pages limit).
+  Decap config for the Figures collection (YAML in `src/content/<lang>/figures/`) and the
+  Downloads page merge (generated figure files + Downloads entries; `downloadsFor()` in
+  `src/lib/figure-store.ts` already handles replacements).
 - Stage 6: the Arabic parity rule in `check.ts` must allow the shared keys the Summary page
   uses (citations, notes, cross-references), not only `summary.*` keys. `X-Robots-Tag: noindex`
   on `mountain-report-dwt.pages.dev` plus canonical to pinecone.lu. Propose the WMO video to Dan

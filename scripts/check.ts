@@ -2,6 +2,7 @@
 // Usage: npm run check [-- --pre-release] [-- --root <dir>]
 // Exit code 1 when any FAIL is found. Node built-ins only, no dependencies.
 
+import { createHash } from "node:crypto";
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { extname, join, relative, sep } from "node:path";
 import {
@@ -27,6 +28,7 @@ import {
   parseWrangler,
 } from "./check-lib.ts";
 import { validateReportConfig, type ReportConfig } from "../src/config/validate.ts";
+import { parseWgmsCsv, processedCsv, selectPeriod } from "./data/wgms-lib.ts";
 
 type Level = "FAIL" | "WARN";
 interface Finding {
@@ -129,6 +131,58 @@ for (const file of distHtml) {
   const html = read(file);
   for (const index of findImgsWithoutAlt(html)) report("FAIL", "figures", "<img> without alt attribute", at(file, html, index));
   for (const index of findFiguresWithoutFigcaption(html)) report("FAIL", "figures", "<figure> without <figcaption>", at(file, html, index));
+}
+
+// ---------- b2. data and figure files ----------
+
+// The processed data file must match what scripts/data/process-wgms.ts makes from data/raw/.
+// The original files are not in the repository: when they are absent (CI, a fresh clone) this
+// is a WARN; when present, a wrong SHA-256 or an out-of-date processed file is a FAIL.
+const processingFile = join(DATA, "processing.json");
+if (existsSync(processingFile)) {
+  const settings = readJson(processingFile, "data") as
+    | { rawDir: string; output: string; firstYear: number; lastYear: number; series: Array<{ id: string; file: string; sha256: string }> }
+    | undefined;
+  if (settings) {
+    const missing = settings.series.filter(({ file }) => !existsSync(join(ROOT, settings.rawDir, file)));
+    if (missing.length > 0) {
+      report("WARN", "data", `original data files not present (${missing.length}), ${settings.output} not re-verified: see ${settings.rawDir}/SOURCE.md`, settings.rawDir);
+    } else {
+      try {
+        const expected = processedCsv(
+          settings.series.map(({ id, file, sha256 }) => {
+            const path = join(settings.rawDir, file);
+            const bytes = readFileSync(join(ROOT, path));
+            if (createHash("sha256").update(bytes).digest("hex") !== sha256) throw new Error(`${path}: SHA-256 does not match data/processing.json`);
+            return { id, rows: selectPeriod(parseWgmsCsv(bytes.toString("utf8"), path), settings.firstYear, settings.lastYear, path) };
+          }),
+        );
+        const outFile = join(ROOT, settings.output);
+        if (!existsSync(outFile) || read(outFile) !== expected) report("FAIL", "data", `${settings.output} is out of date: run npm run data`, settings.output);
+      } catch (error) {
+        report("FAIL", "data", (error as Error).message, "data/processing.json");
+      }
+    }
+  }
+}
+
+// Every generated figure SVG needs a PNG made from that exact SVG (npm run figures:png).
+if (distExists) {
+  const figureDir = join(DIST, BASE_PATH.replace(/^\/+|\/+$/g, ""), "downloads", "figures");
+  const manifestFile = join(DATA, "figure-png.json");
+  const manifest = (existsSync(manifestFile) ? readJson(manifestFile, "figures") : {}) as Record<string, string>;
+  const svgs = existsSync(figureDir) ? readdirSync(figureDir).filter((f) => f.endsWith(".svg")) : [];
+  for (const svg of svgs) {
+    const png = svg.replace(/\.svg$/, ".png");
+    const hash = createHash("sha256").update(readFileSync(join(figureDir, svg))).digest("hex");
+    if (!existsSync(join(PUBLIC, "downloads", "figures", png))) {
+      report("FAIL", "figures", `no PNG for ${svg}: run npm run figures:png, then build again`, `public/downloads/figures/${png}`);
+    } else if (manifest[png] !== hash) {
+      report("FAIL", "figures", `${png} is stale (its SVG has changed): run npm run figures:png, then build again`, `public/downloads/figures/${png}`);
+    } else if (!existsSync(join(figureDir, png))) {
+      report("FAIL", "figures", `${png} is not in dist/: build again after npm run figures:png`, `public/downloads/figures/${png}`);
+    }
+  }
 }
 
 // ---------- c. translation parity ----------

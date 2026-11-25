@@ -1,0 +1,199 @@
+---
+// One data figure in a chapter: chart (wide and narrow SVG), caption with source, long
+// description, data table and downloads. A bar chart also gets a keyboard and pointer layer
+// (a slider over the plot, see the script below). Without JavaScript the chart, the table and
+// the downloads all work; only the slider stays hidden.
+import { t, tf } from "../../i18n/index";
+import { built, downloadsFor } from "../../lib/figure-store";
+import { formatSize, type FigureData } from "../../lib/figures";
+import { formatReference, parseReferences } from "../../lib/references";
+import referencesData from "../../data/references.json";
+
+interface Props {
+  figure: FigureData;
+  lang: string;
+}
+
+const { figure, lang } = Astro.props;
+const b = built(figure, lang);
+const downloads = downloadsFor(figure, lang);
+const references = parseReferences(referencesData);
+const sources = figure.source.map((key) => formatReference(references.get(key)!));
+const descId = `${b.anchor}-description`;
+const tableCaptionId = `${b.anchor}-table-caption`;
+const readoutId = `${b.anchor}-readout`;
+const formatLabel = { png: t(lang, "figure.download.png"), svg: t(lang, "figure.download.svg"), csv: t(lang, "figure.download.csv") };
+const addDescribedBy = (svg: string) => svg.replace("<svg ", `<svg aria-describedby="${descId}" `);
+---
+
+<figure id={b.anchor} class="report-figure" data-figure={figure.id}>
+  <div class="figure-chart">
+    {
+      b.slider && (
+        <p class="chart-readout" id={readoutId} aria-hidden="true" data-hint={t(lang, "figure.slider.hint")} hidden>
+          {t(lang, "figure.slider.hint")}
+        </p>
+      )
+    }
+    <div class="chart-plot">
+      <Fragment set:html={addDescribedBy(b.svgWide)} />
+      <Fragment set:html={addDescribedBy(b.svgNarrow)} />
+      {
+        b.slider && (
+          <div
+            class="chart-slider"
+            role="slider"
+            tabindex="0"
+            hidden
+            aria-label={tf(lang, "figure.slider.label", { number: figure.number })}
+            aria-valuemin={b.slider.years[0]}
+            aria-valuemax={b.slider.years[b.slider.years.length - 1]}
+            aria-valuenow={b.slider.years[b.slider.years.length - 1]}
+            aria-valuetext={b.slider.texts[b.slider.texts.length - 1]}
+          />
+        )
+      }
+    </div>
+  </div>
+  <figcaption>
+    <span class="figure-label">{b.label}</span>
+    <span class="figure-title">{figure.title}</span>
+    <span class="figure-caption">{figure.caption}</span>
+    <span class="figure-source">
+      {t(lang, "figure.source")}{" "}
+      {
+        sources.map((s) => (
+          <>
+            {s.text}
+            {s.link && (
+              <>
+                {" "}
+                <a href={s.link.href}>{s.link.label}</a>
+              </>
+            )}
+          </>
+        ))
+      }
+    </span>
+  </figcaption>
+  <details class="figure-description">
+    <summary>{t(lang, "figure.description")}</summary>
+    <p id={descId}>{figure.longDescription}</p>
+  </details>
+  <div class="figure-table" role="region" tabindex="0" aria-labelledby={tableCaptionId}>
+    <table>
+      <caption id={tableCaptionId}>{tf(lang, "figure.table.caption", { number: figure.number })}</caption>
+      <thead>
+        <tr>{b.table.columns.map((c) => <th scope="col">{c}</th>)}</tr>
+      </thead>
+      <tbody>
+        {
+          b.table.rows.map((row) => (
+            <tr>
+              <th scope="row">{row[0]}</th>
+              {row.slice(1).map((cell) => (
+                <td>{cell}</td>
+              ))}
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+  </div>
+  <div class="figure-downloads">
+    <p class="figure-downloads-label">{tf(lang, "figure.downloads", { number: figure.number })}</p>
+    <ul>
+      {
+        downloads.map((d) => (
+          <li>
+            <a href={d.href} download>
+              {tf(lang, "figure.download.item", { format: formatLabel[d.format], size: formatSize(lang, d.bytes) })}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</figure>
+
+<script>
+  // Keyboard and pointer layer for bar charts: a slider over the plot. Arrow keys, Home/End and
+  // Page Up/Down move between years; pointer movement selects the nearest bar. The readout above
+  // the chart shows the value; the slider's aria-valuetext gives it to screen readers.
+  for (const figure of document.querySelectorAll<HTMLElement>(".report-figure")) {
+    const slider = figure.querySelector<HTMLElement>(".chart-slider");
+    const readout = figure.querySelector<HTMLElement>(".chart-readout");
+    if (!slider || !readout) continue;
+    const svgs = [...figure.querySelectorAll<SVGSVGElement>(".figure-chart svg")];
+    const bars = svgs.map((svg) => [...svg.querySelectorAll<SVGPathElement>("[data-readout]")]);
+    const count = bars[0]?.length ?? 0;
+    if (count === 0) continue;
+    const texts = bars[0].map((bar) => bar.dataset.readout ?? "");
+    const first = Number(slider.getAttribute("aria-valuemin"));
+    let index = -1;
+
+    const visibleSvg = () => svgs.find((svg) => svg.getBoundingClientRect().width > 0);
+
+    const show = (i: number) => {
+      index = Math.max(0, Math.min(count - 1, i));
+      slider.setAttribute("aria-valuenow", String(first + index));
+      slider.setAttribute("aria-valuetext", texts[index]);
+      readout.textContent = texts[index];
+      svgs.forEach((svg, k) => {
+        const hover = svg.querySelector<SVGRectElement>("[data-role=hover]");
+        const left = Number(svg.dataset.plotLeft);
+        const band = Number(svg.dataset.band);
+        if (hover) {
+          hover.setAttribute("x", String(left + index * band));
+          hover.setAttribute("visibility", "visible");
+        }
+        bars[k].forEach((bar, j) => bar.classList.toggle("is-current", j === index));
+      });
+    };
+
+    const clear = () => {
+      if (document.activeElement === slider) return;
+      readout.textContent = readout.dataset.hint ?? "";
+      svgs.forEach((svg, k) => {
+        svg.querySelector("[data-role=hover]")?.setAttribute("visibility", "hidden");
+        bars[k].forEach((bar) => bar.classList.remove("is-current"));
+      });
+    };
+
+    const indexAt = (clientX: number): number | undefined => {
+      const svg = visibleSvg();
+      if (!svg) return undefined;
+      const rect = svg.getBoundingClientRect();
+      const scale = svg.viewBox.baseVal.width / rect.width;
+      const x = (clientX - rect.left) * scale;
+      return Math.floor((x - Number(svg.dataset.plotLeft)) / Number(svg.dataset.band));
+    };
+
+    slider.addEventListener("keydown", (event) => {
+      const current = index < 0 ? count - 1 : index;
+      const moves: Record<string, number> = {
+        ArrowLeft: current - 1,
+        ArrowDown: current - 1,
+        ArrowRight: current + 1,
+        ArrowUp: current + 1,
+        PageDown: current - 10,
+        PageUp: current + 10,
+        Home: 0,
+        End: count - 1,
+      };
+      if (!(event.key in moves)) return;
+      event.preventDefault();
+      show(moves[event.key]);
+    });
+    slider.addEventListener("focus", () => show(index < 0 ? count - 1 : index));
+    slider.addEventListener("blur", clear);
+    slider.addEventListener("pointermove", (event) => {
+      const i = indexAt(event.clientX);
+      if (i !== undefined && i >= 0 && i < count) show(i);
+    });
+    slider.addEventListener("pointerleave", clear);
+
+    slider.hidden = false;
+    readout.hidden = false;
+  }
+</script>

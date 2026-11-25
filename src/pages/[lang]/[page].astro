@@ -2,6 +2,7 @@
 import type { MarkdownHeading } from "astro";
 import { getCollection, render } from "astro:content";
 import Base from "../../layouts/Base.astro";
+import Figure from "../../components/figures/Figure.astro";
 import ReportLayout from "../../layouts/ReportLayout.astro";
 import { allPageSlugs, chapterTitle, fixedPage } from "../../config/pages";
 import { defaultLanguage, fullLanguages, report } from "../../config/report";
@@ -9,10 +10,15 @@ import { t, tf } from "../../i18n/index";
 import type { Crumb, TocHeading } from "../../lib/nav";
 import { pageUrl } from "../../lib/urls";
 import { GLOSSARY_INDEX_ID } from "../../plugins/structure";
+import { splitAtFigureSlots } from "../../plugins/figures";
+import { figuresFor } from "../../lib/figure-store";
 
 export function getStaticPaths() {
   return fullLanguages.flatMap((language) =>
-    allPageSlugs(report.chapters).map((page) => ({ params: { lang: language.code, page } })),
+    allPageSlugs(report.chapters)
+      // The Figures page has its own route (figures.astro).
+      .filter((page) => page !== "figures")
+      .map((page) => ({ params: { lang: language.code, page } })),
   );
 }
 
@@ -37,6 +43,15 @@ async function findEntry(language: string) {
 const entry = await findEntry(lang);
 const rendered = entry ? await render(entry) : undefined;
 const Content = rendered?.Content;
+
+// Pages with figure slots ("FIGURE: <id>" paragraphs) are rendered in parts, with the Figure
+// component at each slot.
+const html = entry?.rendered?.html ?? "";
+const parts = html.includes("data-figure=") ? splitAtFigureSlots(html) : undefined;
+const figures = parts ? new Map((await figuresFor(lang)).map((f) => [f.id, f])) : new Map();
+for (const part of parts ?? []) {
+  if ("figure" in part && !figures.has(part.figure)) throw new Error(`${lang}/${page}: no figure "${part.figure}" in src/content/${lang}/figures/`);
+}
 
 const fallbackTitle = chapter
   ? tf(lang, "chapter.heading", { number: chapter.number, title: chapterTitle(chapter, lang) })
@@ -83,7 +98,13 @@ const englishEntry = entry || lang === defaultLanguage.code ? undefined : await 
           </nav>
         )
       }
-      <Content />
+      {
+        parts ? (
+          parts.map((part) => ("figure" in part ? <Figure figure={figures.get(part.figure)!} lang={lang} /> : <Fragment set:html={part.html} />))
+        ) : (
+          <Content />
+        )
+      }
     </ReportLayout>
   ) : (
     <Base lang={lang} title={title} switchPath={page} breadcrumbs={breadcrumbs}>

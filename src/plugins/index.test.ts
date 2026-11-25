@@ -9,6 +9,7 @@ describe("contentPlugins", () => {
     expect(names).toEqual([
       "mountain-report-heading-ids",
       "mountain-report-figure-placeholder",
+      "mountain-report-figures",
       "mountain-report-crossrefs",
       "mountain-report-calibrated",
       "mountain-report-notes",
