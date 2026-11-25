@@ -18,23 +18,21 @@ A second approach compares and combines many independent estimates [@glambie2025
 
 ## 1.2 Global glacier mass change since the 1970s
 
-The paper describing the WGMS method reports that glaciers lost 9,179 ± 621 Gt of water between 1976 and 2024, an average of 187 ± 20 Gt per year [@dussaillant2025essd]. About 41% of this total loss took place in the last ten years of that record [@dussaillant2025essd]. About 6% of it took place in 2023 alone, which the authors identify as a record year for glacier mass loss [@dussaillant2025essd].
+The paper describing the WGMS method reports that glaciers lost 9,179 ± 621 Gt of water between 1976 and 2024, an average of 187 ± 20 Gt yr⁻¹ [@dussaillant2025essd]. About 41% of this total loss took place in the last ten years of that record [@dussaillant2025essd]. About 6% of it took place in 2023 alone, which the authors identify as a record year for glacier mass loss [@dussaillant2025essd].
 
-The current version of the series runs to the hydrological year 2025 [@wgms2026amce; @zemp2026]. On this basis, glaciers have lost 9,583 ± 1,211 Gt since 1975 [@zemp2026]. The source states the start of the cumulative period as 1975, while its figure of global mass change begins with the hydrological year 1976 [@zemp2026].
+The current version of the series runs to the hydrological year 2025 [@wgms2026amce; @zemp2026]. On this basis, glaciers have lost 9,583 ± 1,211 Gt since 1975 [@zemp2026].
 
 TODO_FIGURE: Annual global glacier mass change (Gt) by hydrological year, 1976 to 2025, from the WGMS annual mass-change estimates (version 2026-02-10).
 
 ## 1.3 Glacier loss from 2000 to 2023
 
-GlaMBIE estimates that glaciers lost on average 273 ± 16 Gt of mass per year from 2000 to 2023 [@glambie2025]. The cumulative loss over the period was 6,542 ± 387 Gt [@glambie2025]. This is about 5% of the global glacier mass in 2000 [@glambie2025].
+GlaMBIE estimates that glaciers lost on average 273 ± 16 Gt yr⁻¹ from 2000 to 2023 [@glambie2025]. The cumulative loss over the period was 6,542 ± 387 Gt [@glambie2025]. This is about 5% of the global glacier mass in 2000 [@glambie2025].
 
-Mass loss averaged 231 ± 23 Gt per year in 2000 to 2011 and 314 ± 23 Gt per year in 2012 to 2023, an increase of 36 ± 10% [@glambie2025]. The largest annual loss in the record was in 2023, at 548 ± 120 Gt [@glambie2025].
+Mass loss averaged 231 ± 23 Gt yr⁻¹ in 2000 to 2011 and 314 ± 23 Gt yr⁻¹ in 2012 to 2023, an increase of 36 ± 10% [@glambie2025]. The largest annual loss in the record was in 2023, at 548 ± 120 Gt [@glambie2025].
 
-### 1.3.1 Mountain regions
+### 1.3.1 Regional differences
 
-Relative losses since 2000 range from 2% to 39% between regions [@glambie2025]. Central Europe lost 39% of its glacier ice, the largest relative loss of any region [@glambie2025]. Its glaciers lost 2.0 ± 0.1 Gt per year, or 1.06 ± 0.04 m water equivalent (w.e.) per year averaged over the glacier area [@glambie2025].
-
-In High Mountain Asia, mass loss in South Asia West increased in the second half of the record [@glambie2025]. Over 2000 to 2023, the largest regional shares of global glacier loss came from Alaska (22%), the Canadian Arctic (20%), the glaciers around Greenland (13%) and the Southern Andes (10%) [@glambie2025].
+Relative losses since 2000 range from 2% to 39% between regions [@glambie2025]. Central Europe lost 39% of its glacier ice, the largest relative loss of any region [@glambie2025]. Its glaciers lost 2.0 ± 0.1 Gt yr⁻¹, or 1.06 ± 0.04 m w.e. yr⁻¹ (metres water equivalent) averaged over the glacier area [@glambie2025]. In High Mountain Asia, mass loss in South Asia West increased in the second half of the record [@glambie2025]. Over 2000 to 2023, the largest regional shares of global glacier loss came from Alaska (22%), the Canadian Arctic (20%), the glaciers around Greenland (13%) and the Southern Andes (10%) [@glambie2025].
 
 ### 1.3.2 The IPCC assessment of high mountain glaciers
 
@@ -54,10 +52,10 @@ The World Meteorological Organization (WMO) also reports on a set of reference g
 
 ## 1.5 Contribution to sea-level rise
 
-The paper describing the WGMS method reports that glacier mass loss raised global mean sea level by 25.3 ± 1.7 mm between 1976 and 2024, or 0.5 ± 0.2 mm per year on average [@dussaillant2025essd]. About 10 mm of this rise came in the last ten years of that record, and about 1.5 mm in 2023 [@dussaillant2025essd].
+The paper describing the WGMS method reports that glacier mass loss raised global mean sea level by 25.3 ± 1.7 mm between 1976 and 2024, or 0.5 ± 0.2 mm yr⁻¹ on average [@dussaillant2025essd]. About 10 mm of this rise came in the last ten years of that record, and about 1.5 mm in 2023 [@dussaillant2025essd].
 
-GlaMBIE gives a contribution of 18 ± 1 mm from 2000 to 2023, an average of 0.75 ± 0.04 mm per year [@glambie2025]. The 2023 loss alone corresponds to 1.51 ± 0.33 mm [@glambie2025]. For 2002 to 2021, GlaMBIE puts the glacier contribution at 0.72 ± 0.04 mm per year and that of the Greenland Ice Sheet at 0.62 ± 0.06 mm per year [@glambie2025]. It expresses these as shares of 20% and 17% of observed sea-level rise, using an observed rate of 3.64 ± 0.26 mm per year for 2003 to 2016 [@glambie2025]. Over 2002 to 2021, glaciers lost about 18% more mass than the Greenland Ice Sheet and over twice as much as the Antarctic Ice Sheet [@glambie2025].
+GlaMBIE gives a contribution of 18 ± 1 mm from 2000 to 2023, an average of 0.75 ± 0.04 mm yr⁻¹ [@glambie2025]. The 2023 loss alone corresponds to 1.51 ± 0.33 mm [@glambie2025]. For 2002 to 2021, GlaMBIE puts the glacier contribution at 0.72 ± 0.04 mm yr⁻¹ and that of the Greenland Ice Sheet at 0.62 ± 0.06 mm yr⁻¹ [@glambie2025]. It expresses these as shares of 20% and 17% of observed sea-level rise, using an observed rate of 3.64 ± 0.26 mm yr⁻¹ for 2003 to 2016 [@glambie2025]. Over 2002 to 2021, glaciers lost about 18% more mass than the Greenland Ice Sheet and over twice as much as the Antarctic Ice Sheet [@glambie2025].
 
 The loss in the hydrological year 2025 corresponds to 1.1 ± 0.4 mm of sea-level rise [@zemp2026]. The cumulative loss since 1975 corresponds to 26.4 ± 3.3 mm [@zemp2026].
 
-For the eleven high mountain regions alone, SROCC gives a sea-level contribution of 0.34 ± 0.07 mm per year for 2006 to 2015 [@hock2019srocc].
+For the eleven high mountain regions alone, SROCC gives a sea-level contribution of 0.34 ± 0.07 mm yr⁻¹ for 2006 to 2015 [@hock2019srocc].
