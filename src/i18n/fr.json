@@ -1,0 +1,10 @@
+{
+  "site.underConstruction": "Site en construction.",
+  "banner.demo": "Contenu de démonstration à des fins de portfolio. Il ne s'agit pas d'une évaluation scientifique. Sans lien avec le GIEC ou l'OMM.",
+  "a11y.skip": "Aller au contenu principal",
+  "lang.choose": "Choisir une langue",
+  "lang.en.name": "English",
+  "lang.fr.name": "Français",
+  "notFound.title": "Page introuvable",
+  "notFound.text": "La page demandée n'existe pas."
+}

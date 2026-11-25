@@ -1,0 +1,16 @@
+---
+import Base from "../../layouts/Base.astro";
+import { fullLanguages, reportTitle } from "../../config/report";
+import { t } from "../../i18n/index";
+
+export function getStaticPaths() {
+  return fullLanguages.map((language) => ({ params: { lang: language.code } }));
+}
+
+const { lang } = Astro.params;
+---
+
+<Base lang={lang} title={reportTitle(lang)}>
+  <h1>{reportTitle(lang)}</h1>
+  <p>{t(lang, "site.underConstruction")}</p>
+</Base>

@@ -1,0 +1,390 @@
+// Pure helpers for scripts/check.ts. No file system access here, so they can be
+// unit-tested with plain vitest. Node strip-types friendly: no enums, no
+// parameter properties.
+
+export type Attrs = Record<string, string>;
+
+export interface TextHit {
+  text: string;
+  index: number;
+  kind: "text" | "attribute";
+}
+
+export interface UrlOptions {
+  /** True for admin pages, where the Decap CDN and GitHub hosts are allowed. */
+  isAdmin: boolean;
+  /** Hosts of the official source URLs listed in the references data. */
+  referenceHosts: ReadonlySet<string>;
+}
+
+const EM_DASH = "\u2014";
+
+// ---------- HTML ----------
+
+export function parseAttrs(tagBody: string): Attrs {
+  const attrs: Attrs = {};
+  for (const m of tagBody.matchAll(/([\w:-]+)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+)))?/g)) {
+    attrs[m[1].toLowerCase()] = m[2] ?? m[3] ?? m[4] ?? "";
+  }
+  return attrs;
+}
+
+/** Indexes of every <img> without an alt attribute (an empty alt is allowed). */
+export function findImgsWithoutAlt(html: string): number[] {
+  const out: number[] = [];
+  for (const m of html.matchAll(/<img\b([^>]*)>/gi)) {
+    if (!("alt" in parseAttrs(m[1]))) out.push(m.index ?? 0);
+  }
+  return out;
+}
+
+/** Indexes of every <figure> that has no <figcaption> inside it. */
+export function findFiguresWithoutFigcaption(html: string): number[] {
+  const out: number[] = [];
+  for (const m of html.matchAll(/<figure\b[^>]*>([\s\S]*?)<\/figure>/gi)) {
+    if (!/<figcaption\b/i.test(m[1])) out.push(m.index ?? 0);
+  }
+  return out;
+}
+
+// ---------- translations ----------
+
+/** Flattens nested objects into dot keys. Flat dot-key files come back unchanged. */
+export function flattenKeys(value: unknown, prefix = ""): string[] {
+  if (value === null || typeof value !== "object" || Array.isArray(value)) {
+    return prefix === "" ? [] : [prefix];
+  }
+  const out: string[] = [];
+  for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
+    const key = prefix === "" ? k : `${prefix}.${k}`;
+    if (v !== null && typeof v === "object" && !Array.isArray(v)) out.push(...flattenKeys(v, key));
+    else out.push(key);
+  }
+  return out;
+}
+
+export interface Dictionary {
+  code: string;
+  scope: "full" | "summary";
+  isDefault: boolean;
+  data: unknown;
+}
+
+/**
+ * Full-scope languages must have exactly the key set of the default language.
+ * Summary-scope languages may only use keys that start with "summary." and
+ * exist in the default language.
+ */
+export function compareTranslations(dictionaries: readonly Dictionary[]): string[] {
+  const problems: string[] = [];
+  const reference = dictionaries.find((d) => d.isDefault);
+  if (!reference) return ["no default language to compare against"];
+  const refKeys = new Set(flattenKeys(reference.data));
+  for (const d of dictionaries) {
+    if (d === reference) continue;
+    const keys = new Set(flattenKeys(d.data));
+    if (d.scope === "full") {
+      for (const k of refKeys) if (!keys.has(k)) problems.push(`key "${k}" is in ${reference.code} but missing in ${d.code}`);
+      for (const k of keys) if (!refKeys.has(k)) problems.push(`key "${k}" is in ${d.code} but missing in ${reference.code}`);
+    } else {
+      for (const k of keys) {
+        if (!k.startsWith("summary.")) problems.push(`${d.code} key "${k}" does not start with "summary."`);
+        if (!refKeys.has(k)) problems.push(`${d.code} key "${k}" does not exist in ${reference.code}`);
+      }
+    }
+  }
+  return problems;
+}
+
+// ---------- hardcoded text in .astro ----------
+
+function blankRange(chars: string[], from: number, to: number): void {
+  for (let i = from; i < to && i < chars.length; i++) if (chars[i] !== "\n") chars[i] = " ";
+}
+
+/** Blanks {expressions} (balanced braces, string aware) while keeping offsets. */
+function blankExpressions(text: string): string {
+  const chars = text.split("");
+  let i = 0;
+  while (i < text.length) {
+    if (text[i] !== "{") {
+      i++;
+      continue;
+    }
+    let depth = 0;
+    let j = i;
+    let quote = "";
+    for (; j < text.length; j++) {
+      const c = text[j];
+      if (quote) {
+        if (c === "\\") j++;
+        else if (c === quote) quote = "";
+      } else if (c === '"' || c === "'" || c === "`") quote = c;
+      else if (c === "{") depth++;
+      else if (c === "}") {
+        depth--;
+        if (depth === 0) break;
+      }
+    }
+    blankRange(chars, i, j + 1);
+    i = j + 1;
+  }
+  return chars.join("");
+}
+
+const VISIBLE_ATTRS = /\b(alt|aria-label|title|placeholder)\s*=\s*("([^"]*)"|'([^']*)')/gi;
+
+function hasLetters(s: string): boolean {
+  return /\p{L}/u.test(s.replace(/&#?\w+;/g, " "));
+}
+
+/**
+ * Finds literal visible text in an .astro file: text nodes outside {expressions}
+ * and literal alt / aria-label / title / placeholder attributes. Frontmatter,
+ * <script>, <style> and comments are ignored, as are punctuation and whitespace.
+ */
+export function findHardcodedText(source: string): TextHit[] {
+  const chars = source.split("");
+  const fm = /^---\r?\n[\s\S]*?\r?\n---/.exec(source);
+  if (fm) blankRange(chars, 0, fm[0].length);
+  for (const m of source.matchAll(/<script\b[^>]*>[\s\S]*?<\/script>|<style\b[^>]*>[\s\S]*?<\/style>|<!--[\s\S]*?-->/gi)) {
+    blankRange(chars, m.index ?? 0, (m.index ?? 0) + m[0].length);
+  }
+  const cleaned = blankExpressions(chars.join(""));
+
+  const hits: TextHit[] = [];
+  let last = 0;
+  const pushText = (from: number, to: number) => {
+    const raw = cleaned.slice(from, to);
+    if (hasLetters(raw)) hits.push({ text: raw.trim().replace(/\s+/g, " "), index: from + (raw.length - raw.trimStart().length), kind: "text" });
+  };
+  for (const tag of cleaned.matchAll(/<[^>]*>/g)) {
+    const start = tag.index ?? 0;
+    pushText(last, start);
+    for (const a of tag[0].matchAll(VISIBLE_ATTRS)) {
+      const value = a[3] ?? a[4] ?? "";
+      if (hasLetters(value)) hits.push({ text: `${a[1]}="${value}"`, index: start + (a.index ?? 0), kind: "attribute" });
+    }
+    last = start + tag[0].length;
+  }
+  pushText(last, cleaned.length);
+  return hits;
+}
+
+// ---------- external URLs ----------
+
+const XML_NAMESPACE_URIS: RegExp[] = [
+  /^http:\/\/www\.w3\.org\/(2000\/svg|1999\/xlink|1999\/xhtml)$/,
+  /^http:\/\/www\.sitemaps\.org\/schemas\/sitemap\/0\.9$/,
+  /^http:\/\/www\.google\.com\/schemas\/sitemap-(news|image|video)\/\d+(\.\d+)?$/,
+];
+
+const ALWAYS_HOSTS = ["doi.org", "creativecommons.org", "youtube-nocookie.com", "player.vimeo.com", "pinecone.lu"];
+// Decap CDN (unpkg) and GitHub: admin pages only.
+const ADMIN_HOSTS = ["unpkg.com", "github.com", "api.github.com"];
+
+const hostMatches = (host: string, domain: string) => host === domain || host.endsWith(`.${domain}`);
+
+export function findExternalUrls(text: string): Array<{ url: string; index: number }> {
+  const out: Array<{ url: string; index: number }> = [];
+  for (const m of text.matchAll(/https?:\/\/[^\s"'`<>)\\\]]+/g)) {
+    out.push({ url: m[0].replace(/[.,;:]+$/, ""), index: m.index ?? 0 });
+  }
+  return out;
+}
+
+export function isUrlAllowed(url: string, options: UrlOptions): boolean {
+  if (XML_NAMESPACE_URIS.some((re) => re.test(url))) return true;
+  let host: string;
+  try {
+    host = new URL(url).hostname.toLowerCase();
+  } catch {
+    return false;
+  }
+  if (ALWAYS_HOSTS.some((d) => hostMatches(host, d))) return true;
+  if (options.referenceHosts.has(host)) return true;
+  if (options.isAdmin && ADMIN_HOSTS.some((d) => hostMatches(host, d))) return true;
+  return false;
+}
+
+// ---------- references and citations ----------
+
+/** Citation keys used in a Markdown body: [@key] and [@a; @b]. Code fences are ignored. */
+export function extractCitationKeys(markdown: string): string[] {
+  const withoutFences = markdown.replace(/```[\s\S]*?```/g, "");
+  const keys: string[] = [];
+  for (const group of withoutFences.matchAll(/\[(@[^\]]*)\]/g)) {
+    for (const k of group[1].matchAll(/@([\w][\w:.\-/]*)/g)) keys.push(k[1].replace(/[.:\-/]+$/, ""));
+  }
+  return keys;
+}
+
+export interface ReferenceIndex {
+  keys: Set<string>;
+  problems: string[];
+  hosts: Set<string>;
+}
+
+function collectHosts(value: unknown, hosts: Set<string>): void {
+  if (typeof value === "string") {
+    if (/^https?:\/\//i.test(value)) {
+      try {
+        hosts.add(new URL(value).hostname.toLowerCase());
+      } catch {
+        // malformed URL: reported elsewhere (reference needs a usable doi or url)
+      }
+    }
+  } else if (Array.isArray(value)) {
+    for (const v of value) collectHosts(v, hosts);
+  } else if (value !== null && typeof value === "object") {
+    for (const v of Object.values(value as Record<string, unknown>)) collectHosts(v, hosts);
+  }
+}
+
+/**
+ * Reads the references data: an array of objects with "key" (or "id"), or an
+ * object keyed by reference key. Every reference needs a "doi" or a "url".
+ * Undefined data (no file yet) is valid and empty.
+ */
+export function indexReferences(data: unknown): ReferenceIndex {
+  const index: ReferenceIndex = { keys: new Set(), problems: [], hosts: new Set() };
+  if (data === undefined || data === null) return index;
+  let entries: Array<[string | undefined, unknown]>;
+  if (Array.isArray(data)) {
+    entries = data.map((item) => {
+      const rec = item as Record<string, unknown> | null;
+      const k = rec && (rec.key ?? rec.id);
+      return [typeof k === "string" ? k : undefined, item];
+    });
+  } else if (typeof data === "object") {
+    entries = Object.entries(data as Record<string, unknown>);
+  } else {
+    index.problems.push("references data must be an array or an object");
+    return index;
+  }
+  entries.forEach(([key, item], i) => {
+    const label = key ?? `#${i}`;
+    if (key === undefined || key === "") {
+      index.problems.push(`reference ${label} has no "key"`);
+    } else if (index.keys.has(key)) {
+      index.problems.push(`duplicate reference key "${key}"`);
+    } else {
+      index.keys.add(key);
+    }
+    const rec = item !== null && typeof item === "object" ? (item as Record<string, unknown>) : {};
+    const hasValue = (f: string) => typeof rec[f] === "string" && (rec[f] as string).trim() !== "";
+    if (!hasValue("doi") && !hasValue("url")) index.problems.push(`reference "${label}" has neither "doi" nor "url"`);
+    collectHosts(item, index.hosts);
+  });
+  return index;
+}
+
+// ---------- characters and markers ----------
+
+export function findEmDashes(text: string): number[] {
+  const out: number[] = [];
+  for (let i = text.indexOf(EM_DASH); i >= 0; i = text.indexOf(EM_DASH, i + 1)) out.push(i);
+  return out;
+}
+
+export function findMarker(text: string, marker: string): number[] {
+  const out: number[] = [];
+  for (let i = text.indexOf(marker); i >= 0; i = text.indexOf(marker, i + 1)) out.push(i);
+  return out;
+}
+
+export function lineAt(text: string, index: number): number {
+  let line = 1;
+  for (let i = 0; i < index && i < text.length; i++) if (text[i] === "\n") line++;
+  return line;
+}
+
+// ---------- dist layout ----------
+
+export const DIST_ROOT_ALLOWED: ReadonlySet<string> = new Set(["_headers", "_redirects", "_routes.json", "404.html"]);
+
+/** Problems for one path relative to dist/ (posix separators). basePath is e.g. "/mountain-report". */
+export function checkDistPath(path: string, basePath: string): string[] {
+  const problems: string[] = [];
+  const prefix = `${basePath.replace(/^\/+|\/+$/g, "")}/`;
+  if (path.toLowerCase().endsWith(".md")) problems.push(`dist/${path}: Markdown files must not be published`);
+  if (!path.startsWith(prefix) && !DIST_ROOT_ALLOWED.has(path) && !path.endsWith(".DS_Store")) {
+    problems.push(`dist/${path} is outside ${basePath}/`);
+  }
+  return problems;
+}
+
+// ---------- worker/wrangler.toml ----------
+
+export interface WranglerInfo {
+  basePath?: string;
+  pagesOrigin?: string;
+  routes: string[];
+}
+
+/** Removes a # comment from a TOML line, ignoring # inside quoted strings. */
+function stripTomlComment(line: string): string {
+  let quote = "";
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i];
+    if (quote) {
+      if (c === "\\" && quote === '"') i++;
+      else if (c === quote) quote = "";
+    } else if (c === '"' || c === "'") quote = c;
+    else if (c === "#") return line.slice(0, i);
+  }
+  return line;
+}
+
+const TOML_STRING = String.raw`(?:"((?:[^"\\]|\\.)*)"|'([^']*)')`;
+
+/** Reads [vars] BASE_PATH and PAGES_ORIGIN and every route pattern, with plain string parsing. */
+export function parseWrangler(toml: string): WranglerInfo {
+  const info: WranglerInfo = { routes: [] };
+  const lines = toml.split(/\r?\n/).map(stripTomlComment);
+  let section = "";
+  for (const line of lines) {
+    const header = /^\s*\[\[?\s*([^\]]*?)\s*\]\]?\s*$/.exec(line);
+    if (header) {
+      section = header[1];
+      continue;
+    }
+    if (section === "vars") {
+      const m = new RegExp(`^\\s*(BASE_PATH|PAGES_ORIGIN)\\s*=\\s*${TOML_STRING}`).exec(line);
+      if (m) {
+        const value = m[2] ?? m[3] ?? "";
+        if (m[1] === "BASE_PATH") info.basePath = value;
+        else info.pagesOrigin = value;
+      }
+    }
+  }
+  for (const line of lines) {
+    for (const m of line.matchAll(new RegExp(`\\bpattern\\s*=\\s*${TOML_STRING}`, "g"))) {
+      info.routes.push(m[1] ?? m[2] ?? "");
+    }
+  }
+  return info;
+}
+
+/** Compares wrangler.toml with report.config.json. site is e.g. "https://pinecone.lu". */
+export function compareWrangler(info: WranglerInfo, config: { site: string; basePath: string }): string[] {
+  const problems: string[] = [];
+  if (info.basePath === undefined) problems.push("[vars] BASE_PATH is missing in worker/wrangler.toml");
+  else if (info.basePath !== config.basePath) {
+    problems.push(`worker/wrangler.toml BASE_PATH "${info.basePath}" differs from basePath "${config.basePath}" in report.config.json`);
+  }
+  let host = "";
+  try {
+    host = new URL(config.site).host;
+  } catch {
+    problems.push(`site "${config.site}" in report.config.json is not a valid URL`);
+  }
+  const expected = `${host}${config.basePath}*`;
+  if (info.routes.length === 0) problems.push("no route pattern found in worker/wrangler.toml");
+  for (const route of info.routes) {
+    if (route !== expected) problems.push(`route pattern "${route}" must be exactly "${expected}"`);
+  }
+  if (info.pagesOrigin === undefined || info.pagesOrigin === "") problems.push("[vars] PAGES_ORIGIN is missing in worker/wrangler.toml");
+  else if (!/^https:\/\/[^\s/]+/.test(info.pagesOrigin)) problems.push(`PAGES_ORIGIN "${info.pagesOrigin}" must be an https URL`);
+  return problems;
+}

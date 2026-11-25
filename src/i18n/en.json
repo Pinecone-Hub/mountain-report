@@ -1,0 +1,10 @@
+{
+  "site.underConstruction": "Site under construction.",
+  "banner.demo": "Demo content for portfolio purposes. Not a scientific assessment. Not affiliated with the IPCC or WMO.",
+  "a11y.skip": "Skip to main content",
+  "lang.choose": "Choose a language",
+  "lang.en.name": "English",
+  "lang.fr.name": "Français",
+  "notFound.title": "Page not found",
+  "notFound.text": "The page you requested does not exist."
+}
