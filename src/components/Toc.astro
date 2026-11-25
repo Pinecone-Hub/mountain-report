@@ -1,0 +1,141 @@
+---
+import { t } from "../i18n/index";
+import type { TocHeading } from "../lib/nav";
+
+interface Props {
+  lang: string;
+  headings: TocHeading[];
+}
+
+const { lang, headings } = Astro.props;
+---
+
+{
+  headings.length > 0 && (
+    <aside class="toc-wrap">
+      <details class="toc" data-toc open>
+        <summary>{t(lang, "toc.title")}</summary>
+        <nav aria-label={t(lang, "nav.toc")}>
+          <ul>
+            {headings.map((h) => (
+              <li class={h.depth === 3 ? "sub" : undefined}>
+                <a href={`#${h.id}`}>{h.text}</a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </details>
+    </aside>
+  )
+}
+
+<script>
+  import { pickActiveIndex } from "../lib/toc";
+
+  const details = document.querySelector<HTMLDetailsElement>("details[data-toc]");
+  if (details) {
+    const links = Array.from(details.querySelectorAll<HTMLAnchorElement>("nav a[href^='#']"));
+    const targets = links.map((a) => document.getElementById(decodeURIComponent(a.hash.slice(1))));
+
+    // Open on desktop (always visible there), collapsed by default on mobile.
+    const desktop = window.matchMedia("(min-width: 64rem)");
+    const syncOpen = () => {
+      details.open = desktop.matches;
+    };
+    syncOpen();
+    desktop.addEventListener("change", syncOpen);
+
+    const update = () => {
+      const tops = targets.map((el) => (el ? el.getBoundingClientRect().top : Number.POSITIVE_INFINITY));
+      const active = pickActiveIndex(tops, window.innerHeight * 0.25);
+      links.forEach((link, i) => {
+        if (i === active) link.setAttribute("aria-current", "true");
+        else link.removeAttribute("aria-current");
+      });
+    };
+    update();
+
+    const observer = new IntersectionObserver(update, { rootMargin: "0px 0px -70% 0px", threshold: [0, 1] });
+    targets.forEach((el) => el && observer.observe(el));
+  }
+</script>
+
+<style>
+  .toc-wrap {
+    margin-block-end: var(--space-5);
+  }
+
+  .toc {
+    border: var(--border-width) solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+
+  summary {
+    padding: var(--space-3) var(--space-4);
+    font-weight: var(--font-weight-strong);
+    cursor: pointer;
+  }
+
+  nav {
+    padding: 0 var(--space-4) var(--space-3);
+  }
+
+  ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  li {
+    margin-block: var(--space-1);
+  }
+
+  li.sub {
+    padding-inline-start: var(--space-4);
+    font-size: var(--text-sm);
+  }
+
+  a {
+    display: block;
+    padding-block: var(--space-1);
+    padding-inline: var(--space-2);
+    border-inline-start: 3px solid transparent;
+    color: var(--text);
+    text-decoration: none;
+  }
+
+  a:hover {
+    text-decoration: underline;
+  }
+
+  a[aria-current="true"] {
+    border-inline-start-color: var(--accent);
+    color: var(--accent);
+    font-weight: var(--font-weight-strong);
+  }
+
+  @media (min-width: 64rem) {
+    .toc-wrap {
+      position: sticky;
+      inset-block-start: var(--space-5);
+      align-self: start;
+      max-block-size: calc(100vh - 2 * var(--space-5));
+      overflow-y: auto;
+      margin-block-end: 0;
+    }
+
+    .toc {
+      border: 0;
+      border-inline-start: var(--border-width) solid var(--border);
+      border-radius: 0;
+      background: transparent;
+    }
+
+    /* Always expanded on desktop: the summary is removed from layout, tab order and the
+       accessibility tree; the open <details> content stays visible. */
+    summary {
+      display: none;
+    }
+  }
+</style>

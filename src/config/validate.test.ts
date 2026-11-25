@@ -16,7 +16,7 @@ describe("validateReportConfig", () => {
   it("accepts an empty chapter list and lower-case colours", () => {
     const c = clone();
     c.chapters = [];
-    c.accentColour = "#00aa8c";
+    c.accentColour = "#00664f";
     expect(() => validateReportConfig(c, known)).not.toThrow();
   });
 
@@ -94,7 +94,7 @@ describe("validateReportConfig", () => {
 
   it("rejects duplicate chapter ids and bad chapter numbers", () => {
     const dup = clone();
-    dup.chapters.push({ id: "chapter-1", number: 4 });
+    dup.chapters.push({ id: "chapter-1", number: 4, title: { en: "A", fr: "B" } });
     expect(() => validateReportConfig(dup, known)).toThrow(/duplicate chapter id "chapter-1"/);
     const bad = clone();
     bad.chapters[0].number = 0;
@@ -110,5 +110,36 @@ describe("validateReportConfig", () => {
     expect(() => validateReportConfig(c, known)).toThrow(/"site"/);
     c.site = "https://pinecone.lu/";
     expect(() => validateReportConfig(c, known)).toThrow(/must not end/);
+  });
+
+  it("fails when the accent colour has too little contrast against the page background", () => {
+    const c = clone();
+    c.accentColour = "#00AA8C";
+    expect(() => validateReportConfig(c, known)).toThrow(/contrast .*:1 against the page background/);
+    c.accentColour = "#FFFFFF";
+    expect(() => validateReportConfig(c, known)).toThrow(/contrast 1\.00:1/);
+    c.accentColour = "#767676";
+    expect(() => validateReportConfig(c, known)).not.toThrow();
+  });
+
+  it("requires a chapter title for every full language", () => {
+    const missing = clone();
+    delete missing.chapters[1].title.fr;
+    expect(() => validateReportConfig(missing, known)).toThrow(/chapter "chapter-2": title\.fr is missing/);
+    const none = clone();
+    delete none.chapters[0].title;
+    expect(() => validateReportConfig(none, known)).toThrow(/chapter "chapter-1": "title" must be an object/);
+    const empty = clone();
+    empty.chapters[2].title.en = " ";
+    expect(() => validateReportConfig(empty, known)).toThrow(/title\.en must be a non-empty string/);
+    expect(validateReportConfig(raw, known).chapters[0].title.fr).toBe("Recul des glaciers");
+  });
+
+  it("rejects chapter ids that are unsafe or collide with fixed pages", () => {
+    const c = clone();
+    c.chapters[0].id = "faq";
+    expect(() => validateReportConfig(c, known)).toThrow(/reserved route name/);
+    c.chapters[0].id = "Chapter 1";
+    expect(() => validateReportConfig(c, known)).toThrow(/lower-case letters/);
   });
 });

@@ -1,6 +1,9 @@
 // Pure validation of report.config.json. Throws one clear error listing every
 // problem, so a bad config fails the build with an actionable message.
-// No imports: also used by scripts/check.ts under node --experimental-strip-types.
+// Only imports the pure contrast helper (with its .ts extension) so that scripts/check.ts can
+// load this file under node --experimental-strip-types.
+
+import { CONTRAST_TEXT, contrastRatio, PAGE_BACKGROUND } from "../lib/contrast.ts";
 
 export interface LanguageConfig {
   code: string;
@@ -12,7 +15,12 @@ export interface LanguageConfig {
 export interface ChapterConfig {
   id: string;
   number: number;
+  /** Chapter title per language; required for every full-scope language. */
+  title: Record<string, string>;
 }
+
+/** Route names used by the fixed pages. A chapter id must not collide with them. */
+export const RESERVED_ROUTES: readonly string[] = ["summary", "figures", "downloads", "faq", "glossary", "about", "accessibility", "search", "admin", "admin-demo", "api", "pagefind", "_astro"];
 
 export interface ReportConfig {
   id: string;
@@ -62,6 +70,11 @@ export function validateReportConfig(raw: unknown, knownLanguageCodes: readonly 
 
   if (!isNonEmptyString(raw.accentColour) || !/^#[0-9A-Fa-f]{6}$/.test(raw.accentColour)) {
     problems.push('"accentColour" must be a colour in #RRGGBB form');
+  } else {
+    const ratio = contrastRatio(raw.accentColour, PAGE_BACKGROUND);
+    if (ratio < CONTRAST_TEXT) {
+      problems.push(`"accentColour" ${raw.accentColour} has contrast ${ratio.toFixed(2)}:1 against the page background ${PAGE_BACKGROUND}; at least ${CONTRAST_TEXT}:1 is required (WCAG 2.2 AA)`);
+    }
   }
 
   // Languages
@@ -137,10 +150,24 @@ export function validateReportConfig(raw: unknown, knownLanguageCodes: readonly 
       }
       if (ids.has(item.id)) problems.push(`duplicate chapter id "${item.id}"`);
       ids.add(item.id);
+      if (!/^[a-z0-9][a-z0-9-]*$/.test(item.id)) problems.push(`chapter id "${item.id}" must use lower-case letters, digits and hyphens only`);
+      if (RESERVED_ROUTES.includes(item.id)) problems.push(`chapter id "${item.id}" is a reserved route name`);
+      const chapterTitle: Record<string, string> = {};
+      if (!isRecord(item.title)) {
+        problems.push(`chapter "${item.id}": "title" must be an object keyed by language code`);
+      } else {
+        for (const [k, v] of Object.entries(item.title)) {
+          if (!isNonEmptyString(v)) problems.push(`chapter "${item.id}": title.${k} must be a non-empty string`);
+          else chapterTitle[k] = v;
+        }
+        for (const code of fullCodes) {
+          if (!(code in chapterTitle)) problems.push(`chapter "${item.id}": title.${code} is missing`);
+        }
+      }
       if (typeof item.number !== "number" || !Number.isInteger(item.number) || item.number < 1) {
         problems.push(`chapter "${item.id}": "number" must be a positive integer`);
       } else {
-        chapters.push({ id: item.id, number: item.number });
+        chapters.push({ id: item.id, number: item.number, title: chapterTitle });
       }
     });
   }

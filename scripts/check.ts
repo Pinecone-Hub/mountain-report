@@ -9,6 +9,10 @@ import {
   compareTranslations,
   compareWrangler,
   type Dictionary,
+  checkContrastPairs,
+  extractStyleBlocks,
+  findPhysicalCssProperties,
+  parseCssHexVariables,
   extractCitationKeys,
   findEmDashes,
   findExternalUrls,
@@ -210,6 +214,31 @@ for (const file of [...srcFiles, ...dataFiles, ...docsFiles]) {
     report("WARN", "worker", "worker/wrangler.toml not found: skipped");
   } else if (config) {
     for (const problem of compareWrangler(parseWrangler(read(file)), config)) report("FAIL", "worker", problem, "worker/wrangler.toml");
+  }
+}
+
+// ---------- j. CSS: logical properties only ----------
+
+for (const file of srcFiles.filter((f) => /\.(css|astro)$/.test(f))) {
+  const text = read(file);
+  const blocks = file.endsWith(".css") ? [{ css: text, index: 0 }] : extractStyleBlocks(text);
+  for (const block of blocks) {
+    for (const hit of findPhysicalCssProperties(block.css)) {
+      report("FAIL", "css", `physical property "${hit.property}": use the logical equivalent`, at(file, text, block.index + hit.index));
+    }
+  }
+}
+
+// ---------- k. design tokens: contrast ----------
+
+{
+  const file = join(SRC, "styles", "tokens.css");
+  if (!existsSync(file)) {
+    report("FAIL", "contrast", "src/styles/tokens.css not found", "src/styles");
+  } else {
+    const vars = parseCssHexVariables(read(file));
+    if (config) vars.accent = config.accentColour;
+    for (const problem of checkContrastPairs(vars)) report("FAIL", "contrast", problem.replace(/^contrast: /, ""), "src/styles/tokens.css");
   }
 }
 

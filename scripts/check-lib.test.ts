@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
+  checkContrastPairs,
   checkDistPath,
+  CONTRAST_PAIRS,
+  extractStyleBlocks,
+  findPhysicalCssProperties,
+  parseCssHexVariables,
   compareTranslations,
   compareWrangler,
   parseWrangler,
@@ -310,5 +315,88 @@ BASE_PATH = "/mountain-report" # must match
   it("handles empty input", () => {
     expect(parseWrangler("")).toEqual({ routes: [] });
     expect(compareWrangler(parseWrangler(""), config).length).toBe(3);
+  });
+});
+
+describe("design token contrast", () => {
+  const good = { text: "#1a1a1a", "text-muted": "#4a4f55", bg: "#ffffff", surface: "#f2f4f6", accent: "#005A8C", focus: "#0b5fc4", "border-strong": "#6b7280" };
+
+  it("reads hex variables and ignores comments", () => {
+    const vars = parseCssHexVariables(":root { --bg: #fff; /* --text: #000; */ --text: #1A1A1A; --space-1: 0.25rem; }");
+    expect(vars).toEqual({ bg: "#fff", text: "#1A1A1A" });
+  });
+
+  it("passes the shipped-style palette", () => {
+    expect(checkContrastPairs(good)).toEqual([]);
+  });
+
+  it("fails a pair below 4.5:1 for text and below 3:1 for the focus colour", () => {
+    const text = checkContrastPairs({ ...good, "text-muted": "#999999" });
+    expect(text.some((p) => p.includes("--text-muted") && p.includes("needs 4.5:1"))).toBe(true);
+    const focus = checkContrastPairs({ ...good, focus: "#cccccc" });
+    expect(focus.some((p) => p.includes("--focus") && p.includes("needs 3:1"))).toBe(true);
+  });
+
+  it("reports missing and invalid colours instead of passing", () => {
+    const { surface: _surface, ...withoutSurface } = good;
+    expect(checkContrastPairs(withoutSurface).some((p) => p.includes("no colour for --surface"))).toBe(true);
+    expect(checkContrastPairs({ ...good, text: "red" }).some((p) => p.includes("is not a #RGB"))).toBe(true);
+    expect(checkContrastPairs({}).length).toBe(CONTRAST_PAIRS.length);
+  });
+});
+
+describe("findPhysicalCssProperties", () => {
+  it.each([
+    "margin-left: 1px",
+    "margin-right:1px",
+    "padding-left: 0",
+    "padding-right: 0",
+    "border-left: 1px solid red",
+    "border-right-width: 2px",
+    "left: 0",
+    "right:0",
+    "text-align: left",
+    "text-align:right",
+    "float: left",
+    "float:right",
+  ])("flags %s", (decl) => {
+    expect(findPhysicalCssProperties(`a { ${decl}; }`)).toHaveLength(1);
+  });
+
+  it.each([
+    "margin-inline-start: 1px",
+    "padding-inline: 0",
+    "border-inline-start: 1px solid red",
+    "inset-inline-start: 0",
+    "text-align: start",
+    "text-align: center",
+    "float: inline-start",
+    "border-top-left-radius: 2px",
+    "overflow-y: auto",
+  ])("allows %s", (decl) => {
+    expect(findPhysicalCssProperties(`a { ${decl}; }`)).toEqual([]);
+  });
+
+  it("ignores comments and reports the position", () => {
+    expect(findPhysicalCssProperties("/* margin-left: 0 */ a { color: red; }")).toEqual([]);
+    const hits = findPhysicalCssProperties("a {\n  margin-left: 0;\n}");
+    expect(hits[0].property).toBe("margin-left");
+    expect(hits[0].index).toBe(6);
+  });
+
+  it("handles empty input", () => {
+    expect(findPhysicalCssProperties("")).toEqual([]);
+  });
+});
+
+describe("extractStyleBlocks", () => {
+  it("finds style blocks with their offsets", () => {
+    const src = "<p>x</p>\n<style>\n  a { left: 0; }\n</style>";
+    const blocks = extractStyleBlocks(src);
+    expect(blocks).toHaveLength(1);
+    expect(src.slice(blocks[0].index, blocks[0].index + 5)).toBe("\n  a ");
+  });
+  it("returns nothing without a style block", () => {
+    expect(extractStyleBlocks("<p>x</p>")).toEqual([]);
   });
 });

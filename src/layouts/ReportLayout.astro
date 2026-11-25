@@ -1,0 +1,57 @@
+---
+import Base from "./Base.astro";
+import Toc from "../components/Toc.astro";
+import type { Crumb, TocHeading } from "../lib/nav";
+
+interface Props {
+  lang: string;
+  /** Page title: the h1 and the start of the document title. */
+  title: string;
+  /** Small label above the h1, for example "Chapter 1". */
+  eyebrow?: string;
+  switchPath?: string;
+  breadcrumbs?: Crumb[];
+  /** The page's h2 and h3 headings, for the side table of contents. */
+  headings: TocHeading[];
+}
+
+const { lang, title, eyebrow, switchPath, breadcrumbs, headings } = Astro.props;
+---
+
+<Base lang={lang} title={title} switchPath={switchPath} breadcrumbs={breadcrumbs}>
+  <header class="report-head">
+    {eyebrow && <p class="eyebrow">{eyebrow}</p>}
+    <h1>{title}</h1>
+  </header>
+  <div class="report-layout">
+    <Toc lang={lang} headings={headings} />
+    <article class="report-body">
+      <slot />
+    </article>
+  </div>
+</Base>
+
+<style>
+  .report-layout {
+    display: block;
+  }
+
+  .report-body {
+    min-inline-size: 0;
+  }
+
+  /* The first heading of the main column starts level with the table of contents. */
+  .report-body > :global(:first-child),
+  .report-body > :global(:first-child > h2:first-child) {
+    margin-block-start: 0;
+  }
+
+  @media (min-width: 64rem) {
+    .report-layout {
+      display: grid;
+      grid-template-columns: var(--toc-width) minmax(0, 1fr);
+      gap: var(--space-7);
+      align-items: start;
+    }
+  }
+</style>

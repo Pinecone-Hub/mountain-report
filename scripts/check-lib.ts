@@ -2,6 +2,8 @@
 // unit-tested with plain vitest. Node strip-types friendly: no enums, no
 // parameter properties.
 
+import { CONTRAST_LARGE_OR_UI, CONTRAST_TEXT, contrastRatio } from "../src/lib/contrast.ts";
+
 export type Attrs = Record<string, string>;
 
 export interface TextHit {
@@ -387,4 +389,103 @@ export function compareWrangler(info: WranglerInfo, config: { site: string; base
   if (info.pagesOrigin === undefined || info.pagesOrigin === "") problems.push("[vars] PAGES_ORIGIN is missing in worker/wrangler.toml");
   else if (!/^https:\/\/[^\s/]+/.test(info.pagesOrigin)) problems.push(`PAGES_ORIGIN "${info.pagesOrigin}" must be an https URL`);
   return problems;
+}
+
+// ---------- design tokens: contrast ----------
+
+export interface ContrastPair {
+  /** CSS variable name without "--", or "accent" (resolved from report.config.json). */
+  foreground: string;
+  background: string;
+  minimum: number;
+  /** What the pair is used for, shown in the failure message. */
+  use: string;
+}
+
+/** Text/background and UI pairs the stylesheets use. Text 4.5:1, focus ring and UI borders 3:1. */
+export const CONTRAST_PAIRS: readonly ContrastPair[] = [
+  { foreground: "text", background: "bg", minimum: CONTRAST_TEXT, use: "body text" },
+  { foreground: "text", background: "surface", minimum: CONTRAST_TEXT, use: "text on surface (banner, TOC, footer, hover)" },
+  { foreground: "text-muted", background: "bg", minimum: CONTRAST_TEXT, use: "muted text" },
+  { foreground: "text-muted", background: "surface", minimum: CONTRAST_TEXT, use: "muted text on surface" },
+  { foreground: "accent", background: "bg", minimum: CONTRAST_TEXT, use: "links and accent text" },
+  { foreground: "accent", background: "surface", minimum: CONTRAST_TEXT, use: "links and accent text on surface" },
+  { foreground: "bg", background: "accent", minimum: CONTRAST_TEXT, use: "button text" },
+  { foreground: "bg", background: "text", minimum: CONTRAST_TEXT, use: "skip link text" },
+  { foreground: "focus", background: "bg", minimum: CONTRAST_LARGE_OR_UI, use: "focus indicator" },
+  { foreground: "focus", background: "surface", minimum: CONTRAST_LARGE_OR_UI, use: "focus indicator on surface" },
+  { foreground: "border-strong", background: "bg", minimum: CONTRAST_LARGE_OR_UI, use: "UI component borders" },
+  { foreground: "border-strong", background: "surface", minimum: CONTRAST_LARGE_OR_UI, use: "UI component borders on surface" },
+];
+
+/** Reads `--name: #hex;` declarations from CSS. Comments are ignored; later declarations win. */
+export function parseCssHexVariables(css: string): Record<string, string> {
+  const vars: Record<string, string> = {};
+  const clean = css.replace(/\/\*[\s\S]*?\*\//g, "");
+  for (const m of clean.matchAll(/--([\w-]+)\s*:\s*(#[0-9a-fA-F]{3,8})\s*;/g)) vars[m[1]] = m[2];
+  return vars;
+}
+
+/** One message per pair that is missing a colour, has an invalid colour or is below its minimum. */
+export function checkContrastPairs(
+  vars: Readonly<Record<string, string>>,
+  pairs: readonly ContrastPair[] = CONTRAST_PAIRS,
+): string[] {
+  const problems: string[] = [];
+  for (const pair of pairs) {
+    const fg = vars[pair.foreground];
+    const bg = vars[pair.background];
+    const missing = [fg === undefined ? pair.foreground : "", bg === undefined ? pair.background : ""].filter(Boolean);
+    if (missing.length > 0) {
+      problems.push(`contrast: no colour for --${missing.join(", --")} (needed for ${pair.use})`);
+      continue;
+    }
+    let ratio: number;
+    try {
+      ratio = contrastRatio(fg, bg);
+    } catch {
+      problems.push(`contrast: --${pair.foreground} (${fg}) or --${pair.background} (${bg}) is not a #RGB or #RRGGBB colour`);
+      continue;
+    }
+    if (ratio < pair.minimum) {
+      problems.push(`contrast: --${pair.foreground} ${fg} on --${pair.background} ${bg} is ${ratio.toFixed(2)}:1, needs ${pair.minimum}:1 (${pair.use})`);
+    }
+  }
+  return problems;
+}
+
+// ---------- CSS: physical properties ----------
+
+export interface CssHit {
+  property: string;
+  index: number;
+}
+
+const PHYSICAL_PROPERTY = new RegExp(
+  [
+    String.raw`(?<![\w-])(margin-(?:left|right)|padding-(?:left|right)|border-(?:left|right)(?:-[a-z]+)?)\s*:`,
+    String.raw`(?<![\w-])(left|right)\s*:`,
+    String.raw`(?<![\w-])(text-align\s*:\s*(?:left|right))\b`,
+    String.raw`(?<![\w-])(float\s*:\s*(?:left|right))\b`,
+  ].join("|"),
+  "g",
+);
+
+/** Physical CSS properties that have a logical equivalent. Comments are ignored. */
+export function findPhysicalCssProperties(css: string): CssHit[] {
+  const clean = css.replace(/\/\*[\s\S]*?\*\//g, (c) => c.replace(/[^\n]/g, " "));
+  const hits: CssHit[] = [];
+  for (const m of clean.matchAll(PHYSICAL_PROPERTY)) {
+    hits.push({ property: (m[1] ?? m[2] ?? m[3] ?? m[4]).replace(/\s+/g, " "), index: m.index ?? 0 });
+  }
+  return hits;
+}
+
+/** Contents of every <style> block of an .astro or HTML file, with the offset of each in the file. */
+export function extractStyleBlocks(source: string): Array<{ css: string; index: number }> {
+  const blocks: Array<{ css: string; index: number }> = [];
+  for (const m of source.matchAll(/<style\b[^>]*>([\s\S]*?)<\/style>/gi)) {
+    blocks.push({ css: m[1], index: (m.index ?? 0) + m[0].indexOf(m[1]) });
+  }
+  return blocks;
 }

@@ -3,6 +3,28 @@
 The approved plan is to be pasted here by Dan. The build brief is the source of truth where they
 differ. The changes below amend the brief and apply from now on.
 
+## Decisions
+
+### Fonts (stage 1, 25 November 2026)
+
+Computed fonts, inspected in a browser on 25 November 2026:
+
+| Site | Fonts | Licence |
+| --- | --- | --- |
+| wmo.int | Montserrat (variable, 200 to 700), from Google Fonts | SIL OFL 1.1 |
+| ipcc.ch (home page and AR6 SYR microsite) | IPCCSans and IPCCSerif, self-hosted by the IPCC; secondary: Roboto, Roboto Condensed, Lora (Google Fonts) | IPCCSans and IPCCSerif: proprietary, no open licence published. Roboto, Lora: open |
+
+Choice: Noto Sans with Noto Sans Arabic (SIL OFL 1.1), self-hosted through
+`@fontsource-variable`, subset, `font-display: swap`.
+
+Reasons:
+- The IPCC fonts are not open, so they cannot be used.
+- Montserrat is open, but its wide geometric letterforms read less well in long report text,
+  and it has no Arabic.
+- The Noto family covers all six UN languages (Arabic, Chinese, English, French, Russian,
+  Spanish) with one consistent design. This matters for a template meant for several
+  multilingual report microsites.
+
 ## Changes to the brief (25 November 2026)
 
 ### 1. Downloads (stages 4 to 6)

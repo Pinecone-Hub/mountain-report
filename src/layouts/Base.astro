@@ -1,28 +1,59 @@
 ---
-import { languageConfig } from "../config/report";
+import "../styles/tokens.css";
+import "../styles/fonts.css";
+import "../styles/global.css";
+import arabicFontsUrl from "../styles/fonts-arabic.css?url";
+import Breadcrumbs from "../components/Breadcrumbs.astro";
+import Footer from "../components/Footer.astro";
+import Header from "../components/Header.astro";
+import { fullLanguages, languageConfig, report } from "../config/report";
 import { t } from "../i18n/index";
+import type { Crumb } from "../lib/nav";
+import { withBase } from "../lib/paths";
+import { BASE, pageUrl } from "../lib/urls";
 
 interface Props {
   lang: string;
+  /** The page title. The document title becomes "<title> | <shortTitle>". */
   title: string;
+  /** Route below the language root that the language switcher keeps ("about"); empty for home. */
+  switchPath?: string;
+  /** Breadcrumb trail. Leave empty on the Home page. */
+  breadcrumbs?: Crumb[];
 }
 
-const { lang, title } = Astro.props;
+const { lang, title, switchPath = "", breadcrumbs = [] } = Astro.props;
+const language = languageConfig(lang);
+const documentTitle = `${title} | ${report.shortTitle[lang]}`;
+const site = Astro.site;
 ---
 
 <!doctype html>
-<html lang={lang} dir={languageConfig(lang).dir}>
+<html lang={lang} dir={language.dir} style={`--accent: ${report.accentColour}`}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{title}</title>
+    <title>{documentTitle}</title>
+    <link rel="icon" href={withBase(BASE, "favicon.svg")} type="image/svg+xml" />
+    {lang === "ar" && <link rel="stylesheet" href={arabicFontsUrl} />}
+    {
+      site &&
+        fullLanguages.map((l) => (
+          <link rel="alternate" hreflang={l.code} href={new URL(pageUrl(l.code, switchPath), site).href} />
+        ))
+    }
     <slot name="head" />
   </head>
   <body>
     <a class="skip-link" href="#main">{t(lang, "a11y.skip")}</a>
     <p class="demo-banner" role="note">{t(lang, "banner.demo")}</p>
+    <Header lang={lang} switchPath={switchPath} />
     <main id="main">
-      <slot />
+      <div class="container">
+        <Breadcrumbs lang={lang} items={breadcrumbs} />
+        <slot />
+      </div>
     </main>
+    <Footer lang={lang} />
   </body>
 </html>
