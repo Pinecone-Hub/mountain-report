@@ -35,9 +35,12 @@ colour, chapters, languages and base path. No report-specific literal (such as
 ## Downloads and video
 
 - Downloads are a Decap-managed collection (full report PDF, one PDF per chapter, figure files
-  PNG/SVG/CSV), each with title, language, size and date, uploaded through the CMS media
-  library. Demo PDFs are clearly marked placeholders. No Playwright PDF generation. Keep the
-  print stylesheet.
+  PNG/SVG/CSV), each with title, language and date (editable), uploaded through the CMS media
+  library. File size is computed at build time, never entered in Decap.
+- Figure files generated from data (stage 4) appear in Downloads automatically. Editors can add
+  extra files in Decap or replace a generated one.
+- Demo PDFs are small, clearly marked placeholders. Cloudflare Pages limit: 25 MiB per file.
+- No Playwright PDF generation. Keep the print stylesheet.
 - Video component: YouTube (youtube-nocookie.com) or Vimeo (dnt=1), click-to-load with a local
   placeholder, video URL editable in Decap.
 
