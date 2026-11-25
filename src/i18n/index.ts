@@ -18,3 +18,14 @@ export function t(lang: string, key: TranslationKey): string {
   }
   return value;
 }
+
+/**
+ * Looks a string up and fills {name} placeholders. An unknown placeholder in the string
+ * (no value given) throws, like a missing key: it would otherwise show up on the page.
+ */
+export function tf(lang: string, key: TranslationKey, values: Record<string, string | number>): string {
+  return t(lang, key).replace(/\{(\w+)\}/g, (_, name: string) => {
+    if (!(name in values)) throw new Error(`Missing value "${name}" for translation key "${key}"`);
+    return String(values[name]);
+  });
+}

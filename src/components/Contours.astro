@@ -1,0 +1,27 @@
+---
+import { contourPaths } from "../lib/contours";
+
+const width = 800;
+const height = 420;
+const paths = contourPaths({ seed: 2026, width, height, levels: 14 });
+---
+
+<svg class="contours" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+  {paths.map((d) => <path d={d} />)}
+</svg>
+
+<style>
+  .contours {
+    display: block;
+    inline-size: 100%;
+    block-size: 100%;
+  }
+
+  path {
+    fill: none;
+    stroke: var(--accent);
+    stroke-opacity: 0.3;
+    stroke-width: 1;
+    vector-effect: non-scaling-stroke;
+  }
+</style>

@@ -1,16 +1,198 @@
 ---
 import Base from "../../layouts/Base.astro";
-import { fullLanguages, reportTitle } from "../../config/report";
-import { t } from "../../i18n/index";
+import Contours from "../../components/Contours.astro";
+import { chapterTitle } from "../../config/pages";
+import { fullLanguages, report, reportTitle } from "../../config/report";
+import { t, tf, type TranslationKey } from "../../i18n/index";
+import { pageUrl } from "../../lib/urls";
 
 export function getStaticPaths() {
   return fullLanguages.map((language) => ({ params: { lang: language.code } }));
 }
 
 const { lang } = Astro.params;
+
+const keyMessages: TranslationKey[] = ["home.keyMessages.1", "home.keyMessages.2", "home.keyMessages.3"];
+
+interface Tile {
+  href: string;
+  label?: string;
+  title: string;
+}
+const tiles: Tile[] = [
+  { href: pageUrl(lang, "summary"), title: t(lang, "page.summary") },
+  ...report.chapters.map((chapter) => ({
+    href: pageUrl(lang, chapter.id),
+    label: tf(lang, "chapter.label", { number: chapter.number }),
+    title: chapterTitle(chapter, lang),
+  })),
+  { href: pageUrl(lang, "figures"), title: t(lang, "page.figures") },
+  { href: pageUrl(lang, "downloads"), title: t(lang, "page.downloads") },
+  { href: pageUrl(lang, "faq"), title: t(lang, "page.faq") },
+  { href: pageUrl(lang, "glossary"), title: t(lang, "page.glossary") },
+];
 ---
 
 <Base lang={lang} title={reportTitle(lang)}>
-  <h1>{reportTitle(lang)}</h1>
-  <p>{t(lang, "site.underConstruction")}</p>
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="hero-text">
+      <h1 id="hero-title">{reportTitle(lang)}</h1>
+      <p class="subtitle">{t(lang, "home.subtitle")}</p>
+      <p>
+        <a class="button" href={pageUrl(lang, "downloads")}>{t(lang, "home.downloadFull")}</a>
+      </p>
+    </div>
+    <div class="hero-art"><Contours /></div>
+  </section>
+
+  <section aria-labelledby="key-messages">
+    <h2 id="key-messages">{t(lang, "home.keyMessages.title")}</h2>
+    <ol class="messages">
+      {keyMessages.map((key) => <li>{t(lang, key)}</li>)}
+    </ol>
+  </section>
+
+  <section aria-labelledby="explore">
+    <h2 id="explore">{t(lang, "home.explore.title")}</h2>
+    <ul class="tiles">
+      {
+        tiles.map((tile) => (
+          <li>
+            <a class="tile" href={tile.href}>
+              <span class="tile-label">{tile.label}</span>
+              <span class="tile-title">{tile.title}</span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
 </Base>
+
+<style>
+  .hero {
+    margin-block-end: var(--space-7);
+    padding-block: var(--space-7);
+    border-block-end: var(--border-width) solid var(--border);
+  }
+
+  .hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-5);
+  }
+
+  .hero-art {
+    display: none;
+  }
+
+  .hero-text {
+    min-inline-size: 0;
+  }
+
+  @media (min-width: 40rem) {
+    .hero {
+      grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+      gap: var(--space-6);
+      align-items: center;
+    }
+
+    .hero-art {
+      display: block;
+      block-size: 100%;
+      min-block-size: 14rem;
+      overflow: hidden;
+    }
+  }
+
+  h1 {
+    font-size: clamp(2rem, 1rem + 3vw, var(--text-3xl));
+  }
+
+  .subtitle {
+    font-size: var(--text-lg);
+    color: var(--text);
+  }
+
+  .button {
+    display: inline-block;
+    padding: var(--space-3) var(--space-5);
+    border-radius: var(--radius);
+    background: var(--accent);
+    color: var(--bg);
+    font-weight: var(--font-weight-strong);
+    text-decoration: none;
+  }
+
+  .button:hover {
+    text-decoration: underline;
+  }
+
+  .messages {
+    padding-inline-start: var(--space-5);
+  }
+
+  .messages li {
+    margin-block-end: var(--space-2);
+  }
+
+  .tiles {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+    gap: var(--space-4);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    max-inline-size: none;
+  }
+
+  .tiles li {
+    display: flex;
+  }
+
+  .tile {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: var(--space-1);
+    padding: var(--space-4);
+    border: var(--border-width) solid var(--border-strong);
+    border-radius: var(--radius);
+    background: var(--bg);
+    color: var(--text);
+    text-decoration: none;
+  }
+
+  .tile:hover {
+    border-color: var(--accent);
+    background: var(--surface);
+  }
+
+  .tile:hover .tile-title {
+    text-decoration: underline;
+  }
+
+  .tile-label:empty {
+    display: none;
+  }
+
+  .tile-label {
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+    font-weight: var(--font-weight-strong);
+  }
+
+  .tile-title {
+    color: var(--accent);
+    font-size: var(--text-lg);
+    font-weight: var(--font-weight-strong);
+    line-height: var(--leading-heading);
+  }
+
+  @media (min-width: 40rem) {
+    .tile-label:empty {
+      display: block;
+      min-block-size: calc(var(--text-sm) * var(--leading-body));
+    }
+  }
+</style>

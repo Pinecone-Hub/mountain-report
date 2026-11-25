@@ -1,0 +1,60 @@
+---
+import Base from "../../layouts/Base.astro";
+import ReportLayout from "../../layouts/ReportLayout.astro";
+import { allPageSlugs, chapterTitle, fixedPage } from "../../config/pages";
+import { fullLanguages, report } from "../../config/report";
+import { t, tf } from "../../i18n/index";
+import type { Crumb, TocHeading } from "../../lib/nav";
+import { pageUrl } from "../../lib/urls";
+
+export function getStaticPaths() {
+  return fullLanguages.flatMap((language) =>
+    allPageSlugs(report.chapters).map((page) => ({ params: { lang: language.code, page } })),
+  );
+}
+
+const { lang, page } = Astro.params;
+const chapter = report.chapters.find((c) => c.id === page);
+const fixed = fixedPage(page);
+if (!chapter && !fixed) throw new Error(`No page definition for route "${page}"`);
+
+const title = chapter ? chapterTitle(chapter, lang) : t(lang, fixed!.titleKey);
+const eyebrow = chapter ? tf(lang, "chapter.label", { number: chapter.number }) : undefined;
+const breadcrumbs: Crumb[] = [
+  { label: t(lang, "breadcrumb.home"), href: pageUrl(lang) },
+  { label: eyebrow ? `${eyebrow}: ${title}` : title },
+];
+
+// Summary and chapters use the report layout with placeholder sections until stage 2.
+const isReportPage = page === "summary" || chapter !== undefined;
+const sections = [1, 2, 3].map((number) => ({
+  id: `placeholder-section-${number}`,
+  title: tf(lang, "placeholder.section", { number }),
+}));
+const headings: TocHeading[] = sections.map((s) => ({ depth: 2, id: s.id, text: s.title }));
+---
+
+{
+  isReportPage ? (
+    <ReportLayout lang={lang} title={title} eyebrow={eyebrow} switchPath={page} breadcrumbs={breadcrumbs} headings={headings}>
+      {sections.map((s) => (
+        <section aria-labelledby={s.id}>
+          <h2 id={s.id}>{s.title}</h2>
+          <p>{t(lang, "placeholder.text")}</p>
+        </section>
+      ))}
+    </ReportLayout>
+  ) : (
+    <Base lang={lang} title={title} switchPath={page} breadcrumbs={breadcrumbs}>
+      <h1>{title}</h1>
+      {page === "about" ? (
+        <section id="sources" aria-labelledby="sources-title">
+          <h2 id="sources-title">{t(lang, "page.sources")}</h2>
+          <p>{t(lang, "page.inPreparation")}</p>
+        </section>
+      ) : (
+        <p>{t(lang, "page.inPreparation")}</p>
+      )}
+    </Base>
+  )
+}

@@ -1,28 +1,12 @@
 ---
 import Base from "../layouts/Base.astro";
-import { defaultLanguage, fullLanguages, reportTitle } from "../config/report";
-import { t } from "../i18n/index";
-import { withBase } from "../lib/paths";
+import { defaultLanguage, reportTitle } from "../config/report";
+import { pageUrl } from "../lib/urls";
 
-const base = import.meta.env.BASE_URL;
 const lang = defaultLanguage.code;
-const target = withBase(base, `${lang}/`);
 ---
 
 <Base lang={lang} title={reportTitle(lang)}>
-  <meta slot="head" http-equiv="refresh" content={`0;url=${target}`} />
+  <meta slot="head" http-equiv="refresh" content={`0;url=${pageUrl(lang)}`} />
   <h1>{reportTitle(lang)}</h1>
-  <nav aria-label={t(lang, "lang.choose")}>
-    <ul>
-      {
-        fullLanguages.map((language) => (
-          <li>
-            <a href={withBase(base, `${language.code}/`)} lang={language.code} hreflang={language.code}>
-              {t(lang, `lang.${language.code}.name` as "lang.en.name")}
-            </a>
-          </li>
-        ))
-      }
-    </ul>
-  </nav>
 </Base>

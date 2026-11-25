@@ -1,0 +1,44 @@
+---
+import { t } from "../i18n/index";
+import { pageUrl } from "../lib/urls";
+
+interface Props {
+  lang: string;
+}
+
+const { lang } = Astro.props;
+---
+
+<footer class="site-footer">
+  <div class="container">
+    <nav aria-label={t(lang, "nav.footer")}>
+      <ul>
+        <li>
+          {t(lang, "footer.licence.label")}{" "}<a href="https://creativecommons.org/licenses/by/4.0/" hreflang="en">{t(lang, "footer.licence.name")}</a>
+        </li>
+        <li><a href={pageUrl(lang, "about", "sources")}>{t(lang, "page.sources")}</a></li>
+        <li><a href={pageUrl(lang, "accessibility")}>{t(lang, "page.accessibility")}</a></li>
+        <li>{t(lang, "footer.builtBy")}</li>
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    padding-block: var(--space-5);
+    border-block-start: var(--border-width) solid var(--border);
+    background: var(--surface);
+    font-size: var(--text-sm);
+  }
+
+  ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-5);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    max-inline-size: none;
+  }
+</style>

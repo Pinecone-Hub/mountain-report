@@ -1,0 +1,58 @@
+---
+import { reportTitle } from "../config/report";
+import { t } from "../i18n/index";
+import { pageUrl } from "../lib/urls";
+import LanguageSwitcher from "./LanguageSwitcher.astro";
+
+interface Props {
+  lang: string;
+  switchPath?: string;
+}
+
+const { lang, switchPath } = Astro.props;
+---
+
+<header class="site-header">
+  <div class="container bar">
+    <a class="site-title" href={pageUrl(lang)}>{reportTitle(lang)}</a>
+    <div class="tools">
+      <a class="search-link" href={pageUrl(lang, "search")}>{t(lang, "page.search")}</a>
+      <LanguageSwitcher lang={lang} switchPath={switchPath} />
+    </div>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    border-block-end: var(--border-width) solid var(--border);
+    background: var(--bg);
+  }
+
+  .bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3) var(--space-5);
+    padding-block: var(--space-3);
+  }
+
+  .site-title {
+    color: var(--text);
+    font-size: var(--text-lg);
+    font-weight: var(--font-weight-strong);
+    line-height: var(--leading-heading);
+    text-decoration: none;
+  }
+
+  .site-title:hover {
+    text-decoration: underline;
+  }
+
+  .tools {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3) var(--space-5);
+  }
+</style>
