@@ -23,7 +23,9 @@ import {
   findMarker,
   findSuspectEmphasis,
   indexReferences,
+  isAdminPath,
   isUrlAllowed,
+  findOversizedFiles,
   lineAt,
   parseWrangler,
 } from "./check-lib.ts";
@@ -123,6 +125,9 @@ if (!distExists) {
   for (const file of allDist) {
     for (const problem of checkDistPath(relative(DIST, file).split(sep).join("/"), BASE_PATH)) report("FAIL", "dist", problem);
   }
+  // Cloudflare Pages serves no file over 25 MiB (binaries included).
+  const sized = allDist.map((file) => ({ path: `dist/${relative(DIST, file).split(sep).join("/")}`, bytes: statSync(file).size }));
+  for (const problem of findOversizedFiles(sized)) report("FAIL", "size", problem);
 }
 
 // ---------- b. images and figures ----------
@@ -224,7 +229,7 @@ for (const problem of references.problems) report("FAIL", "citations", problem, 
 const urlFiles = [...srcFiles.filter((f) => !isTest(f)), ...publicFiles, ...distFiles];
 for (const file of urlFiles) {
   const path = rel(file);
-  const isAdmin = /(^|\/)admin(-demo)?(\/|\.|$)/.test(path.replace(/^(src\/pages|dist)\//, "").replace(new RegExp(`^${BASE_PATH.slice(1)}/`), ""));
+  const isAdmin = isAdminPath(path, BASE_PATH);
   const text = read(file);
   for (const { url, index } of findExternalUrls(text)) {
     if (!isUrlAllowed(url, { isAdmin, referenceHosts: references.hosts })) {
@@ -254,8 +259,8 @@ for (const file of srcFiles.filter((f) => rel(f).startsWith("src/content/") && f
 
 // ---------- g2. calibrated language: italics that nearly match a term ----------
 
-for (const file of srcFiles.filter((f) => /^src\/content\/[a-z]{2,3}\/.*\.md$/.test(rel(f)))) {
-  const lang = rel(file).split("/")[2];
+for (const file of srcFiles.filter((f) => /^src\/content\/(?:pages|chapters)\/[a-z]{2,3}\/.*\.md$/.test(rel(f)))) {
+  const lang = rel(file).split("/")[3];
   const text = read(file);
   for (const hit of findSuspectEmphasis(text, lang)) {
     report("WARN", "calibrated", `italic text ${JSON.stringify(hit.text)} looks like calibrated language but is not on the list`, at(file, text, hit.index));
@@ -304,6 +309,26 @@ for (const file of srcFiles.filter((f) => /\.(css|astro)$/.test(f))) {
     const vars = parseCssHexVariables(read(file));
     if (config) vars.accent = config.accentColour;
     for (const problem of checkContrastPairs(vars)) report("FAIL", "contrast", problem.replace(/^contrast: /, ""), "src/styles/tokens.css");
+  }
+}
+
+// ---------- l. dist/_routes.json: only the Functions path invokes the Function ----------
+
+if (distExists && config) {
+  const routes = join(DIST, "_routes.json");
+  const expected = [`${config.basePath}/api/*`];
+  if (!existsSync(routes)) {
+    report("FAIL", "routes", "dist/_routes.json is missing (the build script writes it)", "dist/_routes.json");
+  } else {
+    let include: unknown;
+    try {
+      include = (JSON.parse(read(routes)) as { include?: unknown }).include;
+    } catch {
+      include = undefined;
+    }
+    if (!Array.isArray(include) || include.length !== expected.length || include.some((v, i) => v !== expected[i])) {
+      report("FAIL", "routes", `dist/_routes.json include must be exactly ${JSON.stringify(expected)}`, "dist/_routes.json");
+    }
   }
 }
 

@@ -1,0 +1,87 @@
+---
+// The Decap CMS page, shared by /admin/ (GitHub backend) and /admin-demo/ (test backend, nothing
+// is saved). A minimal document without the site layout: Decap builds its own interface. Decap
+// is loaded here only, from a pinned CDN version with Subresource Integrity (src/lib/decap.ts).
+import "../styles/tokens.css";
+import "../styles/fonts.css";
+import { DECAP_INTEGRITY, DECAP_URL } from "../lib/decap";
+import { t } from "../i18n/index";
+import { withBase } from "../lib/paths";
+import { BASE } from "../lib/urls";
+
+interface Props {
+  /** "demo": the test backend, with a fixed banner and the generated repository files. */
+  demo?: boolean;
+}
+
+const { demo = false } = Astro.props;
+const folder = demo ? "admin-demo" : "admin";
+const title = t("en", demo ? "admin.demo.title" : "admin.title");
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>{title}</title>
+    <link rel="icon" href={withBase(BASE, "favicon.svg")} type="image/svg+xml" />
+    <link rel="cms-config-url" type="text/yaml" href={withBase(BASE, `${folder}/config.yml`)} />
+  </head>
+  <body class={demo ? "admin-demo" : undefined}>
+    {demo && (
+      <div class="admin-banner" role="note">
+        <strong>{t("en", "admin.demo.notSaved")}.</strong>
+        {t("en", "banner.demo")}{" "}
+        <a href={withBase(BASE, "admin-guide/")}>{t("en", "admin.demo.guide")}</a>
+      </div>
+    )}
+    <noscript><p>{t("en", "admin.noscript")}</p></noscript>
+    {demo && <script is:inline src={withBase(BASE, "admin-demo/repo-files.js")}></script>}
+    <script is:inline src={DECAP_URL} integrity={DECAP_INTEGRITY} crossorigin="anonymous"></script>
+  </body>
+</html>
+
+<style is:global>
+  /* The demo notice has its own space at the top. Decap's fixed header and sidebar are positioned
+     against #nc-root (it has a transform), so they sit below the notice instead of under it. */
+  :root {
+    --admin-banner-height: 3.5rem;
+  }
+
+  .admin-banner {
+    position: fixed;
+    inset-block-start: 0;
+    inset-inline: 0;
+    z-index: 10000;
+    box-sizing: border-box;
+    block-size: var(--admin-banner-height);
+    margin: 0;
+    padding-block: var(--space-1);
+    padding-inline: var(--space-4);
+    overflow: auto;
+    background: var(--surface);
+    border-block-end: var(--border-width) solid var(--border-strong);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    line-height: 1.35;
+  }
+
+  .admin-banner strong {
+    margin-inline-end: var(--space-2);
+  }
+
+  .admin-banner a {
+    color: var(--text);
+  }
+
+  .admin-demo #nc-root {
+    position: absolute;
+    inset-block-start: var(--admin-banner-height);
+    inset-inline: 0;
+    min-block-size: calc(100vh - var(--admin-banner-height));
+    transform: translateZ(0);
+  }
+</style>

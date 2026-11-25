@@ -1,0 +1,163 @@
+---
+// Downloads page, built at build time from two sources: the Downloads entries of the language
+// (full report, chapters, other files; edited in the CMS) and the files of every figure of the
+// language (generated from the data, or the replacement uploaded in the CMS). File sizes are
+// read from the files, never from content. A language with neither shows the "in preparation" stub.
+import { statSync } from "node:fs";
+import { join } from "node:path";
+import { getCollection } from "astro:content";
+import Base from "../../layouts/Base.astro";
+import { defaultLanguage, fullLanguages, report } from "../../config/report";
+import { t, tf, type TranslationKey } from "../../i18n/index";
+import { fileFormat, formatIsoDate, groupDownloads, type FileFormat } from "../../lib/downloads";
+import { built, downloadsFor, figuresFor } from "../../lib/figure-store";
+import { formatSize } from "../../lib/figures";
+import type { Crumb } from "../../lib/nav";
+import { withBase } from "../../lib/paths";
+import { BASE, pageUrl } from "../../lib/urls";
+
+export function getStaticPaths() {
+  return fullLanguages.map((language) => ({ params: { lang: language.code } }));
+}
+
+const { lang } = Astro.params;
+const title = t(lang, "page.downloads");
+const breadcrumbs: Crumb[] = [{ label: t(lang, "breadcrumb.home"), href: pageUrl(lang) }, { label: title }];
+
+const formatKey: Record<FileFormat, TranslationKey> = {
+  pdf: "downloads.format.pdf",
+  png: "figure.download.png",
+  svg: "figure.download.svg",
+  csv: "figure.download.csv",
+  other: "downloads.format.file",
+};
+const languageName = (code: string) => t(lang, `lang.${code}.name` as TranslationKey);
+
+interface Item {
+  title: string;
+  href: string;
+  /** "PDF document, 4 KB". */
+  detail: string;
+  /** Language of the file, for entries. */
+  language?: string;
+  /** Language of the file when it differs from the page language (hreflang). */
+  fileLang?: string;
+  date?: string;
+  dateText?: string;
+}
+
+function sizeOf(file: string): number {
+  const path = join(process.cwd(), "public", file);
+  try {
+    return statSync(path).size;
+  } catch {
+    throw new Error(`downloads: file public/${file} not found`);
+  }
+}
+
+const entries = (await getCollection("downloads", ({ data }) => data.lang === lang)).map((e) => e.data);
+const groups = groupDownloads(entries, report.chapters.map((c) => c.id));
+const toItem = (entry: (typeof entries)[number]): Item => {
+  const format = fileFormat(entry.file);
+  return {
+    title: entry.title,
+    href: withBase(BASE, entry.file),
+    detail: tf(lang, "figure.download.item", { format: t(lang, formatKey[format]), size: formatSize(lang, sizeOf(entry.file)) }),
+    language: entry.lang,
+    fileLang: entry.lang === lang ? undefined : entry.lang,
+    date: entry.date,
+    dateText: tf(lang, "downloads.date", { date: formatIsoDate(lang, entry.date) }),
+  };
+};
+
+const figureItems: Item[] = (await figuresFor(lang)).flatMap((figure) => {
+  const b = built(figure, lang);
+  return downloadsFor(figure, lang).map((d) => ({
+    title: tf(lang, "downloads.figureFile", { label: b.label, title: figure.title, format: t(lang, formatKey[d.format]) }),
+    href: d.href,
+    detail: tf(lang, "figure.download.item", { format: t(lang, formatKey[d.format]), size: formatSize(lang, d.bytes) }),
+  }));
+});
+
+const sections: Array<{ id: string; heading: string; items: Item[] }> = [
+  { id: "full-report", heading: t(lang, "downloads.group.full"), items: groups.full.map(toItem) },
+  { id: "chapters", heading: t(lang, "downloads.group.chapters"), items: groups.chapters.map(toItem) },
+  { id: "other-files", heading: t(lang, "downloads.group.other"), items: groups.other.map(toItem) },
+  { id: "figure-files", heading: t(lang, "downloads.group.figures"), items: figureItems },
+].filter((section) => section.items.length > 0);
+
+const englishHasFiles = lang !== defaultLanguage.code && ((await getCollection("downloads", ({ data }) => data.lang === defaultLanguage.code)).length > 0 || (await figuresFor(defaultLanguage.code)).length > 0);
+---
+
+<Base lang={lang} title={title} switchPath="downloads" breadcrumbs={breadcrumbs}>
+  <h1>{title}</h1>
+  {
+    sections.length === 0 ? (
+      <>
+        <p>{t(lang, "page.inPreparation")}</p>
+        {englishHasFiles && (
+          <p>
+            <a href={pageUrl(defaultLanguage.code, "downloads")} hreflang={defaultLanguage.code} lang={defaultLanguage.code}>
+              {t(lang, "page.stub.english")}
+            </a>
+          </p>
+        )}
+      </>
+    ) : (
+      <>
+        <p>{t(lang, "downloads.intro")}</p>
+        {sections.map((section) => (
+          <section aria-labelledby={`downloads-${section.id}`}>
+            <h2 id={`downloads-${section.id}`}>{section.heading}</h2>
+            <ul class="download-list">
+              {section.items.map((item) => (
+                <li>
+                  <a class="download-link" href={item.href} download hreflang={item.fileLang} lang={item.fileLang}>
+                    {item.title}
+                  </a>
+                  <span class="download-meta">
+                    <span>{item.detail}</span>
+                    {item.language && <span>{tf(lang, "downloads.inLanguage", { language: languageName(item.language) })}</span>}
+                    {item.date && item.dateText && <time datetime={item.date}>{item.dateText}</time>}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))}
+      </>
+    )
+  }
+</Base>
+
+<style>
+  .download-list {
+    display: grid;
+    gap: var(--space-3);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .download-list li {
+    display: grid;
+    gap: var(--space-1);
+    padding-block-end: var(--space-3);
+    border-block-end: var(--border-width) solid var(--border);
+  }
+
+  .download-link {
+    display: inline-block;
+    min-block-size: 24px;
+    padding-block: var(--space-1);
+    font-weight: var(--font-weight-strong);
+  }
+
+  .download-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1) var(--space-5);
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+  }
+</style>

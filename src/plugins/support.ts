@@ -50,7 +50,9 @@ export interface PageId {
   slug: string;
 }
 
-const CONTENT_PATH = /\/content\/([a-z]{2,3}(?:-[A-Za-z0-9]+)*)\/(?:chapters\/)?([A-Za-z0-9_-]+)\.md$/;
+const LANG = "[a-z]{2,3}(?:-[A-Za-z0-9]+)*";
+// src/content/pages|chapters/<lang>/<slug>.md, or the editor guide src/content/guide/<lang>.md (slug "guide").
+const CONTENT_PATH = new RegExp(`/content/(?:(?:pages|chapters)/(${LANG})/([A-Za-z0-9_-]+)|guide/(${LANG}))\\.md$`);
 
 function pathOf(fileURL: URL | string | undefined): string {
   if (fileURL === undefined) throw new Error("content plugin: the file path is unknown");
@@ -62,12 +64,12 @@ function pathOf(fileURL: URL | string | undefined): string {
   }
 }
 
-/** Language and page of a content file (src/content/<lang>/[chapters/]<slug>.md). Throws otherwise. */
+/** Language and page of a content file (src/content/pages|chapters/<lang>/<slug>.md, or guide/<lang>.md). Throws otherwise. */
 export function pageFromFile(fileURL: URL | string | undefined): PageId {
   const path = pathOf(fileURL);
   const match = CONTENT_PATH.exec(path);
-  if (!match) throw new Error(`${path}: not a content file (expected src/content/<lang>/<page>.md)`);
-  return { lang: match[1], slug: match[2] };
+  if (!match) throw new Error(`${path}: not a content file (expected src/content/<collection>/<lang>/<page>.md)`);
+  return match[1] !== undefined ? { lang: match[1], slug: match[2] } : { lang: match[3], slug: "guide" };
 }
 
 /** Short file name for error messages: the path from "src/" on when there is one. */

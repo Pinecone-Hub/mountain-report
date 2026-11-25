@@ -35,6 +35,12 @@ export interface AuthorConfig {
   affiliation: string;
 }
 
+/** Decap CMS settings: the GitHub repository ("owner/name") and the branch edits are published to. */
+export interface CmsConfig {
+  repo: string;
+  branch: string;
+}
+
 export interface ReportConfig {
   id: string;
   site: string;
@@ -42,6 +48,7 @@ export interface ReportConfig {
   title: Record<string, string>;
   shortTitle: Record<string, string>;
   accentColour: string;
+  cms: CmsConfig;
   languages: LanguageConfig[];
   chapters: ChapterConfig[];
   citation: CitationConfig;
@@ -90,6 +97,16 @@ export function validateReportConfig(raw: unknown, knownLanguageCodes: readonly 
     if (ratio < CONTRAST_TEXT) {
       problems.push(`"accentColour" ${raw.accentColour} has contrast ${ratio.toFixed(2)}:1 against the page background ${PAGE_BACKGROUND}; at least ${CONTRAST_TEXT}:1 is required (WCAG 2.2 AA)`);
     }
+  }
+
+  const cms: CmsConfig = { repo: "", branch: "" };
+  if (!isRecord(raw.cms)) {
+    problems.push('"cms" must be an object with "repo" and "branch"');
+  } else {
+    if (!isNonEmptyString(raw.cms.repo) || !/^[\w.-]+\/[\w.-]+$/.test(raw.cms.repo)) problems.push('"cms.repo" must be "owner/name"');
+    else cms.repo = raw.cms.repo;
+    if (!isNonEmptyString(raw.cms.branch)) problems.push('"cms.branch" is missing or empty');
+    else cms.branch = raw.cms.branch;
   }
 
   // Languages
@@ -226,6 +243,7 @@ export function validateReportConfig(raw: unknown, knownLanguageCodes: readonly 
     title,
     shortTitle,
     accentColour: raw.accentColour as string,
+    cms,
     languages,
     chapters,
     citation,

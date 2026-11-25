@@ -23,9 +23,11 @@ interface Props {
   switchPath?: string;
   /** Breadcrumb trail. Leave empty on the Home page. */
   breadcrumbs?: Crumb[];
+  /** A page that exists in one language only (the editor guide): no language alternates, no language switcher. */
+  singleLanguage?: boolean;
 }
 
-const { lang, title, switchPath = "", breadcrumbs = [] } = Astro.props;
+const { lang, title, switchPath = "", breadcrumbs = [], singleLanguage = false } = Astro.props;
 const language = languageConfig(lang);
 const documentTitle = `${title} | ${report.shortTitle[lang]}`;
 const site = Astro.site;
@@ -41,6 +43,7 @@ const site = Astro.site;
     {lang === "ar" && <link rel="stylesheet" href={arabicFontsUrl} />}
     {
       site &&
+        !singleLanguage &&
         fullLanguages.map((l) => (
           <link rel="alternate" hreflang={l.code} href={new URL(pageUrl(l.code, switchPath), site).href} />
         ))
@@ -50,7 +53,7 @@ const site = Astro.site;
   <body>
     <a class="skip-link" href="#main">{t(lang, "a11y.skip")}</a>
     <p class="demo-banner" role="note">{t(lang, "banner.demo")}</p>
-    <Header lang={lang} switchPath={switchPath} />
+    <Header lang={lang} switchPath={switchPath} switcher={!singleLanguage} />
     <main id="main">
       <div class="container">
         <Breadcrumbs lang={lang} items={breadcrumbs} />

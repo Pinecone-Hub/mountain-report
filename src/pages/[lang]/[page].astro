@@ -16,8 +16,8 @@ import { figuresFor } from "../../lib/figure-store";
 export function getStaticPaths() {
   return fullLanguages.flatMap((language) =>
     allPageSlugs(report.chapters)
-      // The Figures page has its own route (figures.astro).
-      .filter((page) => page !== "figures")
+      // The Figures and Downloads pages have their own routes (figures.astro, downloads.astro).
+      .filter((page) => page !== "figures" && page !== "downloads")
       .map((page) => ({ params: { lang: language.code, page } })),
   );
 }
@@ -50,7 +50,7 @@ const html = entry?.rendered?.html ?? "";
 const parts = html.includes("data-figure=") ? splitAtFigureSlots(html) : undefined;
 const figures = parts ? new Map((await figuresFor(lang)).map((f) => [f.id, f])) : new Map();
 for (const part of parts ?? []) {
-  if ("figure" in part && !figures.has(part.figure)) throw new Error(`${lang}/${page}: no figure "${part.figure}" in src/content/${lang}/figures/`);
+  if ("figure" in part && !figures.has(part.figure)) throw new Error(`${lang}/${page}: no figure "${part.figure}" in src/content/figures/${lang}/`);
 }
 
 const fallbackTitle = chapter

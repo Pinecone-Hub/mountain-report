@@ -15,7 +15,7 @@ import { parseReferences } from "./references";
 import { BASE } from "./urls";
 
 const data = parseProcessedCsv(csvText);
-const references = parseReferences(referencesData);
+const references = parseReferences(referencesData.references);
 
 function sources(figure: FigureData): { short: string; ids: string[] } {
   const refs = figure.source.map((key) => {

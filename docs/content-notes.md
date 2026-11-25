@@ -79,7 +79,7 @@ quotation marks, attributed to him and labelled in chapter 2 as not IPCC calibra
 ### Summary, FAQ, glossary, home
 
 - Summary (blocked by a tool guard; content returned in the report for the coordinator to save as
-  `src/content/en/summary.md`): A.3 *very likely* (p. 133); B headline *high confidence* twice
+  `src/content/pages/en/summary.md`): A.3 *very likely* (p. 133); B headline *high confidence* twice
   (p. 133); B.1 *limited evidence* (p. 133), *high confidence* (p. 161); B.2 *high confidence*
   (p. 158); B.3 *high confidence* (p. 162); C.1 *medium confidence* (p. 135), *high confidence*
   (p. 163).

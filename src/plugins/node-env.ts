@@ -18,7 +18,7 @@ function readIfExists(file: string): string | undefined {
 export function createNodeEnv(): PluginEnv {
   const base = `${report.basePath.replace(/\/+$/, "")}/`;
   const defaultLang = report.languages.find((l) => l.default)?.code ?? "en";
-  const references = parseReferences(JSON.parse(readFileSync(join(SRC, "data", "references.json"), "utf8")));
+  const references = parseReferences((JSON.parse(readFileSync(join(SRC, "data", "references.json"), "utf8")) as { references: unknown }).references);
   const sectionCache = new Map<string, Set<string>>();
   const glossaryCache = new Map<string, string | undefined>();
 
@@ -26,12 +26,11 @@ export function createNodeEnv(): PluginEnv {
   function sections(lang: string): ReadonlySet<string> {
     const cached = sectionCache.get(lang);
     if (cached) return cached;
-    const own = join(CONTENT, lang);
-    const dir = existsSync(own) ? lang : defaultLang;
+    const dir = existsSync(join(CONTENT, "pages", lang)) ? lang : defaultLang;
     const found = new Set<string>();
-    const summary = readIfExists(join(CONTENT, dir, "summary.md"));
+    const summary = readIfExists(join(CONTENT, "pages", dir, "summary.md"));
     if (summary) for (const token of collectSections(summary)) found.add(token);
-    const chapters = join(CONTENT, dir, "chapters");
+    const chapters = join(CONTENT, "chapters", dir);
     if (existsSync(chapters)) {
       for (const name of readdirSync(chapters).filter((n) => n.endsWith(".md"))) {
         for (const token of collectSections(readFileSync(join(chapters, name), "utf8"))) found.add(token);
@@ -51,7 +50,7 @@ export function createNodeEnv(): PluginEnv {
     glossaryEntry(lang, heading) {
       const cacheKey = `${lang}:${heading}`;
       if (!glossaryCache.has(cacheKey)) {
-        const markdown = readIfExists(join(CONTENT, lang, "glossary.md"));
+        const markdown = readIfExists(join(CONTENT, "pages", lang, "glossary.md"));
         glossaryCache.set(cacheKey, markdown === undefined ? undefined : glossaryEntryText(markdown, heading));
       }
       return glossaryCache.get(cacheKey);

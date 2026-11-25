@@ -11,6 +11,10 @@
     "fr": "Rapport montagne"
   },
   "accentColour": "#005A8C",
+  "cms": {
+    "repo": "Pinecone-Hub/mountain-report",
+    "branch": "main"
+  },
   "citation": {
     "authors": [
       "Butuc, D."

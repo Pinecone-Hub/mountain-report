@@ -7,9 +7,10 @@ import LanguageSwitcher from "./LanguageSwitcher.astro";
 interface Props {
   lang: string;
   switchPath?: string;
+  switcher?: boolean;
 }
 
-const { lang, switchPath } = Astro.props;
+const { lang, switchPath, switcher = true } = Astro.props;
 ---
 
 <header class="site-header">
@@ -17,7 +18,7 @@ const { lang, switchPath } = Astro.props;
     <a class="site-title" href={pageUrl(lang)}>{reportTitle(lang)}</a>
     <div class="tools">
       <a class="search-link" href={pageUrl(lang, "search")}>{t(lang, "page.search")}</a>
-      <LanguageSwitcher lang={lang} switchPath={switchPath} />
+      {switcher && <LanguageSwitcher lang={lang} switchPath={switchPath} />}
     </div>
   </div>
 </header>

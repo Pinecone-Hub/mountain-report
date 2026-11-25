@@ -20,6 +20,16 @@ describe("validateReportConfig", () => {
     expect(() => validateReportConfig(c, known)).not.toThrow();
   });
 
+  it("reads the cms block", () => {
+    expect(validateReportConfig(raw, known).cms).toEqual({ repo: "Pinecone-Hub/mountain-report", branch: "main" });
+  });
+
+  it.each([undefined, null, "x", {}, { repo: "", branch: "main" }, { repo: "noslash", branch: "main" }, { repo: "a/b/c", branch: "main" }, { repo: "a/b", branch: "" }, { repo: "a/b", branch: "  " }, { repo: 5, branch: "main" }])("rejects cms %j", (cms) => {
+    const c = clone();
+    c.cms = cms;
+    expect(() => validateReportConfig(c, known)).toThrow(/cms/);
+  });
+
   it("rejects input that is not an object", () => {
     expect(() => validateReportConfig(null, known)).toThrow(/JSON object/);
     expect(() => validateReportConfig([], known)).toThrow(/JSON object/);

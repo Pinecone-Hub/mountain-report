@@ -80,9 +80,11 @@ if (!existsSync(join(DIST, BASE.slice(1)))) {
   process.exit(1);
 }
 
-// Every index.html under the base, plus the 404 page (requested at an address that does not exist).
+// Every index.html under the base except the editor pages (Decap builds its own interface there;
+// "admin-guide" is a normal page and is tested), plus the 404 page (requested at an address that does not exist).
 const pages: Array<{ label: string; path: string }> = walk(join(DIST, BASE.slice(1)))
   .filter((f) => f.endsWith(`${sep}index.html`))
+  .filter((f) => !/[\\/]admin(-demo)?[\\/]index\.html$/.test(f))
   .map((f) => {
     const dir = relative(DIST, f).split(sep).slice(0, -1).join("/");
     return { label: `/${dir}/`, path: `/${dir}/` };

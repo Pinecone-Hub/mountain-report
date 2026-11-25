@@ -31,9 +31,9 @@ export function testEnv(overrides: Partial<PluginEnv> = {}): PluginEnv {
   };
 }
 
-export const CHAPTER_1 = "file:///project/src/content/en/chapters/chapter-1.md";
-export const SUMMARY = "file:///project/src/content/en/summary.md";
-export const GLOSSARY_FILE = "file:///project/src/content/en/glossary.md";
+export const CHAPTER_1 = "file:///project/src/content/chapters/en/chapter-1.md";
+export const SUMMARY = "file:///project/src/content/pages/en/summary.md";
+export const GLOSSARY_FILE = "file:///project/src/content/pages/en/glossary.md";
 
 /** Renders Markdown through the real Sätteri pipeline with the given plugins. */
 export function render(markdown: string, plugins: HastPluginList, file: string = CHAPTER_1): string {

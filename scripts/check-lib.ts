@@ -3,6 +3,7 @@
 // parameter properties.
 
 import { CALIBRATED_WORD_PATTERN, classifyTerm, hasTermList } from "../src/lib/calibrated-terms.ts";
+import { DECAP_URL } from "../src/lib/decap.ts";
 import { CONTRAST_LARGE_OR_UI, CONTRAST_TEXT, contrastRatio } from "../src/lib/contrast.ts";
 
 export type Attrs = Record<string, string>;
@@ -183,8 +184,10 @@ const XML_NAMESPACE_URIS: RegExp[] = [
 ];
 
 const ALWAYS_HOSTS = ["doi.org", "creativecommons.org", "youtube-nocookie.com", "player.vimeo.com", "pinecone.lu"];
-// Decap CDN (unpkg) and GitHub: admin pages only.
-const ADMIN_HOSTS = ["unpkg.com", "github.com", "api.github.com"];
+// GitHub: admin pages only.
+const ADMIN_HOSTS = ["github.com", "api.github.com"];
+// The Decap CDN (unpkg): admin pages only, and only the pinned version (src/lib/decap.ts).
+const DECAP_PREFIX = DECAP_URL.slice(0, DECAP_URL.indexOf("/dist/") + 1);
 
 const hostMatches = (host: string, domain: string) => host === domain || host.endsWith(`.${domain}`);
 
@@ -207,7 +210,24 @@ export function isUrlAllowed(url: string, options: UrlOptions): boolean {
   if (ALWAYS_HOSTS.some((d) => hostMatches(host, d))) return true;
   if (options.referenceHosts.has(host)) return true;
   if (options.isAdmin && ADMIN_HOSTS.some((d) => hostMatches(host, d))) return true;
+  if (options.isAdmin && url.startsWith(DECAP_PREFIX)) return true;
   return false;
+}
+
+/** Source files that belong to the admin pages although they are not under admin/ (they hold the Decap CDN URL). */
+export const ADMIN_FILES: readonly string[] = ["src/lib/decap.ts"];
+
+/**
+ * True for the admin pages: /admin/ and /admin-demo/ (sources and built files, including the
+ * generated config.yml and repo-files.js) and the Decap constants. "admin-guide/" is a public page.
+ * path is relative to the repository root, with forward slashes; basePath is e.g. "/mountain-report".
+ */
+export function isAdminPath(path: string, basePath: string): boolean {
+  if (ADMIN_FILES.includes(path)) return true;
+  const base = basePath.replace(/^\/+|\/+$/g, "");
+  let rest = path.replace(/^(src\/pages|dist)\//, "");
+  if (base !== "" && rest.startsWith(`${base}/`)) rest = rest.slice(base.length + 1);
+  return /(^|\/)admin(-demo)?(\/|\.|$)/.test(rest);
 }
 
 // ---------- calibrated language ----------
@@ -240,7 +260,8 @@ export function findSuspectEmphasis(markdown: string, lang: string): SuspectEmph
 
 /** Citation keys used in a Markdown body: [@key] and [@a; @b]. Code fences are ignored. */
 export function extractCitationKeys(markdown: string): string[] {
-  const withoutFences = markdown.replace(/```[\s\S]*?```/g, "");
+  // Fenced blocks and inline code are not citations (the content plugins skip them too).
+  const withoutFences = markdown.replace(/```[\s\S]*?```/g, "").replace(/`[^`\n]*`/g, "");
   const keys: string[] = [];
   for (const group of withoutFences.matchAll(/\[(@[^\]]*)\]/g)) {
     for (const k of group[1].matchAll(/@([\w][\w:.\-/]*)/g)) keys.push(k[1].replace(/[.:\-/]+$/, ""));
@@ -278,9 +299,11 @@ function collectHosts(value: unknown, hosts: Set<string>): void {
 export function indexReferences(data: unknown): ReferenceIndex {
   const index: ReferenceIndex = { keys: new Set(), problems: [], hosts: new Set() };
   if (data === undefined || data === null) return index;
+  // The file root is { "references": [...] } (a Decap file collection needs an object at the root).
+  const list = typeof data === "object" && !Array.isArray(data) && Array.isArray((data as { references?: unknown }).references) ? (data as { references: unknown[] }).references : data;
   let entries: Array<[string | undefined, unknown]>;
-  if (Array.isArray(data)) {
-    entries = data.map((item) => {
+  if (Array.isArray(list)) {
+    entries = list.map((item) => {
       const rec = item as Record<string, unknown> | null;
       const k = rec && (rec.key ?? rec.id);
       return [typeof k === "string" ? k : undefined, item];
@@ -341,6 +364,21 @@ export function checkDistPath(path: string, basePath: string): string[] {
     problems.push(`dist/${path} is outside ${basePath}/`);
   }
   return problems;
+}
+
+// ---------- file size limit ----------
+
+/** Cloudflare Pages serves no file over 25 MiB. */
+export const MAX_FILE_BYTES = 25 * 1024 * 1024;
+
+export interface SizedFile {
+  path: string;
+  bytes: number;
+}
+
+/** Problems for every file larger than the limit (exactly the limit is allowed). */
+export function findOversizedFiles(files: readonly SizedFile[], limit: number = MAX_FILE_BYTES): string[] {
+  return files.filter((f) => f.bytes > limit).map((f) => `${f.path} is ${f.bytes} bytes, over the limit of ${limit} bytes (25 MiB)`);
 }
 
 // ---------- worker/wrangler.toml ----------

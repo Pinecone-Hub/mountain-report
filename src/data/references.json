@@ -1,110 +1,112 @@
-[
-  {
-    "key": "wmo2026sogc",
-    "type": "report",
-    "authors": "World Meteorological Organization (WMO)",
-    "year": 2026,
-    "title": "State of the Global Climate 2025",
-    "container": "WMO-No. 1391",
-    "publisher": "World Meteorological Organization, Geneva",
-    "doi": "10.59327/WMO/S/CRI/SOC1",
-    "url": "https://wmo.int/publication-series/state-of-global-climate/state-of-global-climate-2025",
-    "accessed": "2026-11-25"
-  },
-  {
-    "key": "wgms2026amce",
-    "type": "dataset",
-    "authors": "World Glacier Monitoring Service (WGMS)",
-    "year": 2026,
-    "title": "Annual mass-change estimates for the world's glaciers (version 2026-02-10)",
-    "publisher": "WGMS and Copernicus Climate Change Service (C3S)",
-    "doi": "10.5904/wgms-amce-2026-02-10",
-    "url": "https://wgms.ch/mass_change_estimates/",
-    "accessed": "2026-11-25"
-  },
-  {
-    "key": "dussaillant2025essd",
-    "type": "article",
-    "authors": "Dussaillant, I., Hugonnet, R., Huss, M., Berthier, E., Bannwart, J., Paul, F., and Zemp, M.",
-    "year": 2025,
-    "title": "Annual mass change of the world's glaciers from 1976 to 2024 by temporal downscaling of satellite data with in situ observations",
-    "container": "Earth System Science Data",
-    "volume": "17",
-    "issue": "5",
-    "pages": "1977-2006",
-    "doi": "10.5194/essd-17-1977-2025"
-  },
-  {
-    "key": "glambie2025",
-    "type": "article",
-    "authors": "The GlaMBIE Team",
-    "year": 2025,
-    "title": "Community estimate of global glacier mass changes from 2000 to 2023",
-    "container": "Nature",
-    "volume": "639",
-    "issue": "8054",
-    "pages": "382-388",
-    "doi": "10.1038/s41586-024-08545-z"
-  },
-  {
-    "key": "zemp2026",
-    "type": "article",
-    "authors": "The WGMS Network",
-    "year": 2026,
-    "title": "Global glacier mass change in 2025",
-    "container": "Nature Reviews Earth & Environment",
-    "volume": "7",
-    "pages": "213-215",
-    "doi": "10.1038/s43017-026-00777-z"
-  },
-  {
-    "key": "hock2019srocc",
-    "type": "chapter",
-    "authors": "Hock, R., G. Rasul, C. Adler, B. Cáceres, S. Gruber, Y. Hirabayashi, M. Jackson, A. Kääb, S. Kang, S. Kutuzov, Al. Milner, U. Molau, S. Morin, B. Orlove, and H. Steltzer",
-    "year": 2019,
-    "title": "High Mountain Areas",
-    "container": "IPCC Special Report on the Ocean and Cryosphere in a Changing Climate [H.-O. Pörtner, D.C. Roberts, V. Masson-Delmotte, P. Zhai, M. Tignor, E. Poloczanska, K. Mintenbeck, A. Alegría, M. Nicolai, A. Okem, J. Petzold, B. Rama, N.M. Weyer (eds.)]",
-    "pages": "131-202",
-    "publisher": "Cambridge University Press, Cambridge, UK and New York, NY, USA",
-    "doi": "10.1017/9781009157964.004"
-  },
-  {
-    "key": "egu26-19777",
-    "type": "abstract",
-    "authors": "Jacquemart, M., Brondex, J., Knuth, F., Weber, S., Kenner, R., Aaron, J., Gischig, V., de Silva, R., Spielmann, R., Schneider, M., Schumacher, D. L., Welty, E., Gagliardini, O., Gaume, J., Gilbert, A., Huggel, C., Reist, F., Seneviratne, S. I., Senn, I., and Farinotti, D.",
-    "year": 2026,
-    "title": "Reconstructing the 2025 Nesthorn-Birchgletscher hazard cascade",
-    "container": "EGU General Assembly 2026, Vienna, Austria, 3-8 May 2026, EGU26-19777",
-    "doi": "10.5194/egusphere-egu26-19777"
-  },
-  {
-    "key": "egu26-6599",
-    "type": "abstract",
-    "authors": "Bellwald, B.",
-    "year": 2026,
-    "title": "Anatomy of the Blatten rock-collapse debris-ice avalanche (28 May 2025): Insights from a local Quaternary geologist",
-    "container": "EGU General Assembly 2026, Vienna, Austria, 3-8 May 2026, EGU26-6599",
-    "doi": "10.5194/egusphere-egu26-6599"
-  },
-  {
-    "key": "icimod2025thame",
-    "type": "report",
-    "authors": "Maharjan, S. B., Sherpa, T. C., and Shrestha, A. B.",
-    "year": 2025,
-    "title": "Thame Valley Glacial Lake Outburst Flood 2024: Causes, impacts and future risks",
-    "publisher": "International Centre for Integrated Mountain Development (ICIMOD); National Disaster Risk Reduction & Management Authority (NDRRMA)",
-    "doi": "10.53055/ICIMOD.1101",
-    "url": "https://lib.icimod.org/records/8g9ze-1r153",
-    "accessed": "2026-11-25"
-  },
-  {
-    "key": "icimod2025press",
-    "type": "press-release",
-    "authors": "International Centre for Integrated Mountain Development (ICIMOD)",
-    "year": 2025,
-    "title": "Everest region a hotspot of cryosphere-linked hazards, ICIMOD's new study on Nepal's 2024 Thame flood confirms",
-    "publisher": "International Centre for Integrated Mountain Development",
-    "url": "https://www.icimod.org/press-release/everest-region-a-hotspot-of-cryosphere-linked-hazards-icimods-new-study-on-nepals-2024-thame-flood-confirms/",
-    "accessed": "2026-11-25"
-  }
-]
+{
+  "references": [
+    {
+      "key": "wmo2026sogc",
+      "type": "report",
+      "authors": "World Meteorological Organization (WMO)",
+      "year": 2026,
+      "title": "State of the Global Climate 2025",
+      "container": "WMO-No. 1391",
+      "publisher": "World Meteorological Organization, Geneva",
+      "doi": "10.59327/WMO/S/CRI/SOC1",
+      "url": "https://wmo.int/publication-series/state-of-global-climate/state-of-global-climate-2025",
+      "accessed": "2026-11-25"
+    },
+    {
+      "key": "wgms2026amce",
+      "type": "dataset",
+      "authors": "World Glacier Monitoring Service (WGMS)",
+      "year": 2026,
+      "title": "Annual mass-change estimates for the world's glaciers (version 2026-02-10)",
+      "publisher": "WGMS and Copernicus Climate Change Service (C3S)",
+      "doi": "10.5904/wgms-amce-2026-02-10",
+      "url": "https://wgms.ch/mass_change_estimates/",
+      "accessed": "2026-11-25"
+    },
+    {
+      "key": "dussaillant2025essd",
+      "type": "article",
+      "authors": "Dussaillant, I., Hugonnet, R., Huss, M., Berthier, E., Bannwart, J., Paul, F., and Zemp, M.",
+      "year": 2025,
+      "title": "Annual mass change of the world's glaciers from 1976 to 2024 by temporal downscaling of satellite data with in situ observations",
+      "container": "Earth System Science Data",
+      "volume": "17",
+      "issue": "5",
+      "pages": "1977-2006",
+      "doi": "10.5194/essd-17-1977-2025"
+    },
+    {
+      "key": "glambie2025",
+      "type": "article",
+      "authors": "The GlaMBIE Team",
+      "year": 2025,
+      "title": "Community estimate of global glacier mass changes from 2000 to 2023",
+      "container": "Nature",
+      "volume": "639",
+      "issue": "8054",
+      "pages": "382-388",
+      "doi": "10.1038/s41586-024-08545-z"
+    },
+    {
+      "key": "zemp2026",
+      "type": "article",
+      "authors": "The WGMS Network",
+      "year": 2026,
+      "title": "Global glacier mass change in 2025",
+      "container": "Nature Reviews Earth & Environment",
+      "volume": "7",
+      "pages": "213-215",
+      "doi": "10.1038/s43017-026-00777-z"
+    },
+    {
+      "key": "hock2019srocc",
+      "type": "chapter",
+      "authors": "Hock, R., G. Rasul, C. Adler, B. Cáceres, S. Gruber, Y. Hirabayashi, M. Jackson, A. Kääb, S. Kang, S. Kutuzov, Al. Milner, U. Molau, S. Morin, B. Orlove, and H. Steltzer",
+      "year": 2019,
+      "title": "High Mountain Areas",
+      "container": "IPCC Special Report on the Ocean and Cryosphere in a Changing Climate [H.-O. Pörtner, D.C. Roberts, V. Masson-Delmotte, P. Zhai, M. Tignor, E. Poloczanska, K. Mintenbeck, A. Alegría, M. Nicolai, A. Okem, J. Petzold, B. Rama, N.M. Weyer (eds.)]",
+      "pages": "131-202",
+      "publisher": "Cambridge University Press, Cambridge, UK and New York, NY, USA",
+      "doi": "10.1017/9781009157964.004"
+    },
+    {
+      "key": "egu26-19777",
+      "type": "abstract",
+      "authors": "Jacquemart, M., Brondex, J., Knuth, F., Weber, S., Kenner, R., Aaron, J., Gischig, V., de Silva, R., Spielmann, R., Schneider, M., Schumacher, D. L., Welty, E., Gagliardini, O., Gaume, J., Gilbert, A., Huggel, C., Reist, F., Seneviratne, S. I., Senn, I., and Farinotti, D.",
+      "year": 2026,
+      "title": "Reconstructing the 2025 Nesthorn-Birchgletscher hazard cascade",
+      "container": "EGU General Assembly 2026, Vienna, Austria, 3-8 May 2026, EGU26-19777",
+      "doi": "10.5194/egusphere-egu26-19777"
+    },
+    {
+      "key": "egu26-6599",
+      "type": "abstract",
+      "authors": "Bellwald, B.",
+      "year": 2026,
+      "title": "Anatomy of the Blatten rock-collapse debris-ice avalanche (28 May 2025): Insights from a local Quaternary geologist",
+      "container": "EGU General Assembly 2026, Vienna, Austria, 3-8 May 2026, EGU26-6599",
+      "doi": "10.5194/egusphere-egu26-6599"
+    },
+    {
+      "key": "icimod2025thame",
+      "type": "report",
+      "authors": "Maharjan, S. B., Sherpa, T. C., and Shrestha, A. B.",
+      "year": 2025,
+      "title": "Thame Valley Glacial Lake Outburst Flood 2024: Causes, impacts and future risks",
+      "publisher": "International Centre for Integrated Mountain Development (ICIMOD); National Disaster Risk Reduction & Management Authority (NDRRMA)",
+      "doi": "10.53055/ICIMOD.1101",
+      "url": "https://lib.icimod.org/records/8g9ze-1r153",
+      "accessed": "2026-11-25"
+    },
+    {
+      "key": "icimod2025press",
+      "type": "press-release",
+      "authors": "International Centre for Integrated Mountain Development (ICIMOD)",
+      "year": 2025,
+      "title": "Everest region a hotspot of cryosphere-linked hazards, ICIMOD's new study on Nepal's 2024 Thame flood confirms",
+      "publisher": "International Centre for Integrated Mountain Development",
+      "url": "https://www.icimod.org/press-release/everest-region-a-hotspot-of-cryosphere-linked-hazards-icimods-new-study-on-nepals-2024-thame-flood-confirms/",
+      "accessed": "2026-11-25"
+    }
+  ]
+}
