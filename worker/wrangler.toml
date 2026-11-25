@@ -8,6 +8,6 @@ routes = [
 
 [vars]
 # Adjust to the real Pages subdomain if the project name or subdomain differs.
-PAGES_ORIGIN = "https://mountain-report.pages.dev"
+PAGES_ORIGIN = "https://mountain-report-dwt.pages.dev"
 # Must equal basePath in report.config.json (npm run check compares them).
 BASE_PATH = "/mountain-report"
