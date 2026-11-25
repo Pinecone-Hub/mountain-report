@@ -15,35 +15,35 @@ From 2000 to 2023, glaciers lost on average 273 ± 16 Gt of mass per year, about
 
 ### A.2
 
-In the hydrological year 2025, glaciers outside the two ice sheets lost 408 ± 132 Gt [@zemp2026]. For a set of WMO reference glaciers, eight of the ten most negative annual mass balances since 1950 have occurred since 2016 [@wmo2026sogc]. {1.4}
+In the hydrological year 2025, glaciers outside the two ice sheets lost 408 ± 132 Gt [@zemp2026]. In the WMO record for a set of reference glaciers, which begins in 1950, eight of the ten years with the most negative annual balance fall in the period from 2016 onwards [@wmo2026sogc]. {1.4}
 
 ### A.3
 
-Losses differ between mountain regions. Central Europe lost 39% of its glacier ice between 2000 and 2023, the largest relative loss of any region [@glambie2025]. For 2006 to 2015, SROCC assessed the mass budget of glaciers in eleven high mountain regions as *very likely* −490 ± 100 kg m⁻² yr⁻¹ (−123 ± 24 Gt yr⁻¹) [@hock2019srocc]. {1.3.1, 1.3.2}
+Losses differ between mountain regions [@glambie2025]. Central Europe lost 39% of its glacier ice between 2000 and 2023, the largest relative loss of any region [@glambie2025]. For 2006 to 2015, SROCC assessed the mass budget of glaciers in eleven high mountain regions as *very likely* −490 ± 100 kg m⁻² yr⁻¹ (−123 ± 24 Gt yr⁻¹) [@hock2019srocc]. {1.3.1, 1.3.2}
 
 ### A.4
 
-Glacier loss raised global mean sea level by 18 ± 1 mm from 2000 to 2023 [@glambie2025]. For 2002 to 2021, the glacier contribution was about 20% of the observed rise [@glambie2025]. The eleven high mountain regions assessed by SROCC contributed 0.34 ± 0.07 mm per year in 2006 to 2015 [@hock2019srocc]. {1.5}
+Glacier loss raised global mean sea level by 18 ± 1 mm from 2000 to 2023 [@glambie2025]. The eleven high mountain regions assessed by SROCC contributed 0.34 ± 0.07 mm per year in 2006 to 2015 [@hock2019srocc]. {1.5}
 
 ### A.5
 
-Field measurements give annual values for about 500 glaciers, while satellite and airborne surveys cover about 96% of glaciers over several years [@dussaillant2025essd]. The WGMS combines the two to estimate annual mass change for every glacier [@wgms2026amce; @dussaillant2025essd]. {1.1, 3.1}
+Field measurements give annual values for about 500 glaciers, while satellite and airborne surveys cover about 96% of glaciers with decadal estimates [@dussaillant2025essd]. The WGMS combines the two to estimate annual mass change for every glacier [@wgms2026amce; @dussaillant2025essd]. {1.1, 3.1}
 
 ## B. Mountain hazards
 
-The number and area of glacial lakes have increased in most regions (*high confidence*), and glacier retreat and permafrost thaw have made mountain slopes less stable (*high confidence*) [@hock2019srocc]. {2.1.1, 2.2.1}
+In most regions, glacial lakes have become more numerous and larger (*high confidence*), and mountain slopes have become less stable as glaciers retreat and permafrost thaws (*high confidence*) [@hock2019srocc]. {2.1.1, 2.2.1}
 
 ### B.1
 
-There is only *limited evidence* that the frequency of glacial lake outburst floods has changed [@hock2019srocc]. SROCC projects further growth in the number and area of glacial lakes in most regions (*high confidence*) [@hock2019srocc]. {2.1.1}
+SROCC finds only *limited evidence* of a change in how often glacial lake outburst floods occur [@hock2019srocc]. Over the coming decades, it expects glacial lakes to keep growing in number and area across most regions (*high confidence*) [@hock2019srocc]. {2.1.1}
 
 ### B.2
 
-Rock fall has become more frequent in zones of degrading permafrost over the past half-century (*high confidence*) [@hock2019srocc]. {2.2.1}
+Over the last fifty years, rock fall from steep slopes has become more frequent where permafrost is degrading (*high confidence*) [@hock2019srocc]. {2.2.1}
 
 ### B.3
 
-The exposure of people and infrastructure to cryosphere hazards in high mountain regions has increased over recent decades (*high confidence*) [@hock2019srocc]. In the Himalaya, up to two-thirds of current and planned hydropower projects lie in the path of potential glacier floods [@hock2019srocc]. {2.1.2}
+More people and more infrastructure in high mountain regions have been exposed to cryosphere hazards over recent decades (*high confidence*) [@hock2019srocc]. As much as two-thirds of hydropower projects in the Himalaya, built or planned, are sited where potential glacier floods could reach them [@hock2019srocc]. {2.1.2}
 
 ### B.4
 
@@ -59,11 +59,11 @@ Hazard mapping, early warning and engineering works have been applied to reduce 
 
 ### C.1
 
-Applied strategies include lowering glacial lakes, channel and slope works, planting vegetation, hazard and risk mapping as a basis for zoning and early warning, and community programmes [@hock2019srocc]. Where adaptation action has been identified, it has mostly been reactive [@hock2019srocc]. Effective governance, including planning and zoning, is a key enabler for reducing disaster risk (*medium confidence*) [@hock2019srocc]. Significant risk reduction and adaptation will be needed to avoid greater impacts (*high confidence*) [@hock2019srocc]. {3.3.1}
+The strategies applied include engineering works such as lowering glacial lakes, nature-based approaches such as planting vegetation, hazard and risk mapping for zoning and early warning, and community programmes [@hock2019srocc]. Where adaptation action has been identified, it has mostly been reactive [@hock2019srocc]. According to SROCC, effective governance does much to make disaster risk reduction possible, and it should weigh both how planning, zoning and the pressures of urban growth shape exposure and how factors such as poverty shape vulnerability (*medium confidence*) [@hock2019srocc]. Avoiding greater impacts will require substantial efforts in risk reduction and adaptation (*high confidence*) [@hock2019srocc]. {3.3.1}
 
 ### C.2
 
-Early warning systems depend on local engagement and capacity [@hock2019srocc]. At Laguna 513 in Peru, a warning system installed after a flood in 2010 was destroyed by some residents in 2017 during a local conflict [@hock2019srocc]. {3.2.1}
+Early warning systems depend on local engagement and capacity [@hock2019srocc]. At Laguna 513 in Peru, some residents destroyed a warning system in 2017 because of political, social and cultural conflicts [@hock2019srocc]. {3.2.1}
 
 ### C.3
 
@@ -71,7 +71,7 @@ At Blatten, the rock slope began to deform faster about two weeks before the col
 
 ### C.4
 
-At Thame, ICIMOD links the absence of deaths to the flood occurring in daylight and arriving in phases [@icimod2025press]. The sources read do not say whether a warning was issued [@icimod2025thame; @icimod2025press]. The study recommends more monitoring stations, early warning, land-use planning based on detailed surveys and immediate works to stabilise the ground [@icimod2025thame]. {3.2.3, 3.3.3, 3.4.1}
+At Thame, ICIMOD links the absence of deaths to the flood occurring in daylight and arriving in phases [@icimod2025press]. The study does not report whether a warning was issued [@icimod2025thame]. It recommends hydrological and meteorological monitoring stations to support flood-risk assessment and the development of early warning systems, land-use planning based on detailed surveys, and immediate works to stabilise the ground [@icimod2025thame]. {3.2.3, 3.3.3, 3.4.1}
 
 ### C.5
 

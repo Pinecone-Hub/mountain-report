@@ -11,3 +11,4 @@ playwright-report/
 .dev.vars
 .claude/settings.local.json
 .playwright-mcp/
+.local-sources/

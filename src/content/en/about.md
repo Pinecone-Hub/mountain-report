@@ -15,11 +15,13 @@ This site is not affiliated with, endorsed by or reviewed by the Intergovernment
 
 ## How the content was produced
 
-The text draws only on the sources listed below. Each source was read before use, with one limit: for the ICIMOD Thame study, only its library record and the ICIMOD press release were read, not the full report. The text paraphrases the sources and does not reproduce their figures or tables. Apart from a few short quotations, which are marked and attributed, it does not reproduce their wording. Every factual statement carries a citation to the source that supports it. Numbers are given as in the source, with units, periods and uncertainty ranges.
+Text drafted with AI assistance from the cited sources, checked statement by statement against those sources, and reviewed by Dan Butuc.
+
+The text draws only on the approved sources listed below, each of which was read before use. Every factual statement carries a citation to one of these sources and is written in our own words. A few short quotations are marked and attributed to their authors. Sentences that describe this report itself, for example what it does or does not conclude, carry no citation. No figures or tables from the sources are reproduced. Numbers are given as in the source, with units, periods and uncertainty ranges. A separate verification pass compared each statement with its source, and the text was revised where that pass found wording too close to the source, a claim stronger than the source, or a missing citation.
 
 IPCC calibrated terms for likelihood, confidence, evidence and agreement are used only where the cited source uses that term for that statement. They are set in italics, following IPCC practice. Where an author of a non-IPCC source uses a similar word, it is given in quotation marks and attributed to that author.
 
-The text was checked against the sources. Places where a needed fact was not found in these sources are marked as open in the editorial notes and are not filled from other material. The text has not been reviewed by the authors of the sources or by IPCC or WMO experts.
+Where the sources do not report a fact, the text does not supply it from other material. The text has not been reviewed by the authors of the sources or by IPCC or WMO experts.
 
 ## Sources
 
@@ -42,7 +44,7 @@ The WGMS annual mass-change estimates are open access, on condition that they ar
 
 ### Third-party works
 
-Cited works keep their own licences and terms. The Earth System Science Data article and the GlaMBIE article are published under Creative Commons Attribution licences. The ICIMOD study is published under the Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International licence (CC BY-NC-ND 4.0). Text and figures from IPCC SROCC Chapter 2 are cited, not reproduced.
+Cited works keep their own licences and terms. The Earth System Science Data article is published under the Creative Commons Attribution 4.0 licence. The ICIMOD study is published under the Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International licence (CC BY-NC-ND 4.0). Text and figures from IPCC SROCC Chapter 2 are cited, not reproduced.
 
 ## Licence
 
@@ -50,4 +52,4 @@ The text of this site is licensed under the Creative Commons Attribution 4.0 Int
 
 ## Contact
 
-TODO: contact details.
+hello@pinecone.lu

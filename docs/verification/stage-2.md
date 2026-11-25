@@ -214,3 +214,102 @@ so quotes from them are short.
   "unfavourable geology" (chapter-2:65, faq:26) and the causal claim at chapter-2:101.
 - Open markers: TODO_SOURCE at chapter-2:61, chapter-3:31, :39, :88; TODO_FIGURE at
   chapter-1:29, :55; "TODO: contact details" at about.md:53.
+
+---
+
+# Round 2: re-check of the first revision
+
+Scope: every statement changed in the first revision (diff against commit 017da1e), plus
+unchanged sentences put in doubt by the full ICIMOD study (TS, local only:
+`.local-sources/icimod-thame-2024-glof-study.txt`, cited by line). Quotes shortened to the key
+phrase. Counts: OK 75, OVERSTATED 9, TOO_CLOSE 2, UNCITED 2, CANNOT_VERIFY 2 (both are not source
+facts: the About AI sentence and the contact address). Total 90.
+
+Rows not OK in round 2 (all OK rows confirmed the fixes of round 1; see the list after this table):
+
+| file:line | statement (short) | status | what the source says | source | note |
+|---|---|---|---|---|---|
+| about.md:18 | AI drafting sentence, reviewed by Dan Butuc | CANNOT_VERIFY | Process statement, not a source fact. | n/a | |
+| about.md:20 | "Every factual statement carries a citation" | OVERSTATED | Two uncited sentences at chapter-3:79, :81. | content | Fixed in round 3. |
+| about.md:20 | "written in our own words" | OVERSTATED | 7-word runs at chapter-2:17, chapter-3:29. | S p.31; U5 | Fixed in round 3. |
+| about.md:55 | Contact hello@pinecone.lu | CANNOT_VERIFY | Not a source statement. | n/a | |
+| chapter-2.md:11 | "the moraine dams of two glacial lakes" | OVERSTATED | Upper Ngole Cho "is bedrock-dammed ... with a thin layer of moraine"; Lower Ngole Cho "end moraine-dammed". | TS L282, L825, L1140 | Fixed in round 3. |
+| chapter-2.md:17 | Veh et al.: no increase in GLOFs since late 1980s | TOO_CLOSE | "found no increase in the number of glacier lake outburst floods since the late 1980s" | S p.31 | 7-word run. Fixed in round 3. |
+| chapter-2.md:61 | Bellwald: "and the higher hydrostatic pressure that resulted" | OVERSTATED | "(and increased hydrostatic pressures)" | U6 | Causal link not in source. Fixed in round 3. |
+| chapter-2.md:73 | wave "eroded the lake's moraine dam" | OVERSTATED | eroded "moraine deposits atop of the bedrock" (4.5 m) | TS L504, L1140 | Fixed in round 3. |
+| chapter-3.md:29 | Blatten reconstruction data types list | TOO_CLOSE | "aerial topographic surveys, radar and time-lapse images, direct field observations" | U5 | Paragraph cut in round 3. |
+| chapter-3.md:43 | SROCC "groups ... into four kinds" | OVERSTATED | "adaptation strategies that were applied include" | S p.33 | Fixed in round 3. |
+| chapter-3.md:63 | Thame immediate measures vs "risk mitigation" grouping | OVERSTATED | Immediate passage includes riverbank protection and erosion control. | TS L1192-1213 | Fixed in round 3. |
+| chapter-3.md:79 | "Both sources also draw lessons ..." | UNCITED | No citation. | chapter-3 | Removed in round 3. |
+| chapter-3.md:81 | "Both cases led to a reassessment ..." | UNCITED | No citation. | chapter-3 | Removed in round 3. |
+| faq.md:22 | "the moraine dams of two lakes" | OVERSTATED | As chapter-2:11. | TS L282 | Fixed in round 3. |
+| faq.md:26 | "and the higher water pressure ... that followed" | OVERSTATED | "(and increased hydrostatic pressures)" | U6 | Fixed in round 3. |
+
+Round-1 findings closed in round 2 (status OK): WMO-No. 1391 and DOI (cover and imprint); ESSD
+"decadal" (chapter-1:13, chapter-3:11, faq:14, summary A.5); geostatistical modelling cited
+(chapter-1:15); approaches and confidence levels (chapter-1:21); "(20%)" (chapter-1:47);
+*very likely* primary driver reworded (chapter-1:51); WMO 8-of-10 reworded (chapter-1:63, summary
+A.2); GlaMBIE shares with denominator period stated (chapter-1:69); 18% / twice reworded
+(chapter-1:69); all SROCC TOO_CLOSE rows in chapter-2 (15, 17, 19, 23, 33) and chapter-3 (21, 23,
+43, 47, 73) reworded; Dig Tsho figure removed (chapter-2:27); Blatten lake "damaged"
+(chapter-2:53); new river bed (chapter-2:53); Bellwald geology restored (chapter-2:61); Thame
+breach "height" (chapter-2:75; round-1 WRONG withdrawn, the study uses both "height" and "depth");
+"widespread panic" (chapter-2:81, TS L200); "vulnerable" (chapter-2:91); case comparison without
+causal or ranking claims (chapter-2:97); 195 of 233 (chapter-3:13); SROCC gap citation
+(chapter-3:15); Thame warning not reported (chapter-3:33, :77, summary C.4; TS has "warn" only at
+L1225); monitoring stations (chapter-3:35); governance with poverty (chapter-3:47, summary C.1);
+Kedarnath removed (chapter-3:73); Laguna 513 conflicts wording (faq:30, summary C.2); glossary
+confidence reworded; home key messages reworded; all Summary cross-references valid; no
+TODO_SOURCE left.
+
+---
+
+# Round 3: final verification after the cuts and the governance rewrite
+
+Counts: OK 39, OVERSTATED 3, TOO_CLOSE 1, BAD_REFERENCE 2. Total 45.
+
+| file:line | statement (short) | status | what the source says | source | note |
+|---|---|---|---|---|---|
+| about.md:20 | "Every factual statement carries a citation" | OK | No uncited factual sentence; uncited sentences describe the report. | content | |
+| about.md:20 | "written in our own words" | OVERSTATED | chapter-3:57 tracks its source clause by clause. | TS L1193-1196 | Fixed in round 4. |
+| chapter-1.md:13-53 | Cuts (validation paragraph, "two approaches", HMA list, "155 of ~170", WMO 21%) and added citations | OK | No orphan claim or citation. | U2, U3, U4, S p.3, WMO p.16 | |
+| chapter-1.md:45 | TODO_FIGURE note mentions GlaMBIE values for Central Asia and South Asia East | OVERSTATED | The text no longer gives them. | chapter-1 | Fixed in round 4. |
+| chapter-2.md:11 | Thame dam types (bedrock with thin moraine; end moraine) | OK | "is bedrock-dammed"; "end moraine-dammed"; "a 4.5 m thick moraine on top of the bedrock dam" | TS L282, L825, L1140 | |
+| chapter-2.md:17 | Veh et al. reworded | OK | Longest run 3 words. | S p.31 | |
+| chapter-2.md:21-31, 55, 69 | Cuts (2.1.3, ice break-off, collapse type, glacier history, Thyanbo, 2.5) | OK | No orphan; no cross-reference to removed sections. | chapters | |
+| chapter-2.md:53 | Bellwald factors side by side, geology phrase quoted | OK | "unfavourable geology in combination with melting permafrost (and increased hydrostatic pressures)" | U6 | |
+| chapter-2.md:65 | Moraine layer 4.5 m on the bedrock dam | OK | "eroded a 4.5 m thick moraine on top of the bedrock dam" | TS L1140, L505 | |
+| chapter-2.md:79 | "successive dam breaches" | OK | "caused by the successive breaching of two glacial lakes" | TS L1134-1139 | |
+| chapter-3.md:37-41 | SROCC strategies "include"; reactive; governance rewritten (*medium confidence*) | OK | "adaptation strategies that were applied include"; "Effective governance is a key enabler ... as well as vulnerability factors such as poverty" | S p.33, p.5 | Governance wording slightly looser than "key enabler". |
+| chapter-3.md:57 | Tension cracks sentence | TOO_CLOSE | "Tension cracks along the riverbanks in the lower part of the village should be filled or protected ..." | TS L1193-1196 | Tracks the source clause by clause. Fixed in round 4. |
+| chapter-3.md:57 | Riverbank protection and erosion control; check dams, spurs, berms from 1 km upstream; stereo satellite images | OK | TS immediate-measures passage. | TS L1203-1218 | |
+| chapter-3.md:59 | "ICIMOD also calls for action before events ..." | OK | Policy half supported. | U8 | Withdrawn in round 4 (see below). |
+| chapter-3.md:67-69 | Synthesis sentences cited; uncited ones removed | OK | | U6, U8 | |
+| summary.md:66 | C.2 Laguna 513 {3.2.1} | BAD_REFERENCE | Fact in SROCC p.34, but no Laguna 513 text left in any chapter. | S p.34 | Fixed in round 4. |
+| faq.md:30 | Laguna 513, "See sections 3.2 and 3.5" | BAD_REFERENCE | Sections no longer contain it. | S p.34 | Fixed in round 4. |
+| faq.md:22, 26 | Thame dam types; Bellwald factors | OK | As chapter-2:11, :53. | TS; U6 | |
+| summary.md:22, 62 | A.3 citation added; C.1 governance rewritten | OK | | U3; S p.5 | |
+| summary.md (all {x.y}) | All other cross-references | OK | All sections exist and support their statements. | chapters | |
+| glossary.md:3 | "terms used in this report" | OVERSTATED | Six entries not used in the text. | content | Fixed in round 4 (entries removed, Dan's decision). |
+| src/content/en (all) | Every citation key has supporting text | OK | All 10 keys cited next to supporting text. | references.json | |
+
+---
+
+# Round 4: last re-check (Dan's stop rule: no further fixes after this round)
+
+Counts: OK 21, OVERSTATED 1. Total 22.
+
+| file:line | statement (short) | status | what the source says | source | note |
+|---|---|---|---|---|---|
+| chapter-3.md:21 | "In 2017, amid political, social and cultural disputes, some local people in Peru wrecked the early warning system at Laguna 513" | OK | "some local residents destroyed it in 2017 due to political, social and cultural conflicts" | S p.34 | Longest run 4 words. "Amid" is weaker than "due to". |
+| summary.md:66 | C.2 Laguna 513 {3.2.1} | OK | 3.2.1 now contains the sentence. | S p.34 | |
+| faq.md:30 | "See sections 3.2.1, 3.2.2 and 3.3.1" | OK | Each sentence has a section behind it. | S p.33-34 | |
+| chapter-3.md:57 | Tension cracks sentence rewritten | OK | "should be filled or protected from direct exposure to floodwaters, rain, or snowmelt"; "help prevent the rapid infiltration of water" | TS L1193-1202 | "To stop water" slightly firmer than "help prevent". |
+| chapter-3.md:59 | "ICIMOD calls for action on risk before events occur rather than after, and for cryosphere and disaster science to be taken up in policy" | OVERSTATED | "Experts describe proactive risk management and mitigation as 'urgent' and 'essential'" (unattributed); "translate cryospheric and disaster related science into actionable policy" | U8 | **Open, for Dan.** The "before rather than after" half is not in the release and the experts are not named as ICIMOD. The policy half is supported. The verifier withdraws its OK of rounds 2 and 3 for this sentence. |
+| chapter-1.md:45 | TODO_FIGURE note | OK | Matches the current text. | chapter-1 | |
+| glossary.md (13 entries) | Cascading event, Confidence, Evidence, Geodetic method, GLOF, Glacier mass balance, Glaciological method, Hydrological year, Likelihood, Metre water equivalent, Moraine, Reference glaciers, Rock fall and rock avalanche | OK | Each used in chapter or Summary body text (e.g. chapter-2:33, :17, :15, :11, :29; chapter-1:11, :13, :23, :35, :41, :53; summary:18, :42) and each definition supported. | S p.3, p.28-32, p.69; WMO p.16-17; U2 | "Likelihood", "Geodetic method" and "Glacier mass balance" are used by related forms (likely/very likely, geodetic surveys, mass balance) and count as used. |
+| about.md:20 | "own words"; "every factual statement carries a citation" | OK | No 7-word run; no uncited factual sentence. | content | |
+
+## Open after round 4
+
+- chapter-3.md:59: OVERSTATED (see row above). Not fixed, per Dan's stop rule.
