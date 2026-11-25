@@ -7,7 +7,7 @@ their own terms, listed here.
 
 | Dataset | Citation | Terms |
 | --- | --- | --- |
-| WGMS annual mass-change estimates | Dussaillant, I. et al. (2025), Annual mass-change estimates for the world's glaciers, World Glacier Monitoring Service, doi:10.5904/wgms-amce-2025-02b | Open access with correct citation. Official terms URL: TODO_SOURCE |
+| WGMS annual mass-change estimates | World Glacier Monitoring Service (WGMS) (2026), Annual mass-change estimates for the world's glaciers (version 2026-02-10), doi:10.5904/wgms-amce-2026-02-10 | Open access with correct citation, as stated on https://wgms.ch/mass_change_estimates/ |
 
 ## Third-party software and fonts
 
