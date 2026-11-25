@@ -95,6 +95,15 @@ public/         static files (served under the base path)
 11. Do not modify the Pinecone Tools repo or its Worker.
 12. No commit or push until Dan has verified the change. If something fails twice, stop and ask.
 
+## Content file format
+
+Decap's output is the standard for `src/content/**`, `src/data/references.json` and
+`report.config.json` (folded long strings, its key order, its quoting). A save in the editor then
+rewrites an untouched file identically. After hand edits run `npm run build && npm run
+cms:normalise`; `npm run test:cms` enforces it (CI runs it). No formatter config exists in the
+repo (no prettier, editorconfig, biome or VS Code settings), so none needs an exclusion; do not
+add one that touches these files.
+
 ## Working method
 
 Eight stages (0 to 7). At the end of each stage, stop and report to Dan in Romanian (what was

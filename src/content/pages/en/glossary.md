@@ -1,6 +1,7 @@
 ---
 title: Glossary
-description: Definitions of glacier, hazard and IPCC calibrated-language terms used in this report, with their sources.
+description: Definitions of glacier, hazard and IPCC calibrated-language terms
+  used in this report, with their sources.
 lang: en
 id: glossary
 ---

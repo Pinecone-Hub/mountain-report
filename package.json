@@ -12,6 +12,8 @@
     "test": "tsc -p worker/tsconfig.json && tsc -p oauth/tsconfig.json && vitest run",
     "check": "node --experimental-strip-types --disable-warning=ExperimentalWarning scripts/check.ts",
     "test:a11y": "node --experimental-strip-types --disable-warning=ExperimentalWarning scripts/a11y.ts",
+    "cms:normalise": "node --experimental-strip-types --disable-warning=ExperimentalWarning scripts/cms-normalise.ts",
+    "test:cms": "node --experimental-strip-types --disable-warning=ExperimentalWarning scripts/cms-roundtrip.ts",
     "data": "node --experimental-strip-types --disable-warning=ExperimentalWarning scripts/data/process-wgms.ts",
     "figures:png": "node --experimental-strip-types --disable-warning=ExperimentalWarning scripts/figures-png.ts",
     "pdfs:placeholder": "node --experimental-strip-types --disable-warning=ExperimentalWarning scripts/placeholder-pdfs.ts"

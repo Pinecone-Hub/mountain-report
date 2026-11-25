@@ -1,6 +1,8 @@
 ---
 title: Glacier retreat
-description: Global and regional glacier mass change since the 1970s, the record of recent years, the methods behind the estimates and the sea-level contribution.
+description: Global and regional glacier mass change since the 1970s, the record
+  of recent years, the methods behind the estimates and the sea-level
+  contribution.
 lang: en
 chapter: 1
 id: chapter-1

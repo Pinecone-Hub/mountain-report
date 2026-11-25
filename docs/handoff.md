@@ -98,6 +98,14 @@ Deadline for the application: 30 November 2026, 23:59.
 
 ## Technical facts and gotchas
 
+- Content file format (stage 5E): Decap's output is the standard for `src/content/**`,
+  `src/data/references.json` and `report.config.json` (folded strings, key order of the field
+  config; references.json keys come out in an Immutable.js hash order, which is stable). After
+  hand edits: `npm run build && npm run cms:normalise` (rewrites files through the demo editor).
+  `npm run test:cms` checks that saving every entry (with a French fixture) rewrites every file
+  byte for byte. Both use `scripts/cms-driver.ts`. Decap keeps Save disabled while the entry
+  equals the published data, so the technique is: change, save, publish, set back, save.
+
 - **Astro 7 uses the Sätteri Markdown processor**, not remark/rehype. Own plugins are Sätteri
   hast plugins in `src/plugins/` (heading ids, cross-references, citations, notes, calibrated
   terms, structure, figure placeholder), wired in `astro.config.mjs`.

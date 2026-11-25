@@ -1,6 +1,8 @@
 ---
 title: Impacts and adaptation
-description: Monitoring, early warning and land-use planning for mountain hazards, and what the Blatten and Thame events show about warning and response.
+description: Monitoring, early warning and land-use planning for mountain
+  hazards, and what the Blatten and Thame events show about warning and
+  response.
 lang: en
 chapter: 3
 id: chapter-3
