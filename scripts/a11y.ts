@@ -272,6 +272,54 @@ try {
     const opened = await kb.evaluate(() => document.getElementById("cite-1-1")?.closest("details")?.open ?? false);
     if (!opened) fail("faq", "a hash that targets a citation inside a closed answer does not open it");
 
+    // More ways into a closed answer: a link on another page, an in-page link, the TOC, a
+    // citation back-link, and a hash change.
+    const isOpenAround = (selector: string) => kb.evaluate((sel) => document.querySelector(sel)?.closest("details")?.open ?? false, selector);
+    await kb.goto(chapter, { waitUntil: "load" });
+    await kb.evaluate((href) => {
+      const a = document.createElement("a");
+      a.href = href;
+      a.id = "test-faq-link";
+      a.textContent = "faq";
+      document.body.append(a);
+    }, `${BASE}en/faq/#cite-1-1`);
+    await kb.locator("#test-faq-link").click();
+    await kb.waitForURL(/\/faq\/#cite-1-1$/);
+    if (!(await isOpenAround("#cite-1-1"))) fail("faq", "a link from another page with a hash does not open the closed answer");
+
+    await kb.goto(faq, { waitUntil: "load" });
+    const firstToc = kb.locator("details[data-toc] a[href^='#']").first();
+    const tocTarget = (await firstToc.getAttribute("href")) ?? "";
+    if (await isOpenAround(tocTarget)) fail("faq", "the first question is already open before any link is used");
+    await firstToc.click();
+    if (!(await isOpenAround(tocTarget))) fail("faq", "a table-of-contents link does not open the closed question");
+
+    await kb.goto(faq, { waitUntil: "load" });
+    const backLink = kb.locator(".reference-back a").first();
+    const backTarget = (await backLink.getAttribute("href")) ?? "";
+    if (await isOpenAround(backTarget)) fail("faq", "the cited answer is open before the back-link is used");
+    await backLink.click();
+    if (!(await isOpenAround(backTarget))) fail("faq", "a citation back-link does not open the closed answer");
+
+    await kb.goto(faq, { waitUntil: "load" });
+    await kb.evaluate(() => {
+      location.hash = "cite-1-1";
+    });
+    await kb.waitForFunction(() => document.getElementById("cite-1-1")?.closest("details")?.open === true, undefined, { timeout: 2000 }).catch(() => {
+      fail("faq", "changing the hash does not open the closed answer");
+    });
+
+    // Without JavaScript the answers stay closed (and the page still works).
+    const noJs = await browser.newContext({ javaScriptEnabled: false });
+    try {
+      const jp = await noJs.newPage();
+      await jp.goto(faq, { waitUntil: "load" });
+      const states = await jp.locator("details.faq-item").evaluateAll((els) => els.map((el) => (el as HTMLDetailsElement).open));
+      if (states.length === 0 || states.some(Boolean)) fail("faq", "without JavaScript the FAQ answers should be present and closed");
+    } finally {
+      await noJs.close();
+    }
+
     checked++;
   } catch (error) {
     fail("keyboard", (error as Error).message.split("\n")[0]);
@@ -305,6 +353,61 @@ try {
     process.stdout.write(`FAIL [tooltip] ${(error as Error).message.split("\n")[0]}\n`);
   } finally {
     await narrow.close();
+  }
+
+  // Back-links in References and Notes: each is a 24 by 24px target that hit-testing really reaches
+  // (centre and 11px in each direction), and no two targets overlap.
+  for (const [name, size] of [["desktop", { width: 1280, height: 800 }], ["mobile", { width: 390, height: 844 }]] as const) {
+    const ctx = await browser.newContext({ viewport: size });
+    try {
+      const bp = await ctx.newPage();
+      await bp.goto(`${origin}${BASE}en/chapter-1/`, { waitUntil: "load" });
+      await bp.evaluate(() => document.fonts.ready);
+      const problems = await bp.evaluate(() => {
+        const out: string[] = [];
+        const links = Array.from(document.querySelectorAll<HTMLElement>(".reference-back a, a.data-footnote-backref"));
+        if (links.length === 0) out.push("no back-links found");
+        const rects: Array<{ label: string; r: DOMRect }> = [];
+        for (const link of links) {
+          link.scrollIntoView({ block: "center" });
+          const r = link.getBoundingClientRect();
+          const label = link.getAttribute("aria-label") ?? link.textContent ?? "?";
+          rects.push({ label, r });
+          if (r.width < 23.5 || r.height < 23.5) out.push(`${label}: target is ${r.width.toFixed(1)}x${r.height.toFixed(1)}px`);
+          const cx = r.left + r.width / 2;
+          const cy = r.top + r.height / 2;
+          for (const [dx, dy] of [[0, 0], [11, 0], [-11, 0], [0, 11], [0, -11]]) {
+            const hit = document.elementFromPoint(cx + dx, cy + dy);
+            if (!hit || !link.contains(hit)) out.push(`${label}: hit test at (${dx}, ${dy}) from the centre does not reach the link`);
+          }
+        }
+        // Rects were read while scrolling; compare in page coordinates.
+        const page = links.map((l) => {
+          const r = l.getBoundingClientRect();
+          return { label: l.getAttribute("aria-label") ?? "?", left: r.left + scrollX, right: r.right + scrollX, top: r.top + scrollY, bottom: r.bottom + scrollY };
+        });
+        for (let i = 0; i < page.length; i++) {
+          for (let j = i + 1; j < page.length; j++) {
+            const p = page[i];
+            const q = page[j];
+            if (p.left < q.right - 0.5 && q.left < p.right - 0.5 && p.top < q.bottom - 0.5 && q.top < p.bottom - 0.5) {
+              out.push(`targets overlap: "${p.label}" and "${q.label}"`);
+            }
+          }
+        }
+        return out;
+      });
+      for (const problem of problems.slice(0, 5)) {
+        failures++;
+        process.stdout.write(`FAIL [target-size] ${name}: ${problem}\n`);
+      }
+      checked++;
+    } catch (error) {
+      failures++;
+      process.stdout.write(`FAIL [target-size] ${(error as Error).message.split("\n")[0]}\n`);
+    } finally {
+      await ctx.close();
+    }
   }
 
   // Landing on #notes: the Notes heading is at the top of the screen (mobile) and the table of

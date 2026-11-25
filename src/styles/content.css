@@ -38,24 +38,36 @@ section[data-footnotes] li {
   white-space: nowrap;
 }
 
-/* Back-links read like text. The 24px touch target is an invisible area around each link,
-   not a box (WCAG 2.5.8). */
+/* Back-links: every link is a real 24 by 24px target (WCAG 2.5.8) with no visible box. Only
+   the letter or arrow is underlined, like ordinary link text. */
 .reference-back a,
 .data-footnote-backref {
-  position: relative;
+  display: inline-block;
+  min-inline-size: 1.6rem;
+  min-block-size: 1.6rem;
+  line-height: 1.5rem;
+  text-align: center;
   white-space: nowrap;
+  text-decoration: none;
+  vertical-align: middle;
 }
 
-.reference-back a::after,
-.data-footnote-backref::after {
-  content: "";
-  position: absolute;
-  inset-block-start: 50%;
-  inset-inline-start: 50%;
-  inline-size: 1.5rem;
-  block-size: 1.5rem;
-  margin-block-start: -0.75rem;
-  margin-inline-start: -0.75rem;
+.reference-back a > sup,
+.data-footnote-backref > sup {
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.reference-back a:not(:has(sup)),
+.data-footnote-backref:not(:has(sup)) {
+  text-decoration: underline;
+}
+
+@media (max-width: 40rem) {
+  .reference-back sup,
+  .data-footnote-backref sup {
+    font-size: 0.8em;
+  }
 }
 
 .reference-list > li:target,

@@ -2,7 +2,9 @@
 
 Portfolio demo of a static report microsite, "Climate Risks in High Mountain Regions", for a
 WMO / IPCC AR7 website developer consultancy. Served at `https://pinecone.lu/mountain-report/`.
-The build brief (pasted by Dan) is the source of truth; `docs/plan.md` is the approved plan.
+The build brief is the source of truth: `docs/brief.md` (word for word), with Dan's later
+changes, approved sources and decisions in `docs/plan.md` (these win where they differ).
+**At the start of every session, read `docs/handoff.md`** (status, next stage plan, gotchas).
 
 ## Language
 
