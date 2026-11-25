@@ -3,8 +3,9 @@ import { collectSections, fileLabel, glossaryEntryText, headingToken, pageFromFi
 
 describe("pageFromFile", () => {
   it("reads language and slug from a content path", () => {
-    expect(pageFromFile(new URL("file:///p/src/content/en/chapters/chapter-1.md"))).toEqual({ lang: "en", slug: "chapter-1" });
-    expect(pageFromFile(new URL("file:///p/src/content/fr/summary.md"))).toEqual({ lang: "fr", slug: "summary" });
+    expect(pageFromFile(new URL("file:///p/src/content/chapters/en/chapter-1.md"))).toEqual({ lang: "en", slug: "chapter-1" });
+    expect(pageFromFile(new URL("file:///p/src/content/pages/fr/summary.md"))).toEqual({ lang: "fr", slug: "summary" });
+    expect(pageFromFile(new URL("file:///p/src/content/guide/en.md"))).toEqual({ lang: "en", slug: "guide" });
   });
 
   it("throws for a missing or foreign path", () => {
@@ -15,7 +16,7 @@ describe("pageFromFile", () => {
 
 describe("fileLabel and routeOf", () => {
   it("shortens a path from src/", () => {
-    expect(fileLabel(new URL("file:///p/src/content/en/faq.md"))).toBe("src/content/en/faq.md");
+    expect(fileLabel(new URL("file:///p/src/content/pages/en/faq.md"))).toBe("src/content/pages/en/faq.md");
     expect(fileLabel(undefined)).toBe("(unknown file)");
   });
 

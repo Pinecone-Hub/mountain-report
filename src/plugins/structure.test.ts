@@ -4,7 +4,7 @@ import { GLOSSARY_FILE, SUMMARY, render, testEnv } from "./test-env";
 import { citationsPlugin } from "./citations";
 import { headingIdsPlugin } from "./heading-ids";
 
-const FAQ = "file:///project/src/content/en/faq.md";
+const FAQ = "file:///project/src/content/pages/en/faq.md";
 const plugins = () => [headingIdsPlugin(), structurePlugin(testEnv())];
 
 describe("structurePlugin on the Summary", () => {

@@ -17,7 +17,7 @@ interface Props {
 const { figure, lang } = Astro.props;
 const b = built(figure, lang);
 const downloads = downloadsFor(figure, lang);
-const references = parseReferences(referencesData);
+const references = parseReferences(referencesData.references);
 const sources = figure.source.map((key) => formatReference(references.get(key)!));
 const descId = `${b.anchor}-description`;
 const tableCaptionId = `${b.anchor}-table-caption`;

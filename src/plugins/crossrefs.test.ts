@@ -82,7 +82,7 @@ describe("crossRefsPlugin", () => {
   });
 
   it("names the file and value in a build error", () => {
-    expect(() => render("See {1.9}.", plugins(), CHAPTER_1)).toThrow(/src\/content\/en\/chapters\/chapter-1\.md: unknown section "1\.9"/);
+    expect(() => render("See {1.9}.", plugins(), CHAPTER_1)).toThrow(/src\/content\/chapters\/en\/chapter-1\.md: unknown section "1\.9"/);
     expect(() => render("See {5.1}.", plugins(), CHAPTER_1)).toThrow(/no chapter 5/);
     expect(() => render("See {1.2.", plugins(), CHAPTER_1)).toThrow(/chapter-1\.md: malformed/);
   });

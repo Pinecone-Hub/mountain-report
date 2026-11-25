@@ -1,6 +1,8 @@
 ---
 import { t } from "../i18n/index";
-import { pageUrl } from "../lib/urls";
+import { defaultLanguage } from "../config/report";
+import { withBase } from "../lib/paths";
+import { BASE, pageUrl } from "../lib/urls";
 
 interface Props {
   lang: string;
@@ -18,6 +20,11 @@ const { lang } = Astro.props;
         </li>
         <li><a href={pageUrl(lang, "about", "sources")}>{t(lang, "page.sources")}</a></li>
         <li><a href={pageUrl(lang, "accessibility")}>{t(lang, "page.accessibility")}</a></li>
+        <li>
+          <a href={withBase(BASE, "admin-guide/")} hreflang={defaultLanguage.code}>
+            {t(lang, "page.guide")}
+          </a>
+        </li>
         <li>{t(lang, "footer.builtBy")}</li>
       </ul>
     </nav>

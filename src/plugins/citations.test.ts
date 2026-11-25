@@ -76,7 +76,7 @@ describe("citationsPlugin", () => {
   });
 
   it("uses the page language for labels", () => {
-    const html = render("Un [@a2025].", plugins(), "file:///p/src/content/fr/summary.md");
+    const html = render("Un [@a2025].", plugins(), "file:///p/src/content/pages/fr/summary.md");
     expect(html).toContain('aria-label="Référence 1"');
     expect(html).toContain("<h2 id=\"references\">Références</h2>");
   });

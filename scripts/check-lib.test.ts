@@ -21,9 +21,14 @@ import {
   flattenKeys,
   indexReferences,
   isUrlAllowed,
+  isAdminPath,
+  findOversizedFiles,
+  MAX_FILE_BYTES,
   lineAt,
   parseAttrs,
 } from "./check-lib";
+
+import { DECAP_URL } from "../src/lib/decap";
 
 const none = new Set<string>();
 const site = { isAdmin: false, referenceHosts: none };
@@ -155,8 +160,16 @@ describe("external URLs", () => {
   it("restricts GitHub and the Decap CDN to admin pages", () => {
     expect(isUrlAllowed("https://api.github.com/user", site)).toBe(false);
     expect(isUrlAllowed("https://api.github.com/user", admin)).toBe(true);
-    expect(isUrlAllowed("https://unpkg.com/decap-cms@3.0.0/dist/decap-cms.js", site)).toBe(false);
-    expect(isUrlAllowed("https://unpkg.com/decap-cms@3.0.0/dist/decap-cms.js", admin)).toBe(true);
+    expect(isUrlAllowed(DECAP_URL, site)).toBe(false);
+    expect(isUrlAllowed(DECAP_URL, admin)).toBe(true);
+  });
+
+  it("allows only the pinned Decap version on unpkg, and only on admin pages", () => {
+    expect(isUrlAllowed("https://unpkg.com/decap-cms@3.0.0/dist/decap-cms.js", admin)).toBe(false);
+    expect(isUrlAllowed("https://unpkg.com/decap-cms/dist/decap-cms.js", admin)).toBe(false);
+    expect(isUrlAllowed("https://unpkg.com/some-other-package@1.0.0/index.js", admin)).toBe(false);
+    expect(isUrlAllowed("https://unpkg.com.evil.example/decap-cms@3.18.0/dist/decap-cms.js", admin)).toBe(false);
+    expect(isUrlAllowed("https://github.com.evil.example/x", admin)).toBe(false);
   });
 
   it("allows hosts from the references data only", () => {
@@ -176,6 +189,7 @@ describe("citations and references", () => {
   it("extracts single and multiple keys, ignoring code fences", () => {
     expect(extractCitationKeys("Text [@a1] and [@b-2; @c_3].")).toEqual(["a1", "b-2", "c_3"]);
     expect(extractCitationKeys("```\n[@hidden]\n```")).toEqual([]);
+    expect(extractCitationKeys("Write `[@example]` to cite, and [@real].")).toEqual(["real"]);
     expect(extractCitationKeys("")).toEqual([]);
     expect(extractCitationKeys("an email a@b.c and [link](x)")).toEqual([]);
   });
@@ -193,6 +207,12 @@ describe("citations and references", () => {
     expect([...idx.keys]).toEqual(["a", "b"]);
     expect(idx.problems).toEqual([]);
     expect(idx.hosts.has("wgms.ch")).toBe(true);
+  });
+
+  it("reads the { references: [...] } file root and reports duplicates in it", () => {
+    const wrapped = indexReferences({ references: [{ key: "a", doi: "10.1/x" }, { key: "a", doi: "10.1/y" }] });
+    expect(wrapped.keys).toEqual(new Set(["a"]));
+    expect(wrapped.problems).toHaveLength(1);
   });
 
   it("indexes an object keyed by reference key", () => {
@@ -420,5 +440,58 @@ describe("findSuspectEmphasis", () => {
   it("skips languages without a term list and empty input", () => {
     expect(findSuspectEmphasis("*très probable*, *likely stuff*", "fr")).toEqual([]);
     expect(findSuspectEmphasis("", "en")).toEqual([]);
+  });
+});
+
+describe("isAdminPath", () => {
+  const base = "/mountain-report";
+  it.each([
+    "src/pages/admin/index.astro",
+    "src/pages/admin/config.yml.ts",
+    "src/pages/admin-demo/index.astro",
+    "src/pages/admin-demo/repo-files.js.ts",
+    "dist/mountain-report/admin/index.html",
+    "dist/mountain-report/admin/config.yml",
+    "dist/mountain-report/admin-demo/index.html",
+    "dist/mountain-report/admin-demo/config.yml",
+    "dist/mountain-report/admin-demo/repo-files.js",
+    "src/lib/decap.ts",
+  ])("%s is admin", (path) => {
+    expect(isAdminPath(path, base)).toBe(true);
+  });
+
+  it.each([
+    "src/pages/admin-guide/index.astro",
+    "dist/mountain-report/admin-guide/index.html",
+    "dist/mountain-report/en/index.html",
+    "src/components/Footer.astro",
+    "src/lib/cms-config.ts",
+    "dist/mountain-report/en/administration/index.html",
+  ])("%s is public", (path) => {
+    expect(isAdminPath(path, base)).toBe(false);
+  });
+
+  it("works for another base path and for a base of /", () => {
+    expect(isAdminPath("dist/other/admin/index.html", "/other")).toBe(true);
+    expect(isAdminPath("dist/admin/index.html", "/")).toBe(true);
+  });
+});
+
+describe("findOversizedFiles", () => {
+  it("flags files over 25 MiB only", () => {
+    expect(MAX_FILE_BYTES).toBe(26214400);
+    const files = [
+      { path: "dist/a.pdf", bytes: MAX_FILE_BYTES },
+      { path: "dist/b.pdf", bytes: MAX_FILE_BYTES + 1 },
+      { path: "dist/c.csv", bytes: 0 },
+    ];
+    const problems = findOversizedFiles(files);
+    expect(problems).toHaveLength(1);
+    expect(problems[0]).toContain("dist/b.pdf");
+  });
+
+  it("returns nothing for no files and honours a custom limit", () => {
+    expect(findOversizedFiles([])).toEqual([]);
+    expect(findOversizedFiles([{ path: "x", bytes: 11 }], 10)).toHaveLength(1);
   });
 });

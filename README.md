@@ -15,7 +15,7 @@ The full guide is written in stage 7. Steps that already apply:
   `report.config.json` only; no code change is needed.
 - Data figures are generated from the data at build time (SVG and CSV). The PNG versions are
   made locally, because the Cloudflare Pages build has no browser. After any change to the data,
-  the figure metadata (`src/content/<lang>/figures/`) or the chart code, run:
+  the figure metadata (`src/content/figures/<lang>/`) or the chart code, run:
 
   ```
   npm run build && npm run figures:png && npm run build
@@ -31,7 +31,19 @@ The full guide is written in stage 7. Steps that already apply:
 
 Cloudflare Pages accepts files of at most 25 MiB each. Every downloadable file (report PDFs,
 chapter PDFs, figure files) must stay under that limit. The placeholder PDFs in this demo are a
-few kilobytes each.
+few kilobytes each. `npm run check` fails on any file in `dist/` larger than 25 MiB
+(26,214,400 bytes).
+
+## Content editor (Decap CMS)
+
+- `<base>/admin/` is the editor (GitHub backend, editorial workflow). `<base>/admin-demo/` is the
+  same editor on a test backend: it shows the real content and saves nothing.
+- Both read a generated `config.yml` (`src/lib/cms-config.ts`, from `report.config.json`: the
+  `cms` block holds the GitHub repository and branch). Decap is loaded only on these two pages,
+  from a pinned version with Subresource Integrity (`src/lib/decap.ts`).
+- Placeholder PDFs for the Downloads page: `node --experimental-strip-types
+  scripts/placeholder-pdfs.ts` writes them to `public/media/downloads/`.
+- The editor guide is `<base>/admin-guide/` (`src/content/guide/en.md`).
 
 ## Licence
 

@@ -12,7 +12,7 @@ describe("notesPlugin", () => {
     const en = render(MD, plugins());
     expect(en).toContain('<h2 class="notes-title" id="notes">Notes</h2>');
     expect(en).not.toContain("sr-only");
-    const fr = render(MD, plugins(), "file:///p/src/content/fr/summary.md");
+    const fr = render(MD, plugins(), "file:///p/src/content/pages/fr/summary.md");
     expect(fr).toContain('<h2 class="notes-title" id="notes">Notes</h2>');
   });
 
@@ -22,7 +22,7 @@ describe("notesPlugin", () => {
     expect(en).toContain('aria-label="Note 2"');
     expect(en).toContain('aria-label="Back to note 1, occurrence 1"');
     expect(en).toContain('aria-label="Back to note 2, occurrence 1"');
-    const fr = render(MD, plugins(), "file:///p/src/content/fr/summary.md");
+    const fr = render(MD, plugins(), "file:///p/src/content/pages/fr/summary.md");
     expect(fr).toContain('aria-label="Retour à la note 1, occurrence 1"');
     expect(fr).not.toContain("Back to");
   });

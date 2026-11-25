@@ -90,3 +90,36 @@ describe("worker fetch with a stubbed origin", () => {
     expect(fetchMock.mock.calls[0][0]).toBe(request);
   });
 });
+
+describe("worker with the OAuth flow (Decap)", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("proxies the auth popup request with its query string and passes a GitHub Location unchanged", async () => {
+    const github = "https://github.com/login/oauth/authorize?client_id=id&redirect_uri=https%3A%2F%2Fpinecone.lu%2Fmountain-report%2Fapi%2Fcallback&scope=repo&state=1.n.sig";
+    const fetchMock = vi.fn(async (..._a: unknown[]) => new Response(null, { status: 302, headers: { Location: github } }));
+    vi.stubGlobal("fetch", fetchMock);
+    const res = await worker.fetch(new Request("https://pinecone.lu/mountain-report/api/auth?provider=github&site_id=pinecone.lu&scope=repo"), env);
+    expect((fetchMock.mock.calls[0] as [string])[0]).toBe("https://mountain-report.pages.dev/mountain-report/api/auth?provider=github&site_id=pinecone.lu&scope=repo");
+    expect(res.status).toBe(302);
+    expect(res.headers.get("Location")).toBe(github);
+  });
+
+  it("proxies the callback with code and state, and adds no CSP or COOP", async () => {
+    const fetchMock = vi.fn(async (..._a: unknown[]) => new Response("<script>1</script>", {
+      status: 200,
+      headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store", "X-Robots-Tag": "noindex" },
+    }));
+    vi.stubGlobal("fetch", fetchMock);
+    const res = await worker.fetch(new Request("https://pinecone.lu/mountain-report/api/callback?code=abc&state=1.n.sig"), env);
+    expect((fetchMock.mock.calls[0] as [string])[0]).toBe("https://mountain-report.pages.dev/mountain-report/api/callback?code=abc&state=1.n.sig");
+    expect(res.status).toBe(200);
+    expect(res.headers.get("Content-Security-Policy")).toBeNull();
+    expect(res.headers.get("Cross-Origin-Opener-Policy")).toBeNull();
+    expect(res.headers.get("Cache-Control")).toBe("no-store");
+    expect(res.headers.get("X-Robots-Tag")).toBe("noindex");
+    expect(await res.text()).toBe("<script>1</script>");
+  });
+});
+

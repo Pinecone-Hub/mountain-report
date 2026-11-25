@@ -27,7 +27,7 @@ describe("figurePlaceholderPlugin", () => {
   });
 
   it("uses the page language", () => {
-    expect(render("TODO_FIGURE: Texte.", plugins(), "file:///p/src/content/fr/summary.md")).toContain("Figure en préparation");
+    expect(render("TODO_FIGURE: Texte.", plugins(), "file:///p/src/content/pages/fr/summary.md")).toContain("Figure en préparation");
   });
 
   it("leaves ordinary paragraphs and empty input alone", () => {

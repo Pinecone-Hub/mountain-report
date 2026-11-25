@@ -28,8 +28,9 @@ export default defineConfig({
   },
   integrations: [
     sitemap({
-      // The root page only redirects to the default language.
-      filter: (page) => page !== `${SITE}${BASE}/`,
+      // The root page only redirects to the default language. The editor pages stay out of the
+      // sitemap (the editor guide, admin-guide/, is a normal page).
+      filter: (page) => ![`${SITE}${BASE}/`, `${SITE}${BASE}/admin/`, `${SITE}${BASE}/admin-demo/`].includes(page),
     }),
   ],
 });

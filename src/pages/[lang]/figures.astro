@@ -34,7 +34,7 @@ const chapterName = (id: string) => {
   return tf(lang, "chapter.heading", { number: c.number, title: chapterTitle(c, lang) });
 };
 const formatLabel = { png: t(lang, "figure.download.png"), svg: t(lang, "figure.download.svg"), csv: t(lang, "figure.download.csv") };
-const references = parseReferences(referencesData);
+const references = parseReferences(referencesData.references);
 const items = figures.map((figure) => {
   const b = built(figure, lang);
   const size = /viewBox="0 0 (\d+) (\d+)"/.exec(b.svgFile);

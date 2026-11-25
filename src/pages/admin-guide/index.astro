@@ -1,0 +1,21 @@
+---
+// The editor guide: English only, one page outside the language folders. The text is the Markdown
+// file src/content/guide/en.md (not edited in Decap).
+import { getEntry, render } from "astro:content";
+import Base from "../../layouts/Base.astro";
+import { defaultLanguage } from "../../config/report";
+import { t } from "../../i18n/index";
+import type { Crumb } from "../../lib/nav";
+import { pageUrl } from "../../lib/urls";
+
+const lang = defaultLanguage.code;
+const entry = await getEntry("guide", lang);
+if (!entry) throw new Error(`src/content/guide/${lang}.md is missing`);
+const { Content } = await render(entry);
+const breadcrumbs: Crumb[] = [{ label: t(lang, "breadcrumb.home"), href: pageUrl(lang) }, { label: entry.data.title }];
+---
+
+<Base lang={lang} title={entry.data.title} breadcrumbs={breadcrumbs} singleLanguage>
+  <h1>{entry.data.title}</h1>
+  <Content />
+</Base>

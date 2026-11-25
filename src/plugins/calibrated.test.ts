@@ -51,7 +51,7 @@ describe("calibratedPlugin", () => {
   });
 
   it("does nothing for a language without a term list", () => {
-    expect(render("*very likely*", plugins(), "file:///p/src/content/fr/summary.md")).not.toContain("calibrated");
+    expect(render("*very likely*", plugins(), "file:///p/src/content/pages/fr/summary.md")).not.toContain("calibrated");
   });
 
   it("handles empty input and fails clearly when the glossary entry is missing", () => {

@@ -5,7 +5,8 @@ import Contours from "../../components/Contours.astro";
 import { chapterTitle } from "../../config/pages";
 import { fullLanguages, report, reportTitle } from "../../config/report";
 import { t, tf } from "../../i18n/index";
-import { pageUrl } from "../../lib/urls";
+import { withBase } from "../../lib/paths";
+import { BASE, pageUrl } from "../../lib/urls";
 
 export function getStaticPaths() {
   return fullLanguages.map((language) => ({ params: { lang: language.code } }));
@@ -16,6 +17,10 @@ const { lang } = Astro.params;
 // Key messages and their references come from the Home entry of the language, when it exists.
 const [entry] = await getCollection("home", ({ id }) => id === `${lang}/home`);
 const Content = entry ? (await render(entry)).Content : undefined;
+
+// The "Download full report" button goes straight to the full report file when the language has one.
+const fullReport = (await getCollection("downloads", ({ data }) => data.lang === lang && data.kind === "full-report")).sort((a, b) => b.data.date.localeCompare(a.data.date))[0];
+const downloadHref = fullReport ? withBase(BASE, fullReport.data.file) : pageUrl(lang, "downloads");
 
 interface Tile {
   href: string;
@@ -42,7 +47,7 @@ const tiles: Tile[] = [
       <h1 id="hero-title">{reportTitle(lang)}</h1>
       <p class="subtitle">{t(lang, "home.subtitle")}</p>
       <p>
-        <a class="button" href={pageUrl(lang, "downloads")}>{t(lang, "home.downloadFull")}</a>
+        <a class="button" href={downloadHref} download={fullReport ? "" : undefined}>{t(lang, "home.downloadFull")}</a>
       </p>
     </div>
     <div class="hero-art"><Contours /></div>

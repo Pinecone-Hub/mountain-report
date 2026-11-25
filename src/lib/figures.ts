@@ -1,4 +1,4 @@
-// Data figures: builds everything a figure needs from its metadata (src/content/<lang>/figures/)
+// Data figures: builds everything a figure needs from its metadata (src/content/figures/<lang>/)
 // and the processed data (data/glacier-mass-change.csv): the inline SVGs (wide and narrow), the
 // downloadable SVG, the CSV, the data table and the values of the interactive layer. Pure.
 
