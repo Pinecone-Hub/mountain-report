@@ -7,7 +7,7 @@ id: faq
 
 ## How much ice have the world's glaciers lost?
 
-From 2000 to 2023, glaciers lost on average 273 ± 16 Gt of mass per year, a total of 6,542 ± 387 Gt [@glambie2025]. This is about 5% of their mass in 2000 [@glambie2025]. In the hydrological year 2025 alone, they lost 408 ± 132 Gt [@zemp2026]. See sections 1.3 and 1.4.
+From 2000 to 2023, glaciers lost on average 273 ± 16 Gt yr⁻¹, a total of 6,542 ± 387 Gt [@glambie2025]. This is about 5% of their mass in 2000 [@glambie2025]. In the hydrological year 2025 alone, they lost 408 ± 132 Gt [@zemp2026]. See sections 1.3 and 1.4.
 
 ## How do scientists measure glacier loss?
 
@@ -15,7 +15,7 @@ Field teams measure the mass balance of individual glaciers each year, but only 
 
 ## Do melting mountain glaciers raise sea level?
 
-Yes. Glacier loss raised global mean sea level by 18 ± 1 mm from 2000 to 2023 [@glambie2025]. For the eleven high mountain regions assessed by SROCC, the contribution was 0.34 ± 0.07 mm per year in 2006 to 2015 [@hock2019srocc]. See section 1.5.
+Yes. Glacier loss raised global mean sea level by 18 ± 1 mm from 2000 to 2023 [@glambie2025]. For the eleven high mountain regions assessed by SROCC, the contribution was 0.34 ± 0.07 mm yr⁻¹ in 2006 to 2015 [@hock2019srocc]. See section 1.5.
 
 ## What is a glacial lake outburst flood?
 

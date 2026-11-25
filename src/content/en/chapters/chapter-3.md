@@ -8,9 +8,7 @@ id: chapter-3
 
 ## 3.1 Monitoring glaciers and mountain conditions
 
-Field measurements of glacier mass change give annual values but cover roughly 500 glaciers, under 0.2% of the world's total [@dussaillant2025essd]. Satellite and airborne surveys cover about 96% of glaciers, with decadal estimates of elevation change [@dussaillant2025essd]. Combining the two allows annual estimates for every glacier [@dussaillant2025essd]. The resulting dataset is open access, on condition that it is cited correctly [@wgms2026amce].
-
-GlaMBIE did not use satellite gravimetry for three regions of High Mountain Asia (Central Asia, South Asia West and South Asia East), nor for regions where glaciers are small [@glambie2025]. Its combined estimate used 195 of the 233 regional estimates submitted by 35 research teams [@glambie2025].
+The WGMS estimates rest on a small set of field measurements combined with wider satellite and airborne surveys {1.1} [@dussaillant2025essd]. The resulting WGMS dataset is open access, on condition that it is cited correctly [@wgms2026amce].
 
 SROCC identifies gaps in high mountain observation [@hock2019srocc]. Observation records at high elevations are sparse and short, which limits the detection and attribution of changes in their atmospheric drivers [@hock2019srocc]. Knowledge gaps remain on current glacier ice volumes, among other variables [@hock2019srocc]. Satellite data help to overcome the remoteness of high mountains, but cloud cover and rugged terrain still limit them [@hock2019srocc]. Citizen science, and Indigenous and local knowledge, can complement observations from instruments and models [@hock2019srocc]. For mountain communities, SROCC notes a lack of the basic weather and climate information needed both for short-term warning of disasters and for long-term adaptation planning [@hock2019srocc].
 
@@ -48,7 +46,7 @@ The geohazard map for Blatten was updated in November 2025 [@egu26-6599]. Accord
 
 ### 3.3.3 Thame
 
-The study recommends that very high-resolution survey data be used for land-use planning and for hydropower infrastructure [@icimod2025thame]. It also recommends a long-term approach that combines structural and non-structural measures [@icimod2025thame]. ICIMOD calls for a flood risk management plan for the valley [@icimod2025press]. For the lakes that remain, the study finds Upper Ngole Cho still highly vulnerable to avalanches and overflow, rates Rindhi Cho as high risk and rates Homey Cho as moderate risk in need of detailed investigation (see section 2.4.3) [@icimod2025thame].
+The study recommends that very high-resolution survey data be used for land-use planning and for hydropower infrastructure [@icimod2025thame]. It also recommends a long-term approach that combines structural and non-structural measures [@icimod2025thame]. ICIMOD calls for a flood risk management plan for the valley [@icimod2025press]. The study's assessment of the lakes that remain is set out in {2.4.3}.
 
 ## 3.4 Response and recovery
 
@@ -56,7 +54,7 @@ The study recommends that very high-resolution survey data be used for land-use 
 
 The flood left the ground at Thame unstable, with sediment deposits, erosion, subsidence and tension cracks [@icimod2025thame]. The study calls for immediate measures in the village [@icimod2025thame]. To stop water from seeping quickly into the ground, the study asks for the cracks on the riverbanks of the lower village to be filled or covered against floods, rain and snowmelt [@icimod2025thame]. The riverbanks on the old lake deposits should be protected and their erosion controlled, to prevent further subsidence and bank collapse [@icimod2025thame]. Check dams, spurs, diversion berms and similar structures should guide the river into a channel, starting about 1 km above the village [@icimod2025thame]. To follow changes in sediment and landforms, the study also suggests high-resolution stereo satellite images [@icimod2025thame].
 
-ICIMOD calls for action on risk before events occur rather than after, and for cryosphere and disaster science to be taken up in policy [@icimod2025press].
+ICIMOD calls for cryosphere and disaster science to be translated into policy [@icimod2025press].
 
 ### 3.4.2 Rebuilding Blatten
 
@@ -64,8 +62,6 @@ Bellwald describes a plan under which residents would return to a rebuilt Blatte
 
 ## 3.5 What the cases show about warning and response
 
-The sources describe the lead-up to the two events in very different detail [@egu26-6599; @egu26-19777; @icimod2025thame]. For Blatten, they record faster deformation of the rock slope about two weeks before the collapse, and the evacuation of the village before the glacier failed [@egu26-6599; @egu26-19777]. Bellwald links the timely evacuation to monitoring and mitigation by the authorities [@egu26-6599]. For Thame, the study does not report whether a warning was issued [@icimod2025thame]. The absence of deaths is linked to the timing and phased nature of the flood [@icimod2025press].
+The sources describe the lead-up to the two events in very different detail {3.2.2, 3.2.3} [@egu26-6599; @egu26-19777; @icimod2025thame]. At Blatten, rock avalanches were absent from the historical records [@egu26-6599]. At Thame, a co-author of the study points to the need to understand the risk from relatively small lakes [@icimod2025press].
 
-At Blatten, rock avalanches were absent from the historical records [@egu26-6599]. At Thame, a co-author of the study points to the need to understand the risk from relatively small lakes [@icimod2025press].
-
-These observations come from two cases only. They do not support general conclusions about early warning in high mountain regions. Sections 3.2.1 and 3.3.1 summarise the general assessment in SROCC.
+These observations come from two cases only. They do not support general conclusions about early warning in high mountain regions. The general assessment in SROCC is summarised in {3.2.1} and {3.3.1}.

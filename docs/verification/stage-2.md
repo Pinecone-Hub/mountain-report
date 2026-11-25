@@ -312,4 +312,47 @@ Counts: OK 21, OVERSTATED 1. Total 22.
 
 ## Open after round 4
 
-- chapter-3.md:59: OVERSTATED (see row above). Not fixed, per Dan's stop rule.
+- chapter-3.md:59: OVERSTATED (see row above). Not fixed in round 4, per the stop rule; fixed by Dan's decision in round 5.
+
+---
+
+# Round 5: Dan's style review (style and structure only)
+
+Changes: repetition removed in 3.1, 3.3.3 and 3.5; opening of 2.1 removed; IPCC units (Gt yr⁻¹,
+mm yr⁻¹, m w.e. yr⁻¹); Summary C.1 governance shortened; 1975/1976 note moved to
+`docs/content-notes.md`; 1.3.1 renamed "Regional differences"; linking sentence in 2.3.2;
+chapter-3:59 policy half only (closes the round 4 open row).
+
+Counts: OK 17, OVERSTATED 2, BAD_REFERENCE 1. Total 20.
+
+| file:line | statement (short) | status | what the source says | source | note |
+|---|---|---|---|---|---|
+| chapter-1.md:21-61, faq.md:10, :18, home.md:7, summary.md:14, :22, :26 | Units changed to Gt yr⁻¹, mm yr⁻¹, m w.e. yr⁻¹ | OK | Rates stay rates and totals stay totals; all values unchanged. | U2, U3, S p.72 | |
+| chapter-1.md:23 | 1975/1976 sentence removed | OK | "Since 1975, cumulative loss is 9,583 ± 1,211 Gt" | U4 | Note kept in content-notes and the TODO_FIGURE. |
+| chapter-1.md:33 | 1.3.1 "Regional differences"; Summary A.3 {1.3.1} | OK | Section still gives 2% to 39%, Central Europe 39%, regional shares. | U3 | |
+| summary.md:62 | C.1 "SROCC identifies effective governance as a key factor in enabling disaster risk reduction (*medium confidence*)" | OK | "Effective governance is a key enabler for reducing disaster risk ... (medium confidence)" | S p.5 | Differs from chapter-3:39; longest run 2 words. |
+| chapter-2.md:9-11 | Thame dam paragraph before 2.1.1 removed | OK | Facts kept at chapter-2:61-65 and faq:22. | U7; TS L282, L825 | |
+| chapter-2.md:47 | "The two abstracts differ on casualties" | OVERSTATED | U5 "claiming one life"; U6 "avoided loss of life". Neither states a conflict. | U5, U6 | Fixed in round 6. |
+| chapter-3.md:11 | "Global glacier estimates rest on a small set of field measurements ..." | OVERSTATED | The source describes the WGMS method only. | U2 | Fixed in round 6. |
+| chapter-3.md:11 | {1.1} pointer; GlaMBIE 195/233 removed | OK | 1.1 holds the details. | chapter-1 | |
+| summary.md:30 | A.5 {1.1, 3.1} | BAD_REFERENCE | 3.1 no longer gives 500, 96% or "decadal". | chapter-3:11 | Fixed in round 6. |
+| chapter-3.md:49 | Pointer to {2.4.3} for remaining lakes | OK | 2.4.3 holds the lake ratings. | TS L1165, L1175, L1182 | |
+| chapter-3.md:57 | "ICIMOD calls for cryosphere and disaster science to be translated into policy" | OK | "translate cryospheric and disaster related science into actionable policy" | U8 | Closes the round 4 open row. |
+| chapter-3.md:65 | 3.5 comparison {3.2.2, 3.2.3}; Blatten records; Thame small lakes | OK | "lack any documentation about rock avalanches"; "even the relatively smaller lakes" | U6, U8 | |
+| chapter-3.md:67 | Pointer to {3.2.1} and {3.3.1} | OK | Both sections exist and are SROCC-based. | chapter-3 | |
+| all {x.y} | Every cross-reference resolves | OK | 1.1, 1.3, 1.3.1, 1.3.2, 1.4, 1.5, 2.1.1, 2.1.2, 2.2.1, 2.3, 2.3.3, 2.4, 2.4.3, 3.1, 3.2.1-3.2.3, 3.3.1-3.3.3, 3.4.1, 3.4.2 | chapters | Except summary:30 {3.1}, above. |
+| src/content/en (all) | No orphan citation or claim | OK | All 10 keys cited next to supporting text. | content | |
+
+# Round 6: last re-check of the round 5 findings
+
+Counts: OK 3. Total 3. Nothing open.
+
+| file:line | statement (short) | status | what the source says | source | note |
+|---|---|---|---|---|---|
+| chapter-2.md:47 | "The two abstracts describe casualties in different terms" | OK | "claiming one life ..."; "avoided loss of life" | U5, U6 | States only that the wording differs. |
+| chapter-3.md:11 | "The WGMS estimates rest on a small set of field measurements ... {1.1}" | OK | "in situ observations are limited to approximately 500 glaciers"; "approximately 207 000 glaciers" | U2 | |
+| summary.md:30 | A.5 {1.1} | OK | 1.1 holds every element of the statement. | chapter-1 | {3.1} is still used by C.5. |
+
+## Status after round 6
+
+No open rows. Stage 2 English content verified.

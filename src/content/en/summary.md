@@ -11,7 +11,7 @@ Glaciers worldwide are losing mass at an increasing rate, and six of the years w
 
 ### A.1
 
-From 2000 to 2023, glaciers lost on average 273 ± 16 Gt of mass per year, about 5% of their mass in 2000 [@glambie2025]. Annual loss was 36 ± 10% higher in 2012 to 2023 than in 2000 to 2011 [@glambie2025]. {1.3}
+From 2000 to 2023, glaciers lost on average 273 ± 16 Gt yr⁻¹, about 5% of their mass in 2000 [@glambie2025]. Annual loss was 36 ± 10% higher in 2012 to 2023 than in 2000 to 2011 [@glambie2025]. {1.3}
 
 ### A.2
 
@@ -23,11 +23,11 @@ Losses differ between mountain regions [@glambie2025]. Central Europe lost 39% o
 
 ### A.4
 
-Glacier loss raised global mean sea level by 18 ± 1 mm from 2000 to 2023 [@glambie2025]. The eleven high mountain regions assessed by SROCC contributed 0.34 ± 0.07 mm per year in 2006 to 2015 [@hock2019srocc]. {1.5}
+Glacier loss raised global mean sea level by 18 ± 1 mm from 2000 to 2023 [@glambie2025]. The eleven high mountain regions assessed by SROCC contributed 0.34 ± 0.07 mm yr⁻¹ in 2006 to 2015 [@hock2019srocc]. {1.5}
 
 ### A.5
 
-Field measurements give annual values for about 500 glaciers, while satellite and airborne surveys cover about 96% of glaciers with decadal estimates [@dussaillant2025essd]. The WGMS combines the two to estimate annual mass change for every glacier [@wgms2026amce; @dussaillant2025essd]. {1.1, 3.1}
+Field measurements give annual values for about 500 glaciers, while satellite and airborne surveys cover about 96% of glaciers with decadal estimates [@dussaillant2025essd]. The WGMS combines the two to estimate annual mass change for every glacier [@wgms2026amce; @dussaillant2025essd]. {1.1}
 
 ## B. Mountain hazards
 
@@ -59,7 +59,7 @@ Hazard mapping, early warning and engineering works have been applied to reduce 
 
 ### C.1
 
-The strategies applied include engineering works such as lowering glacial lakes, nature-based approaches such as planting vegetation, hazard and risk mapping for zoning and early warning, and community programmes [@hock2019srocc]. Where adaptation action has been identified, it has mostly been reactive [@hock2019srocc]. According to SROCC, effective governance does much to make disaster risk reduction possible, and it should weigh both how planning, zoning and the pressures of urban growth shape exposure and how factors such as poverty shape vulnerability (*medium confidence*) [@hock2019srocc]. Avoiding greater impacts will require substantial efforts in risk reduction and adaptation (*high confidence*) [@hock2019srocc]. {3.3.1}
+The strategies applied include engineering works such as lowering glacial lakes, nature-based approaches such as planting vegetation, hazard and risk mapping for zoning and early warning, and community programmes [@hock2019srocc]. Where adaptation action has been identified, it has mostly been reactive [@hock2019srocc]. SROCC identifies effective governance as a key factor in enabling disaster risk reduction (*medium confidence*) [@hock2019srocc]. Avoiding greater impacts will require substantial efforts in risk reduction and adaptation (*high confidence*) [@hock2019srocc]. {3.3.1}
 
 ### C.2
 

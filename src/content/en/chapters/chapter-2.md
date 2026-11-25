@@ -8,8 +8,6 @@ id: chapter-2
 
 ## 2.1 Glacial lakes and outburst floods
 
-In the Thame glacial lake outburst flood described in section 2.4, two lakes failed in turn: the upper one is held by bedrock with a thin layer of moraine on top, and the lower one by an end moraine [@icimod2025thame].
-
 ### 2.1.1 Global assessment
 
 Floods from glaciers, including glacial lake outburst floods (GLOFs), have been recorded in most mountain ranges that hold glaciers [@hock2019srocc]. SROCC counts them among the glacier hazards with the longest reach [@hock2019srocc]. Earlier floods of this type reached distances of tens to hundreds of kilometres below their source [@hock2019srocc]. Lakes can be held back by moraines or by glacier ice, and both types have produced floods [@hock2019srocc].
@@ -46,7 +44,7 @@ The avalanche blocked the river Lonza [@egu26-19777]. The lake that formed behin
 
 ### 2.3.2 Consequences
 
-The village of Blatten was almost entirely destroyed [@egu26-19777]. It had been fully evacuated before the collapse [@egu26-19777]. One abstract reports that the collapse claimed one life [@egu26-19777]. The other credits the monitoring and mitigation measures of the authorities with allowing residents to leave in time, and refers to loss of life having been avoided [@egu26-6599].
+The village of Blatten was almost entirely destroyed [@egu26-19777]. It had been fully evacuated before the collapse [@egu26-19777]. The two abstracts describe casualties in different terms [@egu26-19777; @egu26-6599]. One reports that the collapse claimed one life [@egu26-19777]. The other credits the monitoring and mitigation measures of the authorities with allowing residents to leave in time, and refers to loss of life having been avoided [@egu26-6599].
 
 ### 2.3.3 Causes under study
 

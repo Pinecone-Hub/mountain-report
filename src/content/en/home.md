@@ -4,7 +4,7 @@ description: "Glacier retreat, mountain hazards and adaptation: a demonstration 
 lang: en
 id: home
 keyMessages:
-  - text: "Glaciers lost on average 273 ± 16 Gt of mass per year from 2000 to 2023, and six of the highest-loss years on record fall within the past seven years [@glambie2025; @zemp2026]."
+  - text: "Glaciers lost on average 273 ± 16 Gt yr⁻¹ from 2000 to 2023, and six of the highest-loss years on record fall within the past seven years [@glambie2025; @zemp2026]."
     ref: "A"
   - text: "In most regions, glacial lakes have become more numerous and larger (*high confidence*), and mountain slopes have become less stable as glaciers retreat and permafrost thaws (*high confidence*) [@hock2019srocc]."
     ref: "B"

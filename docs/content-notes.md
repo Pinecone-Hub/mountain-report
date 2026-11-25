@@ -168,6 +168,15 @@ quotation marks, attributed to him and labelled in chapter 2 as not IPCC calibra
   Ablation zone, Accumulation zone, Albedo, Calving, Glacier collapse, Glacier surge. "Evidence and
   agreement" renamed "Evidence", because "agreement" is no longer used in the text.
 
+## Text review (Dan, style and structure)
+
+- **For a stage 3 footnote (moved out of 1.2):** Zemp et al. give the start of the cumulative
+  period as 1975, while their Fig. 1 of global mass change begins with the hydrological year 1976
+  [@zemp2026].
+- Units now follow IPCC style (Gt yr⁻¹, mm yr⁻¹, m w.e. yr⁻¹, kg m⁻² yr⁻¹); values unchanged.
+- Repetition removed in 3.1, 3.3.3 and 3.5, replaced with {x.y} cross-references; 2.1 opening
+  paragraph removed; 1.3.1 renamed "Regional differences".
+
 ## Remaining markers
 
 - No TODO_SOURCE remains.
