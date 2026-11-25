@@ -51,4 +51,4 @@ Le texte de ce site est mis à disposition sous licence Creative Commons Attribu
 
 ## Contact
 
-hello@pinecone.lu
+[hello@pinecone.lu](mailto:hello@pinecone.lu)
