@@ -10,6 +10,9 @@
 // The Home page holds its key messages as a numbered list in the body; each ends with a
 // cross-reference to the Summary headline, such as {A}.
 //
+// Figures (src/content/<lang>/figures/<id>.yml) are data entries, not Markdown: see the schema
+// below. A chapter places a figure with a paragraph "FIGURE: <id>" (src/plugins/figures.ts).
+//
 // A language folder that does not exist yet (French for now) has no entries: its pages show
 // the "in preparation" stub with a link to the English page.
 
@@ -50,6 +53,28 @@ const references = defineCollection({
   }),
 });
 
+// One data figure. chartType and measure pick the renderer (src/lib/figures.ts); series are
+// ids in data/glacier-mass-change.csv. The replacement fields are optional paths below public/
+// (such as "media/figures/fig-1-1.png") of files uploaded in the CMS that replace the files
+// generated from the data.
+const figure = z.object({
+  id: z.string().regex(/^[a-z0-9-]+$/),
+  chapter: z.string().min(1),
+  number: z.string().regex(/^\d+\.\d+$/),
+  section: z.string().optional(),
+  chartType: z.enum(["bars", "cumulative-lines"]),
+  measure: z.enum(["gt", "mwe"]),
+  series: z.array(z.string().min(1)).min(1),
+  source: z.array(z.string().min(1)).min(1),
+  title: z.string().min(1),
+  caption: z.string().min(1),
+  alt: z.string().min(1).max(250),
+  longDescription: z.string().min(1),
+  replacementPng: z.string().optional(),
+  replacementSvg: z.string().optional(),
+  replacementCsv: z.string().optional(),
+});
+
 const pages = (pattern: string) => glob({ base, pattern, generateId });
 
 export const collections = {
@@ -59,5 +84,9 @@ export const collections = {
   glossary: defineCollection({ loader: pages("*/glossary.md"), schema: page }),
   about: defineCollection({ loader: pages("*/about.md"), schema: page }),
   home: defineCollection({ loader: pages("*/home.md"), schema: page }),
+  figures: defineCollection({
+    loader: glob({ base, pattern: "*/figures/*.yml", generateId: ({ entry }) => entry.replace(/\.yml$/, "").replace("/figures/", "/") }),
+    schema: figure,
+  }),
   references,
 };

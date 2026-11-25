@@ -24,7 +24,7 @@ The current version of the series runs to the hydrological year 2025 [@wgms2026a
 
 [^period]: Zemp et al. give the start of the cumulative period as 1975, while their Fig. 1 of global mass change begins with the hydrological year 1976 [@zemp2026].
 
-TODO_FIGURE: Annual global glacier mass change (Gt) by hydrological year, 1976 to 2025, from the WGMS annual mass-change estimates (version 2026-02-10).
+FIGURE: fig-1-1
 
 ## 1.3 Glacier loss from 2000 to 2023
 
@@ -42,7 +42,7 @@ The IPCC Special Report on the Ocean and Cryosphere in a Changing Climate (SROCC
 
 For 2006 to 2015, SROCC assessed the mass budget of glaciers in these mountain regions as *very likely* −490 ± 100 kg m⁻² yr⁻¹ (−123 ± 24 Gt yr⁻¹) [@hock2019srocc]. Regional averages were *likely* most negative, below −850 kg m⁻² yr⁻¹, in the southern Andes, the Caucasus and the European Alps and Pyrenees [@hock2019srocc]. High Mountain Asia had the least negative average, at −150 ± 110 kg m⁻² yr⁻¹, with strong variation within the region [@hock2019srocc].
 
-TODO_FIGURE: Cumulative specific mass change (m w.e.) by hydrological year for Central Europe, Central Asia, South Asia West and South Asia East, from the WGMS annual mass-change estimates (version 2026-02-10). The caption must state that the values come from the WGMS dataset, and that they will differ from the GlaMBIE values for Central Europe and the SROCC regional averages given in the text, which use other methods and periods.
+FIGURE: fig-1-2
 
 ## 1.4 Recent years
 

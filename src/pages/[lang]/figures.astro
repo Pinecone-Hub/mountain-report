@@ -1,0 +1,208 @@
+---
+// Figures page: every data figure of the report, filterable by chapter, each with a lightbox
+// (native <dialog>: modal, Esc closes, focus returns to the button that opened it). Without
+// JavaScript the filter and the Enlarge buttons stay hidden; every figure is shown and links to
+// its place in the chapter.
+import Base from "../../layouts/Base.astro";
+import FigureImage from "../../components/figures/FigureImage.astro";
+import { chapterTitle } from "../../config/pages";
+import { defaultLanguage, fullLanguages, report } from "../../config/report";
+import { t, tf } from "../../i18n/index";
+import { downloadsFor, figuresFor, imageHref, built } from "../../lib/figure-store";
+import { formatSize } from "../../lib/figures";
+import { formatReference, parseReferences } from "../../lib/references";
+import referencesData from "../../data/references.json";
+import type { Crumb } from "../../lib/nav";
+import { pageUrl } from "../../lib/urls";
+
+export function getStaticPaths() {
+  return fullLanguages.map((language) => ({ params: { lang: language.code } }));
+}
+
+const { lang } = Astro.params;
+const title = t(lang, "page.figures");
+const breadcrumbs: Crumb[] = [{ label: t(lang, "breadcrumb.home"), href: pageUrl(lang) }, { label: title }];
+const figures = await figuresFor(lang);
+const chapterOf = (id: string) => {
+  const chapter = report.chapters.find((c) => c.id === id);
+  if (!chapter) throw new Error(`figure chapter "${id}" is not in report.config.json`);
+  return chapter;
+};
+const chapters = report.chapters.filter((c) => figures.some((f) => f.chapter === c.id));
+const chapterName = (id: string) => {
+  const c = chapterOf(id);
+  return tf(lang, "chapter.heading", { number: c.number, title: chapterTitle(c, lang) });
+};
+const formatLabel = { png: t(lang, "figure.download.png"), svg: t(lang, "figure.download.svg"), csv: t(lang, "figure.download.csv") };
+const references = parseReferences(referencesData);
+const items = figures.map((figure) => {
+  const b = built(figure, lang);
+  const size = /viewBox="0 0 (\d+) (\d+)"/.exec(b.svgFile);
+  const place = figure.section ? tf(lang, "figure.inChapter", { chapter: chapterName(figure.chapter), section: figure.section }) : chapterName(figure.chapter);
+  return {
+    figure,
+    label: b.label,
+    href: pageUrl(lang, figure.chapter, b.anchor),
+    // A replacement image from the CMS is shown as an image; otherwise the chart SVG inline
+    // (site font, and the narrow version on small screens).
+    replacement: figure.replacementSvg || figure.replacementPng ? imageHref(figure, lang) : undefined,
+    width: size ? Number(size[1]) : undefined,
+    height: size ? Number(size[2]) : undefined,
+    svgWide: b.svgWide,
+    svgNarrow: b.svgNarrow,
+    place,
+    dialogId: `lightbox-${figure.id}`,
+    downloads: downloadsFor(figure, lang),
+    sources: figure.source.map((key) => formatReference(references.get(key)!)),
+  };
+});
+const englishFigures = lang === defaultLanguage.code ? [] : await figuresFor(defaultLanguage.code);
+---
+
+<Base lang={lang} title={title} switchPath="figures" breadcrumbs={breadcrumbs}>
+  <h1>{title}</h1>
+  {
+    items.length === 0 ? (
+      <>
+        <p>{t(lang, "page.inPreparation")}</p>
+        {englishFigures.length > 0 && (
+          <p>
+            <a href={pageUrl(defaultLanguage.code, "figures")} hreflang={defaultLanguage.code} lang={defaultLanguage.code}>
+              {t(lang, "page.stub.english")}
+            </a>
+          </p>
+        )}
+      </>
+    ) : (
+      <>
+        <p>{t(lang, "figures.intro")}</p>
+        <fieldset class="figure-filter" hidden>
+          <legend>{t(lang, "figures.filter.legend")}</legend>
+          <label>
+            <input type="radio" name="figure-chapter" value="" checked />
+            {t(lang, "figures.filter.all")}
+          </label>
+          {chapters.map((c) => (
+            <label>
+              <input type="radio" name="figure-chapter" value={c.id} />
+              {chapterName(c.id)}
+            </label>
+          ))}
+        </fieldset>
+        <p class="figure-count" aria-live="polite" data-template={t(lang, "figures.count")} data-total={items.length} hidden />
+        <ul class="figure-list">
+          {items.map((item) => (
+            <li data-chapter={item.figure.chapter}>
+              <figure class="figure-card">
+                <FigureImage item={item} />
+                <figcaption>
+                  <span class="figure-label">{item.label}</span>
+                  <span class="figure-title">{item.figure.title}</span>
+                  <a class="figure-card-link" href={item.href}>
+                    {tf(lang, "figures.view", { place: item.place })}
+                  </a>
+                </figcaption>
+                <button type="button" class="button figure-enlarge" data-dialog={item.dialogId} hidden>
+                  {tf(lang, "figures.enlarge", { number: item.figure.number })}
+                </button>
+              </figure>
+              <dialog id={item.dialogId} class="lightbox" aria-labelledby={`${item.dialogId}-title`}>
+                <div class="lightbox-head">
+                  <h2 id={`${item.dialogId}-title`}>
+                    {item.label}. {item.figure.title}
+                  </h2>
+                  <button type="button" class="button lightbox-close">
+                    {t(lang, "figures.close")}
+                  </button>
+                </div>
+                <figure class="lightbox-figure">
+                  <FigureImage item={item} />
+                  <figcaption>
+                    <span class="figure-caption">{item.figure.caption}</span>
+                    <span class="figure-source">
+                      {t(lang, "figure.source")}{" "}
+                      {item.sources.map((src) => (
+                        <>
+                          {src.text}
+                          {src.link && (
+                            <>
+                              {" "}
+                              <a href={src.link.href}>{src.link.label}</a>
+                            </>
+                          )}
+                        </>
+                      ))}
+                    </span>
+                  </figcaption>
+                </figure>
+                <details class="figure-description">
+                  <summary>{t(lang, "figure.description")}</summary>
+                  <p>{item.figure.longDescription}</p>
+                </details>
+                <div class="figure-downloads">
+                  <p class="figure-downloads-label">{tf(lang, "figure.downloads", { number: item.figure.number })}</p>
+                  <ul>
+                    {item.downloads.map((d) => (
+                      <li>
+                        <a href={d.href} download>
+                          {tf(lang, "figure.download.item", { format: formatLabel[d.format], size: formatSize(lang, d.bytes) })}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <p class="lightbox-link">
+                  <a href={item.href}>{tf(lang, "figures.view", { place: item.place })}</a>
+                </p>
+              </dialog>
+            </li>
+          ))}
+        </ul>
+      </>
+    )
+  }
+</Base>
+
+<script>
+  // ----- Chapter filter. -----
+  const filter = document.querySelector<HTMLFieldSetElement>(".figure-filter");
+  const count = document.querySelector<HTMLElement>(".figure-count");
+  const cards = [...document.querySelectorAll<HTMLLIElement>(".figure-list > li")];
+  if (filter && count) {
+    const update = () => {
+      const chosen = filter.querySelector<HTMLInputElement>("input:checked")?.value ?? "";
+      let shown = 0;
+      for (const card of cards) {
+        const visible = chosen === "" || card.dataset.chapter === chosen;
+        card.hidden = !visible;
+        if (visible) shown++;
+      }
+      count.textContent = (count.dataset.template ?? "").replace("{count}", String(shown)).replace("{total}", count.dataset.total ?? "");
+    };
+    filter.addEventListener("change", update);
+    filter.hidden = false;
+    count.hidden = false;
+    update();
+  }
+
+  // ----- Lightbox. -----
+  for (const button of document.querySelectorAll<HTMLButtonElement>("button[data-dialog]")) {
+    const dialog = document.getElementById(button.dataset.dialog ?? "");
+    if (!(dialog instanceof HTMLDialogElement) || typeof dialog.showModal !== "function") continue;
+    button.hidden = false;
+    button.addEventListener("click", () => {
+      dialog.showModal();
+      dialog.querySelector<HTMLButtonElement>(".lightbox-close")?.focus();
+    });
+    dialog.querySelector(".lightbox-close")?.addEventListener("click", () => dialog.close());
+    // A click on the backdrop (outside the dialog box) closes it.
+    dialog.addEventListener("click", (event) => {
+      if (event.target !== dialog) return;
+      const r = dialog.getBoundingClientRect();
+      const inside = event.clientX >= r.left && event.clientX <= r.right && event.clientY >= r.top && event.clientY <= r.bottom;
+      if (!inside) dialog.close();
+    });
+    // Esc closes natively; focus goes back to the button that opened the dialog.
+    dialog.addEventListener("close", () => button.focus());
+  }
+</script>

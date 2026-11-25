@@ -1,0 +1,26 @@
+---
+// The chart of a figure on the Figures page and in its lightbox: a replacement image from the
+// CMS when there is one, otherwise the chart SVG inline (wide, and narrow on small screens).
+interface Props {
+  item: {
+    figure: { alt: string };
+    replacement?: string;
+    width?: number;
+    height?: number;
+    svgWide: string;
+    svgNarrow: string;
+  };
+}
+const { item } = Astro.props;
+---
+
+{
+  item.replacement ? (
+    <img src={item.replacement} alt={item.figure.alt} width={item.width} height={item.height} loading="lazy" decoding="async" />
+  ) : (
+    <div class="figure-chart">
+      <Fragment set:html={item.svgWide} />
+      <Fragment set:html={item.svgNarrow} />
+    </div>
+  )
+}

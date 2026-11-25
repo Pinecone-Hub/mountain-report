@@ -1,7 +1,8 @@
 // Accessibility tests: serves dist/ with a tiny static server, opens every HTML page in
 // Chromium (desktop and mobile viewport) and runs axe-core with the WCAG 2.2 AA tags.
 // Also checks that the first Tab press focuses the skip link, and keyboard use of calibrated-term
-// tooltips (Tab shows, Esc hides) and of citations (link to the reference and back).
+// tooltips (Tab shows, Esc hides) and of citations (link to the reference and back), the chart
+// slider (arrow keys) and the Figures lightbox (open, Esc, focus return).
 // Usage: npm run test:a11y   (run `npm run build` first). Exit code 1 on any violation.
 
 import { createServer } from "node:http";
@@ -435,6 +436,68 @@ try {
     } catch (error) {
       failures++;
       process.stdout.write(`FAIL [hash-scroll] ${(error as Error).message.split("\n")[0]}\n`);
+    } finally {
+      await ctx.close();
+    }
+  }
+
+  // Figures: the chart slider (keyboard) on the chapter page, and the lightbox on the Figures
+  // page (opens as a modal, axe passes while open, Esc closes, focus returns to its button).
+  {
+    const ctx = await browser.newContext({ viewport: { width: 1280, height: 800 } });
+    const fail = (rule: string, message: string) => {
+      failures++;
+      process.stdout.write(`FAIL [${rule}] ${message}\n`);
+    };
+    try {
+      const cp = await ctx.newPage();
+      await cp.goto(`${origin}${BASE}en/chapter-1/`, { waitUntil: "load" });
+      const slider = cp.locator(".chart-slider").first();
+      if (!(await slider.isVisible())) fail("chart", "the chart slider is not visible with JavaScript");
+      else {
+        await slider.focus();
+        const max = await slider.getAttribute("aria-valuemax");
+        if ((await slider.getAttribute("aria-valuenow")) !== max) fail("chart", "focusing the slider does not select the last year");
+        await cp.keyboard.press("ArrowLeft");
+        if (Number(await slider.getAttribute("aria-valuenow")) !== Number(max) - 1) fail("chart", "ArrowLeft does not move to the previous year");
+        await cp.keyboard.press("Home");
+        const min = await slider.getAttribute("aria-valuemin");
+        if ((await slider.getAttribute("aria-valuenow")) !== min) fail("chart", "Home does not move to the first year");
+        const readout = (await cp.locator(".chart-readout").first().textContent()) ?? "";
+        const valuetext = (await slider.getAttribute("aria-valuetext")) ?? "";
+        if (!readout.startsWith(min ?? "?") || readout !== valuetext) fail("chart", `readout "${readout}" does not match aria-valuetext "${valuetext}"`);
+      }
+      checked++;
+
+      const fp = await ctx.newPage();
+      await fp.goto(`${origin}${BASE}en/figures/`, { waitUntil: "load" });
+      const button = fp.locator("button[data-dialog]").first();
+      const dialogId = (await button.getAttribute("data-dialog")) ?? "";
+      await button.focus();
+      await fp.keyboard.press("Enter");
+      const open = await fp.evaluate((id) => (document.getElementById(id) as HTMLDialogElement | null)?.open === true && document.getElementById(id)?.matches(":modal") === true, dialogId);
+      if (!open) fail("lightbox", "Enter on the Enlarge button does not open a modal dialog");
+      const inDialog = await fp.evaluate((id) => document.getElementById(id)?.contains(document.activeElement) === true, dialogId);
+      if (!inDialog) fail("lightbox", "focus is not inside the dialog after opening");
+      const results = await new AxeBuilder({ page: fp }).withTags(TAGS).analyze();
+      for (const v of results.violations) fail("lightbox", `axe ${v.id} with the dialog open: ${v.help}`);
+      await fp.keyboard.press("Escape");
+      const closed = await fp.evaluate((id) => (document.getElementById(id) as HTMLDialogElement | null)?.open === false, dialogId);
+      if (!closed) fail("lightbox", "Esc does not close the dialog");
+      const back = await fp.evaluate((id) => (document.activeElement as HTMLElement | null)?.dataset.dialog === id, dialogId);
+      if (!back) fail("lightbox", "focus does not return to the Enlarge button after closing");
+      // Filter: choosing a chapter with figures keeps them; the count says how many are shown.
+      const radios = fp.locator(".figure-filter input[type=radio]");
+      if ((await radios.count()) < 2) fail("figures", "the chapter filter has no chapter options");
+      else {
+        await radios.nth(1).check();
+        const shown = await fp.locator(".figure-list > li:not([hidden])").count();
+        const count = (await fp.locator(".figure-count").textContent()) ?? "";
+        if (shown === 0 || !count.startsWith(String(shown))) fail("figures", `the filter shows ${shown} figures but the count says "${count}"`);
+      }
+      checked++;
+    } catch (error) {
+      fail("figures", (error as Error).message.split("\n")[0]);
     } finally {
       await ctx.close();
     }

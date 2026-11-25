@@ -1,0 +1,48 @@
+{
+  "source": "wgms2026amce",
+  "rawDir": "data/raw/wgms-amce-2026-02-10",
+  "output": "data/glacier-mass-change.csv",
+  "firstYear": 1976,
+  "lastYear": 2025,
+  "series": [
+    {
+      "id": "global",
+      "file": "global.csv",
+      "sha256": "73af0a84be3c9aa10131494175e7c2e115ff44f22141992505cd9373497eca35"
+    },
+    {
+      "id": "CEU",
+      "file": "region/CEU.csv",
+      "sha256": "256d01e8842c5591855f5c5a1e7df5e26554e2041f294475843f1c310d6f9892"
+    },
+    {
+      "id": "ASC",
+      "file": "region/ASC.csv",
+      "sha256": "d63f583ada5371292861f99d90f93701fc9056fba617bab6aab179debf107357"
+    },
+    {
+      "id": "ASW",
+      "file": "region/ASW.csv",
+      "sha256": "556539b91236991e7f0dc622aec800423574e8bf9e7ac1aa6db1d068fdeb1282"
+    },
+    {
+      "id": "ASE",
+      "file": "region/ASE.csv",
+      "sha256": "df1a2223682a34431ceef603b929942dfbca5d131dda20d9bf7b46ee28e0e3fe"
+    },
+    {
+      "id": "SA1",
+      "file": "region/SA1.csv",
+      "sha256": "60328a373141cff2816e85ff2c76b52327b6440fd9dcb3cc6d1511fabe5814d1"
+    },
+    {
+      "id": "SA2",
+      "file": "region/SA2.csv",
+      "sha256": "3f39197571b6939591ad20a1e871cb6d3dfaf6227680596a8c156edd24c3e918"
+    }
+  ],
+  "download": {
+    "url": "https://wgms.ch/downloads/wgms-amce-2026-02-10.zip",
+    "sha256": "b88c2355650142160594c96dcb800e3fb58d82abbebd0ab2d976a458153e2ecc"
+  }
+}

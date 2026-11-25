@@ -11,3 +11,6 @@ playwright-report/
 .dev.vars
 .playwright-mcp/
 .local-sources/
+# Original WGMS files: kept locally, not redistributed (see data/raw/*/SOURCE.md).
+data/raw/*/*
+!data/raw/*/SOURCE.md

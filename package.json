@@ -11,7 +11,9 @@
     "preview": "astro preview",
     "test": "tsc -p worker/tsconfig.json && vitest run",
     "check": "node --experimental-strip-types --disable-warning=ExperimentalWarning scripts/check.ts",
-    "test:a11y": "node --experimental-strip-types --disable-warning=ExperimentalWarning scripts/a11y.ts"
+    "test:a11y": "node --experimental-strip-types --disable-warning=ExperimentalWarning scripts/a11y.ts",
+    "data": "node --experimental-strip-types --disable-warning=ExperimentalWarning scripts/data/process-wgms.ts",
+    "figures:png": "node --experimental-strip-types --disable-warning=ExperimentalWarning scripts/figures-png.ts"
   },
   "devDependencies": {
     "@astrojs/check": "0.9.12",
