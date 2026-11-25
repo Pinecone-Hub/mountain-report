@@ -2,7 +2,7 @@
 import { t } from "../i18n/index";
 import { defaultLanguage } from "../config/report";
 import { withBase } from "../lib/paths";
-import { BASE, pageUrl } from "../lib/urls";
+import { BASE, pageLink } from "../lib/urls";
 
 interface Props {
   lang: string;
@@ -18,11 +18,16 @@ const { lang } = Astro.props;
         <li>
           {t(lang, "footer.licence.label")}{" "}<a href="https://creativecommons.org/licenses/by/4.0/" hreflang="en">{t(lang, "footer.licence.name")}</a>
         </li>
-        <li><a href={pageUrl(lang, "about", "sources")}>{t(lang, "page.sources")}</a></li>
-        <li><a href={pageUrl(lang, "accessibility")}>{t(lang, "page.accessibility")}</a></li>
+        <li><a {...pageLink(lang, "about", "sources")}>{t(lang, "page.sources")}</a></li>
+        <li><a {...pageLink(lang, "accessibility")}>{t(lang, "page.accessibility")}</a></li>
         <li>
           <a href={withBase(BASE, "admin-guide/")} hreflang={defaultLanguage.code}>
             {t(lang, "page.guide")}
+          </a>
+        </li>
+        <li>
+          <a href={withBase(BASE, "admin-demo/")} hreflang={defaultLanguage.code}>
+            {t(lang, "footer.editorDemo")}
           </a>
         </li>
         <li>{t(lang, "footer.builtBy")}</li>

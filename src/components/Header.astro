@@ -1,7 +1,7 @@
 ---
-import { reportTitle } from "../config/report";
+import { languageConfig, reportTitle } from "../config/report";
 import { t } from "../i18n/index";
-import { pageUrl } from "../lib/urls";
+import { pageLink, pageUrl } from "../lib/urls";
 import LanguageSwitcher from "./LanguageSwitcher.astro";
 
 interface Props {
@@ -11,13 +11,15 @@ interface Props {
 }
 
 const { lang, switchPath, switcher = true } = Astro.props;
+// The search page exists for the full languages only.
+const hasSearch = languageConfig(lang).scope === "full";
 ---
 
 <header class="site-header">
   <div class="container bar">
-    <a class="site-title" href={pageUrl(lang)}>{reportTitle(lang)}</a>
+    <a class="site-title" {...pageLink(lang)}>{reportTitle(lang)}</a>
     <div class="tools">
-      <a class="search-link" href={pageUrl(lang, "search")}>{t(lang, "page.search")}</a>
+      {hasSearch && <a class="search-link" href={pageUrl(lang, "search")}>{t(lang, "page.search")}</a>}
       {switcher && <LanguageSwitcher lang={lang} switchPath={switchPath} />}
     </div>
   </div>

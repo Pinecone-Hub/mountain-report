@@ -12,7 +12,7 @@ const { lang, headings } = Astro.props;
 
 {
   headings.length > 0 && (
-    <aside class="toc-wrap">
+    <aside class="toc-wrap" data-pagefind-ignore>
       <details class="toc" data-toc open>
         <summary>{t(lang, "toc.title")}</summary>
         <nav aria-label={t(lang, "nav.toc")}>

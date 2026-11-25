@@ -59,3 +59,13 @@ describe("calibratedPlugin", () => {
     expect(() => render("*likely*", [calibratedPlugin(testEnv({ glossaryEntry: () => undefined }))])).toThrow(/chapter-1\.md: calibrated term/);
   });
 });
+
+describe("calibrated terms in a summary-scope language", () => {
+  const ARABIC_SUMMARY = "file:///project/src/content/pages/ar/summary.md";
+
+  it("leaves italics plain when the language has no term list (no error)", () => {
+    const html = render("This is *very likely* true.", [calibratedPlugin(testEnv())], ARABIC_SUMMARY);
+    expect(html).toContain("<em>very likely</em>");
+    expect(html).not.toContain("calibrated-term");
+  });
+});

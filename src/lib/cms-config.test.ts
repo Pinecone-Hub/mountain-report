@@ -64,8 +64,12 @@ describe("buildCmsConfig collections", () => {
     const pages = collection(cms, "pages");
     expect(pages).toMatchObject({ folder: "src/content/pages", extension: "md", create: false, delete: false, i18n: true });
     expect(pages.files).toBeUndefined();
-    expect(pages.fields.map((f: Obj) => f.name)).toEqual(["title", "description", "body"]);
-    const body = pages.fields[2];
+    expect(pages.fields.map((f: Obj) => f.name)).toEqual(["title", "description", "video", "body"]);
+    const video = pages.fields[2];
+    expect(video).toMatchObject({ widget: "object", required: false, i18n: true });
+    expect(video.fields.map((f: Obj) => f.name)).toEqual(["url", "title", "publisher"]);
+    expect(video.fields.every((f: Obj) => f.required === false && f.i18n === true)).toBe(true);
+    const body = pages.fields[3];
     expect(body.widget).toBe("markdown");
     expect(body.hint).toContain("[@key]");
     expect(body.hint).toContain("{1.2}");

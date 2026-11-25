@@ -2,6 +2,7 @@
 import { getCollection, render } from "astro:content";
 import Base from "../../layouts/Base.astro";
 import Contours from "../../components/Contours.astro";
+import Video from "../../components/Video.astro";
 import { chapterTitle } from "../../config/pages";
 import { fullLanguages, report, reportTitle } from "../../config/report";
 import { t, tf } from "../../i18n/index";
@@ -41,7 +42,7 @@ const tiles: Tile[] = [
 ];
 ---
 
-<Base lang={lang} title={reportTitle(lang)}>
+<Base lang={lang} title={reportTitle(lang)} description={entry?.data.description ?? t(lang, "seo.description.home")} schema="report" indexed>
   <section class="hero" aria-labelledby="hero-title">
     <div class="hero-text">
       <h1 id="hero-title">{reportTitle(lang)}</h1>
@@ -74,6 +75,15 @@ const tiles: Tile[] = [
       <section aria-labelledby="key-messages" class="key-messages">
         <h2 id="key-messages">{t(lang, "home.keyMessages.title")}</h2>
         <Content />
+      </section>
+    )
+  }
+
+  {
+    entry?.data.video && (
+      <section aria-labelledby="video" class="video-section">
+        <h2 id="video">{t(lang, "video.title")}</h2>
+        <Video url={entry.data.video.url} title={entry.data.video.title} publisher={entry.data.video.publisher} lang={lang} />
       </section>
     )
   }

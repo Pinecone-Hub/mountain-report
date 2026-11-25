@@ -2,6 +2,8 @@
 export interface Crumb {
   label: string;
   href?: string;
+  /** Set when the link goes to a page in another language than the current one. */
+  hreflang?: string;
 }
 
 /** A heading shown in the table of contents. */

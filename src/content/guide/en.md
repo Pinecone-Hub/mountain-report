@@ -7,8 +7,8 @@ This guide explains how to edit the report with the content editor. It describes
 
 ## Open the editor
 
-- The live editor is at the `admin/` page of this site. It needs a GitHub account with access to the repository of the report. Choose to log in with GitHub and allow access when asked.
-- To try the editor without an account, open the `admin-demo/` page. It shows the real content, but changes are not saved. Reloading the page starts again.
+- The live editor is at the [`admin/`](../admin/) page of this site. It needs a GitHub account with access to the repository of the report. Choose to log in with GitHub and allow access when asked.
+- To try the editor without an account, open the [`admin-demo/`](../admin-demo/) page. It shows the real content, but changes are not saved. Reloading the page starts again.
 
 The editor has these collections: Pages (Home, Summary, FAQ, Glossary, About), Chapters, Figures, References, Downloads and Settings. Pages, Chapters and Figures show two panes side by side, Writing in EN and Writing in FR. Fill in or edit the pane of each language. A language with no text yet is left out of the site.
 

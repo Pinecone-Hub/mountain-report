@@ -1,0 +1,34 @@
+id: fig-1-1
+chapter: chapter-1
+number: "1.1"
+section: "1.2"
+chartType: bars
+measure: gt
+series:
+  - global
+source:
+  - wgms2026amce
+title: Variation annuelle de la masse des glaciers dans le monde, de 1976 à 2025
+caption: Variation annuelle de la masse des glaciers du monde, en gigatonnes
+  (Gt), pour chaque année hydrologique de 1976 à 2025, d'après les estimations
+  annuelles de la variation de masse du WGMS (version 2026-02-10). Les barres
+  situées sous zéro indiquent une perte de masse. Les moustaches représentent
+  l'intervalle à 95 % (1,96 × le 1σ indiqué dans le jeu de données).
+alt: Diagramme en barres de la variation annuelle de la masse des glaciers dans
+  le monde de 1976 à 2025, qui montre une perte chaque année depuis 1993 et la
+  perte la plus forte en 2023.
+longDescription: "L'axe horizontal présente les années hydrologiques 1976 à
+  2025, chacune désignée par son année de fin. L'axe vertical présente la
+  variation de masse en gigatonnes (Gt), les valeurs inférieures à zéro
+  correspondant à une perte de masse. Les estimations centrales indiquent un
+  gain de masse pour sept années, la dernière en 1992 : 1976, 1980, 1981, 1983,
+  1987, 1988 et 1992 ; les intervalles à 95 % de ces années incluent zéro. Les
+  pertes augmentent au cours de la période. Les moyennes décennales sont de
+  −18,6 Gt par an de 1976 à 1985, de −92,3 de 1986 à 1995, de −218,2 de 1996 à
+  2005, de −239,0 de 2006 à 2015 et de −390,3 de 2016 à 2025. La perte la plus
+  forte a été de −555,5 Gt en 2023 (intervalle à 95 % ± 133,3 Gt), suivie de
+  2020 (−460,9 Gt), 2024 (−460,6 Gt), 2022 (−457,8 Gt), 2019 (−434,0 Gt), 2025
+  (−408,1 Gt) et 2011 (−353,5 Gt). La somme des valeurs annuelles de 1976 à 2025
+  est de −9 583,1 Gt. Les intervalles à 95 % sont d'environ ± 190 à ± 210 Gt
+  jusqu'en 1999, descendent à environ ± 146 Gt en 2000 et sont d'environ ± 130
+  Gt de 2016 à 2025. Toutes les valeurs figurent dans le tableau de données."

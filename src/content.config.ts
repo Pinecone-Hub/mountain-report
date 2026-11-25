@@ -1,12 +1,13 @@
 // Content collections (Astro content layer). Layout: src/content/<collection>/<lang>/<file>, the
 // way Decap CMS stores entries with i18n "multiple_folders". Collections: "chapters" (the
-// chapter pages), "figures" (data entries) and "pages" (home, summary, faq, glossary, about).
+// chapter pages), "figures" (data entries) and "pages" (home, summary, faq, glossary, about, accessibility).
 // Entry ids do not show the folder order: they stay "<lang>/<page>" (such as en/summary), and
 // "<lang>/chapters/<slug>" for chapters (en/chapters/chapter-1).
 //
 // Front matter, kept simple because Decap CMS edits it:
 //   title        page title (the H1 of the page)
 //   description  one sentence for the page summary
+//   video        Home only, optional: url (YouTube or Vimeo), title, publisher (credit line)
 //   lang, id     optional, redundant with the path (language folder and file name). Decap CMS cannot
 //                set them per language, so it does not write them; older files may still have them.
 //   chapter      chapters only: the chapter number, as in report.config.json
@@ -26,6 +27,7 @@ import { defineCollection } from "astro:content";
 import { file, glob } from "astro/loaders";
 import { z } from "astro/zod";
 import { skipUntranslated } from "./lib/content-loader";
+import { parseVideoUrl } from "./lib/video";
 
 const base = "./src/content";
 // "en/summary.md" (in pages) -> "en/summary".
@@ -35,9 +37,17 @@ const chapterId = ({ entry }: { entry: string }) => entry.replace(/\.md$/, "").r
 // "en/fig-1-1.yml" (in figures) -> "en/fig-1-1".
 const figureId = ({ entry }: { entry: string }) => entry.replace(/\.yml$/, "");
 
+// An optional video on the Home page. A URL that is not YouTube or Vimeo is a build error.
+const video = z.object({
+  url: z.string().min(1).refine((url) => parseVideoUrl(url) !== undefined, "must be a YouTube (watch, youtu.be, embed) or Vimeo (vimeo.com/<number>) address"),
+  title: z.string().min(1),
+  publisher: z.string().min(1).optional(),
+});
+
 const page = z.object({
   title: z.string().min(1),
   description: z.string().min(1),
+  video: video.optional(),
   lang: z.string().min(2).optional(),
   id: z.string().min(1).optional(),
 });
@@ -112,6 +122,7 @@ export const collections = {
   faq: defineCollection({ loader: pages("*/faq.md"), schema: page }),
   glossary: defineCollection({ loader: pages("*/glossary.md"), schema: page }),
   about: defineCollection({ loader: pages("*/about.md"), schema: page }),
+  accessibility: defineCollection({ loader: pages("*/accessibility.md"), schema: page }),
   home: defineCollection({ loader: pages("*/home.md"), schema: page }),
   figures: defineCollection({
     loader: skipUntranslated(glob({ base: `${base}/figures`, pattern: "*/*.yml", generateId: figureId })),

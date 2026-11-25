@@ -1,6 +1,7 @@
 // Cloudflare Worker for the <basePath>* route. Forwards
 // requests to the Cloudflare Pages project unchanged in path, and rewrites the
-// host on redirects so the public domain is always what the browser sees.
+// host on redirects so the public domain is always what the browser sees. Drops the noindex
+// header that Pages adds for the pages.dev host.
 
 import { resolve, rewriteLocation } from "./route";
 
@@ -54,6 +55,10 @@ export default {
     for (const [name, value] of Object.entries(SECURITY_HEADERS)) {
       headers.set(name, value);
     }
+    // Pages serves every file with X-Robots-Tag: noindex (dist/_headers) so that the pages.dev host
+    // stays out of search engines. The public host must be indexable: drop it. The Functions under
+    // <base>/api/ (OAuth) set their own noindex on purpose and keep it.
+    if (!url.pathname.startsWith(`${env.BASE_PATH}/api/`)) headers.delete("X-Robots-Tag");
 
     if (upstreamResponse.status >= 300 && upstreamResponse.status < 400) {
       const location = headers.get("Location");

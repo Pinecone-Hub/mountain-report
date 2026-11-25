@@ -8,6 +8,9 @@ import {
   findSuspectEmphasis,
   parseCssHexVariables,
   compareTranslations,
+  internalTargets,
+  isPagefindOutput,
+  missingTargets,
   compareWrangler,
   parseWrangler,
   type Dictionary,
@@ -96,9 +99,14 @@ describe("translations", () => {
     expect(problems).toHaveLength(2);
   });
 
-  it("reports summary keys outside summary or missing in the default", () => {
-    expect(compareTranslations([dict("en", "full", { a: "1" }, true), dict("ar", "summary", { a: "x" })])).toHaveLength(1);
+  it("lets a summary language use any key of the default language, even a subset", () => {
+    expect(compareTranslations([dict("en", "full", { a: "1", b: "2" }, true), dict("ar", "summary", { a: "x" })])).toEqual([]);
+  });
+
+  it("reports summary keys missing in the default and empty values", () => {
     expect(compareTranslations([dict("en", "full", { a: "1" }, true), dict("ar", "summary", { "summary.zzz": "x" })])).toHaveLength(1);
+    expect(compareTranslations([dict("en", "full", { a: "1" }, true), dict("ar", "summary", { a: "" })])).toHaveLength(1);
+    expect(compareTranslations([dict("en", "full", { a: "1" }, true), dict("ar", "summary", { a: "  " })])).toHaveLength(1);
   });
 
   it("needs a default language", () => {
@@ -170,6 +178,34 @@ describe("external URLs", () => {
     expect(isUrlAllowed("https://unpkg.com/some-other-package@1.0.0/index.js", admin)).toBe(false);
     expect(isUrlAllowed("https://unpkg.com.evil.example/decap-cms@3.18.0/dist/decap-cms.js", admin)).toBe(false);
     expect(isUrlAllowed("https://github.com.evil.example/x", admin)).toBe(false);
+  });
+
+  it("allows only the CMS repository Issues page on GitHub, on public pages", () => {
+    const opts = { isAdmin: false, referenceHosts: none, repo: "Pinecone-Hub/mountain-report" };
+    expect(isUrlAllowed("https://github.com/Pinecone-Hub/mountain-report/issues", opts)).toBe(true);
+    expect(isUrlAllowed("https://github.com/Pinecone-Hub/mountain-report/issues/", opts)).toBe(true);
+    expect(isUrlAllowed("https://github.com/Pinecone-Hub/mountain-report/issues/new?template=a", opts)).toBe(true);
+    expect(isUrlAllowed("https://github.com/Pinecone-Hub/mountain-report/issuesfoo", opts)).toBe(false);
+    expect(isUrlAllowed("https://github.com/Pinecone-Hub/mountain-report/pulls", opts)).toBe(false);
+    expect(isUrlAllowed("https://github.com/Pinecone-Hub/mountain-report", opts)).toBe(false);
+    expect(isUrlAllowed("https://github.com/Other/repo/issues", opts)).toBe(false);
+    expect(isUrlAllowed("https://github.com.evil.example/Pinecone-Hub/mountain-report/issues", opts)).toBe(false);
+    expect(isUrlAllowed("https://api.github.com/Pinecone-Hub/mountain-report/issues", opts)).toBe(false);
+    expect(isUrlAllowed("http://github.com/Pinecone-Hub/mountain-report/issues", opts)).toBe(false);
+    expect(isUrlAllowed("https://github.com/Pinecone-Hub/mountain-report/issues", site)).toBe(false);
+    expect(isUrlAllowed("https://github.com/Other/repo/pulls", { ...opts, isAdmin: true })).toBe(true);
+  });
+
+  it("allows video page links only (YouTube watch pages, vimeo.com) and the schema.org identifier", () => {
+    expect(isUrlAllowed("https://www.youtube.com/watch?v=abc", site)).toBe(true);
+    expect(isUrlAllowed("https://vimeo.com/123456", site)).toBe(true);
+    expect(isUrlAllowed("https://www.youtube.com/embed/abc", site)).toBe(false);
+    expect(isUrlAllowed("https://www.youtube.com/@channel", site)).toBe(false);
+    expect(isUrlAllowed("https://www.vimeo.com/123456", site)).toBe(false);
+    expect(isUrlAllowed("http://vimeo.com/123456", site)).toBe(false);
+    expect(isUrlAllowed("https://i.ytimg.com/vi/abc/0.jpg", site)).toBe(false);
+    expect(isUrlAllowed("https://schema.org", site)).toBe(true);
+    expect(isUrlAllowed("https://schema.org/Report", site)).toBe(false);
   });
 
   it("allows hosts from the references data only", () => {
@@ -437,8 +473,13 @@ describe("findSuspectEmphasis", () => {
     expect(findSuspectEmphasis("**likely** and `*likely stuff*`\n```\n*likely stuff*\n```\n", "en")).toEqual([]);
   });
 
+  it("checks French italics against the French list", () => {
+    expect(findSuspectEmphasis("*très probable*, *degré de confiance élevé*, *moraine*", "fr")).toEqual([]);
+    expect(findSuspectEmphasis("*très probablement* et *confiance*", "fr").map((h) => h.text)).toEqual(["très probablement", "confiance"]);
+  });
+
   it("skips languages without a term list and empty input", () => {
-    expect(findSuspectEmphasis("*très probable*, *likely stuff*", "fr")).toEqual([]);
+    expect(findSuspectEmphasis("*very likely*, *likely stuff*", "de")).toEqual([]);
     expect(findSuspectEmphasis("", "en")).toEqual([]);
   });
 });
@@ -493,5 +534,36 @@ describe("findOversizedFiles", () => {
   it("returns nothing for no files and honours a custom limit", () => {
     expect(findOversizedFiles([])).toEqual([]);
     expect(findOversizedFiles([{ path: "x", bytes: 11 }], 10)).toHaveLength(1);
+  });
+});
+
+describe("internal links", () => {
+  const html =
+    '<a href="/mr/en/about/#sources">a</a><a href="/mr/en/faq/?x=1">b</a><img src="/mr/x.png"><a href="https://example.org/mr/">e</a>' +
+    '<link rel="alternate" href="https://site.test/mr/fr/"><a href="mailto:a@b.c">m</a><a href="#top">t</a><a href="/other/">o</a>' +
+    '<a href="/mr/api/auth">api</a><a href="relative/">r</a><a href="//cdn.test/mr/">p</a><a href="/mr">root</a>' +
+    '<script>var s = \'<a href="/mr/skipped/">\';</script><!-- <a href="/mr/comment/"> -->';
+
+  it("collects paths under the base without fragments and queries", () => {
+    expect(internalTargets(html, "/mr", "https://site.test").sort()).toEqual(["/mr", "/mr/en/about/", "/mr/en/faq/", "/mr/fr/", "/mr/x.png"]);
+  });
+
+  it("ignores own-origin URLs when no site is given and handles empty input", () => {
+    expect(internalTargets(html, "/mr/").includes("/mr/fr/")).toBe(false);
+    expect(internalTargets("", "/mr")).toEqual([]);
+  });
+
+  it("finds targets without a file", () => {
+    const files = new Set(["/mr/en/about/index.html", "/mr/x.png", "/mr/index.html"]);
+    const exists = (p: string) => files.has(p);
+    expect(missingTargets(["/mr/en/about/", "/mr/x.png", "/mr", "/mr/en/faq/", "/mr/gone.png", "/mr/%E0%A4%A"], exists)).toEqual(["/mr/en/faq/", "/mr/gone.png", "/mr/%E0%A4%A"]);
+  });
+});
+
+describe("isPagefindOutput", () => {
+  it("matches the Pagefind folder under the base only", () => {
+    expect(isPagefindOutput("dist/mr/pagefind/pagefind.js", "/mr")).toBe(true);
+    expect(isPagefindOutput("dist/mr/en/pagefind/x.html", "/mr")).toBe(false);
+    expect(isPagefindOutput("src/pagefind/x.js", "/mr")).toBe(false);
   });
 });

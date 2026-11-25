@@ -2,7 +2,7 @@
 // Chromium (desktop and mobile viewport) and runs axe-core with the WCAG 2.2 AA tags.
 // Also checks that the first Tab press focuses the skip link, and keyboard use of calibrated-term
 // tooltips (Tab shows, Esc hides) and of citations (link to the reference and back), the chart
-// slider (arrow keys) and the Figures lightbox (open, Esc, focus return).
+// slider (arrow keys), the Figures lightbox (open, Esc, focus return) and the click-to-load video.
 // Usage: npm run test:a11y   (run `npm run build` first). Exit code 1 on any violation.
 
 import { createServer } from "node:http";
@@ -323,6 +323,37 @@ try {
       await noJs.close();
     }
 
+    // Video on the Home page: no request to the video host before the click; Tab reaches the play
+    // button, Enter loads the player (youtube-nocookie.com, here answered locally) and focus moves
+    // to the iframe.
+    {
+      const videoHosts = /youtube|ytimg|ytstatic|googlevideo|vimeo/i;
+      const videoRequests: string[] = [];
+      kb.on("request", (request) => {
+        if (videoHosts.test(new URL(request.url()).hostname)) videoRequests.push(request.url());
+      });
+      await kb.route("**/*youtube-nocookie.com/**", (route) => route.fulfill({ status: 200, contentType: "text/html", body: "<!doctype html><title>blocked</title>" }));
+      await kb.goto(`${origin}${BASE}en/`, { waitUntil: "load" });
+      if (!(await kb.locator("[data-video-play]").isVisible())) fail("video", "the play button is not shown on the Home page");
+      else if (videoRequests.length > 0) fail("video", `the page requested the video host before the click: ${videoRequests[0]}`);
+      else if ((await kb.locator("[data-video] iframe").count()) !== 0) fail("video", "an iframe exists before the click");
+      else if (!(await tabTo("[data-video-play]"))) fail("video", "Tab never reached the play button");
+      else {
+        const label = (await kb.evaluate(() => document.activeElement?.getAttribute("aria-label") ?? "")).trim();
+        if (label === "") fail("video", "the play button has no accessible name");
+        await kb.keyboard.press("Enter");
+        const iframe = kb.locator("[data-video] iframe");
+        await iframe.waitFor({ state: "attached", timeout: 3000 }).catch(() => fail("video", "Enter did not add the iframe"));
+        const src = (await iframe.getAttribute("src")) ?? "";
+        const title = (await iframe.getAttribute("title")) ?? "";
+        if (!/^https:\/\/(www\.youtube-nocookie\.com\/embed\/|player\.vimeo\.com\/video\/)/.test(src)) fail("video", `the iframe src is not a privacy-friendly player address: ${src}`);
+        if (title.trim() === "") fail("video", "the iframe has no title");
+        if (!(await kb.evaluate(() => document.activeElement?.tagName === "IFRAME"))) fail("video", "focus did not move to the iframe");
+      }
+      kb.removeAllListeners("request");
+      await kb.unroute("**/*youtube-nocookie.com/**");
+    }
+
     checked++;
   } catch (error) {
     fail("keyboard", (error as Error).message.split("\n")[0]);
@@ -500,6 +531,55 @@ try {
       checked++;
     } catch (error) {
       fail("figures", (error as Error).message.split("\n")[0]);
+    } finally {
+      await ctx.close();
+    }
+  }
+  // Search: a query in the URL gives results, the live region says how many, axe passes with
+  // results shown, and a submitted query works with the keyboard.
+  {
+    const ctx = await browser.newContext({ viewport: { width: 1280, height: 800 } });
+    const fail = (rule: string, message: string) => {
+      failures++;
+      process.stdout.write(`FAIL [${rule}] ${message}\n`);
+    };
+    try {
+      const sp = await ctx.newPage();
+      await sp.goto(`${origin}${BASE}en/search/?q=glacier`, { waitUntil: "load" });
+      try {
+        await sp.waitForSelector("#search-results li", { timeout: 10000 });
+      } catch {
+        fail("search", "the query in the URL gave no results");
+      }
+      const status = ((await sp.locator("#search-status").textContent()) ?? "").trim();
+      const shown = await sp.locator("#search-results li").count();
+      if (shown === 0 || !status.startsWith(String(shown)) || (await sp.locator("#search-status").getAttribute("role")) !== "status") {
+        fail("search", `status "${status}" does not announce the ${shown} results in a role=status region`);
+      }
+      const badLinks = await sp.locator("#search-results a").evaluateAll((els) => els.filter((el) => !(el.getAttribute("href") ?? "").startsWith("/") || !(el.getAttribute("href") ?? "").includes("/en/")).length);
+      if (badLinks > 0) fail("search", `${badLinks} result links are not English pages under the base`);
+      const marks = await sp.locator("#search-results mark").count();
+      if (marks === 0) fail("search", "the excerpts show no highlighted match");
+      for (const viewport of VIEWPORTS) {
+        await sp.setViewportSize({ width: viewport.width, height: viewport.height });
+        const results = await new AxeBuilder({ page: sp }).withTags(TAGS).analyze();
+        for (const v of results.violations) fail("search", `axe ${v.id} with results (${viewport.name}): ${v.help}`);
+      }
+      await sp.setViewportSize({ width: 1280, height: 800 });
+      // Typing a query and pressing Enter searches without leaving the page.
+      await sp.goto(`${origin}${BASE}en/search/`, { waitUntil: "load" });
+      await sp.locator("#search-input").fill("zzzqqqxxx");
+      await sp.keyboard.press("Enter");
+      await sp.waitForFunction(() => (document.querySelector("#search-status")?.textContent ?? "").includes("zzzqqqxxx"), undefined, { timeout: 10000 }).catch(() => fail("search", "a submitted query gave no message"));
+      // The French page searches French only: none of its results is an English page.
+      await sp.goto(`${origin}${BASE}fr/search/?q=glacier`, { waitUntil: "load" });
+      await sp.waitForFunction(() => (document.querySelector("#search-status")?.textContent ?? "") !== "" && !document.querySelector("#search-status")?.textContent?.includes("..."), undefined, { timeout: 10000 }).catch(() => undefined);
+      await sp.waitForTimeout(500);
+      const english = await sp.locator("#search-results a").evaluateAll((els) => els.filter((el) => (el.getAttribute("href") ?? "").includes("/en/")).length);
+      if (english > 0) fail("search", "the French search page returns English pages");
+      checked++;
+    } catch (error) {
+      fail("search", (error as Error).message.split("\n")[0]);
     } finally {
       await ctx.close();
     }

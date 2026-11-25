@@ -7,12 +7,20 @@ export interface PdfLine {
   size: number;
 }
 
-/** Printable ASCII only, and the characters that are special in a PDF string escaped. */
+// Characters outside Latin-1 that WinAnsiEncoding has, as their WinAnsi byte.
+const WIN_ANSI_EXTRA: Readonly<Record<number, number>> = { 0x2019: 0x92, 0x2018: 0x91, 0x201c: 0x93, 0x201d: 0x94, 0x0152: 0x8c, 0x0153: 0x9c, 0x2013: 0x96 };
+
+const octal = (byte: number) => `\\${byte.toString(8).padStart(3, "0")}`;
+
+/** Printable ASCII and WinAnsi letters (written as octal escapes); the characters that are special in a PDF string escaped. */
 export function pdfEscape(text: string): string {
   let out = "";
   for (const ch of text) {
     const code = ch.codePointAt(0) ?? 63;
-    if (code < 32 || code > 126) out += "?";
+    if (code === 0x202f || code === 0xa0) out += " ";
+    else if (code in WIN_ANSI_EXTRA) out += octal(WIN_ANSI_EXTRA[code]);
+    else if (code >= 0xa1 && code <= 0xff) out += octal(code);
+    else if (code < 32 || code > 126) out += "?";
     else if (ch === "(" || ch === ")" || ch === "\\") out += `\\${ch}`;
     else out += ch;
   }

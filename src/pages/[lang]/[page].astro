@@ -6,20 +6,24 @@ import Figure from "../../components/figures/Figure.astro";
 import ReportLayout from "../../layouts/ReportLayout.astro";
 import { allPageSlugs, chapterTitle, fixedPage } from "../../config/pages";
 import { defaultLanguage, fullLanguages, report } from "../../config/report";
+import { SUMMARY_SLUG } from "../../lib/page-links";
 import { t, tf } from "../../i18n/index";
 import type { Crumb, TocHeading } from "../../lib/nav";
-import { pageUrl } from "../../lib/urls";
+import { pageLink } from "../../lib/urls";
 import { GLOSSARY_INDEX_ID } from "../../plugins/structure";
 import { splitAtFigureSlots } from "../../plugins/figures";
 import { figuresFor } from "../../lib/figure-store";
 
 export function getStaticPaths() {
-  return fullLanguages.flatMap((language) =>
+  const full = fullLanguages.flatMap((language) =>
     allPageSlugs(report.chapters)
-      // The Figures and Downloads pages have their own routes (figures.astro, downloads.astro).
-      .filter((page) => page !== "figures" && page !== "downloads")
+      // Figures, Downloads and Search have their own routes (figures.astro, downloads.astro, search.astro).
+      .filter((page) => page !== "figures" && page !== "downloads" && page !== "search")
       .map((page) => ({ params: { lang: language.code, page } })),
   );
+  // A summary-scope language (Arabic) has the Summary only.
+  const summaryOnly = report.languages.filter((l) => l.scope === "summary").map((language) => ({ params: { lang: language.code, page: SUMMARY_SLUG } }));
+  return [...full, ...summaryOnly];
 }
 
 const { lang, page } = Astro.params;
@@ -37,6 +41,7 @@ async function findEntry(language: string) {
   if (page === "faq") return first(await getCollection("faq", (e) => e.id === id));
   if (page === "glossary") return first(await getCollection("glossary", (e) => e.id === id));
   if (page === "about") return first(await getCollection("about", (e) => e.id === id));
+  if (page === "accessibility") return first(await getCollection("accessibility", (e) => e.id === id));
   return undefined;
 }
 
@@ -61,7 +66,8 @@ const title = chapter && entry
   : entry
     ? entry.data.title
     : fallbackTitle;
-const breadcrumbs: Crumb[] = [{ label: t(lang, "breadcrumb.home"), href: pageUrl(lang) }, { label: title }];
+const home = pageLink(lang);
+const breadcrumbs: Crumb[] = [{ label: t(lang, "breadcrumb.home"), href: home.href, hreflang: home.hreflang }, { label: title }];
 
 const renderedHeadings: MarkdownHeading[] = rendered?.headings ?? [];
 const headings: TocHeading[] = renderedHeadings
@@ -83,7 +89,7 @@ const englishEntry = entry || lang === defaultLanguage.code ? undefined : await 
 
 {
   Content ? (
-    <ReportLayout lang={lang} title={title} switchPath={page} breadcrumbs={breadcrumbs} headings={headings} extras={extras}>
+    <ReportLayout lang={lang} title={title} description={entry!.data.description} switchPath={page} breadcrumbs={breadcrumbs} headings={headings} extras={extras} indexed>
       {
         glossaryIndex.length > 0 && (
           <nav id={GLOSSARY_INDEX_ID} class="glossary-index" aria-label={t(lang, "glossary.index")}>
@@ -107,13 +113,13 @@ const englishEntry = entry || lang === defaultLanguage.code ? undefined : await 
       }
     </ReportLayout>
   ) : (
-    <Base lang={lang} title={title} switchPath={page} breadcrumbs={breadcrumbs}>
+    <Base lang={lang} title={title} description={t(lang, "page.inPreparation")} switchPath={page} breadcrumbs={breadcrumbs}>
       <h1>{title}</h1>
       <p>{t(lang, "page.inPreparation")}</p>
       {
         englishEntry && (
           <p>
-            <a href={pageUrl(defaultLanguage.code, page)} hreflang={defaultLanguage.code} lang={defaultLanguage.code}>
+            <a href={pageLink(defaultLanguage.code, page).href} hreflang={defaultLanguage.code} lang={defaultLanguage.code}>
               {t(lang, "page.stub.english")}
             </a>
           </p>

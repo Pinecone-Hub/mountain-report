@@ -68,6 +68,29 @@ describe("worker fetch with a stubbed origin", () => {
     expect(res.headers.get("X-Frame-Options")).toBe("SAMEORIGIN");
   });
 
+  it("removes X-Robots-Tag from pages and assets (the pages.dev noindex must not reach the public host)", async () => {
+    for (const path of ["/mountain-report/en/", "/mountain-report/_astro/app.abc.js", "/mountain-report/404.html"]) {
+      stub(new Response("x", { status: 200, headers: { "X-Robots-Tag": "noindex", "Content-Type": "text/html" } }));
+      const res = await worker.fetch(new Request(`https://pinecone.lu${path}`), env);
+      expect(res.headers.get("X-Robots-Tag")).toBeNull();
+      expect(res.headers.get("Content-Type")).toBe("text/html");
+      expect(res.headers.get("X-Content-Type-Options")).toBe("nosniff");
+    }
+  });
+
+  it("removes X-Robots-Tag in any letter case and leaves a response without it alone", async () => {
+    stub(new Response("x", { status: 200, headers: { "x-robots-tag": "noindex, nofollow" } }));
+    expect((await worker.fetch(new Request("https://pinecone.lu/mountain-report/en/"), env)).headers.has("X-Robots-Tag")).toBe(false);
+    stub(new Response("x", { status: 200 }));
+    expect((await worker.fetch(new Request("https://pinecone.lu/mountain-report/en/"), env)).status).toBe(200);
+  });
+
+  it("keeps the noindex of the Functions under /api/", async () => {
+    stub(new Response("x", { status: 200, headers: { "X-Robots-Tag": "noindex" } }));
+    const res = await worker.fetch(new Request("https://pinecone.lu/mountain-report/api/callback?code=a"), env);
+    expect(res.headers.get("X-Robots-Tag")).toBe("noindex");
+  });
+
   it("rewrites a Location on a 3xx from PAGES_ORIGIN to the public origin", async () => {
     stub(new Response(null, { status: 301, headers: { Location: "https://mountain-report.pages.dev/mountain-report/en/" } }));
     const res = await worker.fetch(new Request("https://pinecone.lu/mountain-report/en"), env);

@@ -2,6 +2,7 @@
 // pipeline). Nothing here touches the file system or Astro, so it is unit-testable.
 
 import type { Properties } from "hast";
+import type { PageLink } from "../lib/page-links";
 import type { Reference } from "../lib/references";
 
 /** Everything a plugin needs from the outside. Built by node-env.ts, faked in tests. */
@@ -16,6 +17,8 @@ export interface PluginEnv {
   references: ReadonlyMap<string, Reference>;
   /** Plain text of a glossary entry (by its heading), or undefined when there is none. */
   glossaryEntry(lang: string, heading: string): string | undefined;
+  /** Link to a page as seen from a page in `lang`: a summary-scope language links to the default-language page (with hreflang) for pages it does not have. */
+  link(lang: string, slug: string, hash?: string): PageLink;
   /** Formats an ISO date for a language ("2026-11-25" becomes "25 November 2026"). */
   formatDate(lang: string, isoDate: string): string;
 }

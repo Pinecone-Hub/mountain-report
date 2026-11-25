@@ -1,12 +1,29 @@
 ---
+// Static fallback for the report root. The host redirects the root to the default language
+// (dist/_redirects); this page is the fallback for hosts that do not (it refreshes by itself) and
+// lists every language.
 import Base from "../layouts/Base.astro";
-import { defaultLanguage, reportTitle } from "../config/report";
+import { defaultLanguage, fullLanguages, reportTitle } from "../config/report";
+import { t, type TranslationKey } from "../i18n/index";
 import { pageUrl } from "../lib/urls";
 
 const lang = defaultLanguage.code;
 ---
 
-<Base lang={lang} title={reportTitle(lang)}>
+<Base lang={lang} title={reportTitle(lang)} description={t(lang, "seo.description.home")} canonicalPath={pageUrl(lang)} alternates={false}>
   <meta slot="head" http-equiv="refresh" content={`0;url=${pageUrl(lang)}`} />
   <h1>{reportTitle(lang)}</h1>
+  <nav aria-label={t(lang, "lang.choose")}>
+    <ul>
+      {
+        fullLanguages.map((language) => (
+          <li>
+            <a href={pageUrl(language.code)} lang={language.code} hreflang={language.code}>
+              {t(lang, `lang.${language.code}.name` as TranslationKey)}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </nav>
 </Base>

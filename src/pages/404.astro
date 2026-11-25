@@ -6,7 +6,7 @@ import { t } from "../i18n/index";
 const lang = defaultLanguage.code;
 ---
 
-<Base lang={lang} title={t(lang, "notFound.title")}>
+<Base lang={lang} title={t(lang, "notFound.title")} description={t(lang, "seo.description.notFound")} canonicalPath={false} alternates={false}>
   <h1>{t(lang, "notFound.title")}</h1>
   <p>{t(lang, "notFound.text")}</p>
 </Base>

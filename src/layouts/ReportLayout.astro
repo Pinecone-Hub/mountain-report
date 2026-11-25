@@ -11,6 +11,8 @@ interface Props {
   lang: string;
   /** Page title: the h1 and the start of the document title. */
   title: string;
+  /** Meta description of the page. */
+  description: string;
   /** Small label above the h1, for example "Chapter 1". */
   eyebrow?: string;
   switchPath?: string;
@@ -19,12 +21,14 @@ interface Props {
   headings: TocHeading[];
   /** "page": how to cite, share, authors and previous/next (Summary and chapters). "report": how to cite the whole report. */
   extras?: "page" | "report";
+  /** True when the page text is indexed by search. */
+  indexed?: boolean;
 }
 
-const { lang, title, eyebrow, switchPath = "", breadcrumbs, headings, extras } = Astro.props;
+const { lang, title, description, eyebrow, switchPath = "", breadcrumbs, headings, extras, indexed = false } = Astro.props;
 ---
 
-<Base lang={lang} title={title} switchPath={switchPath} breadcrumbs={breadcrumbs}>
+<Base lang={lang} title={title} description={description} schema={extras === "page" ? "article" : undefined} switchPath={switchPath} breadcrumbs={breadcrumbs} indexed={indexed}>
   <header class="report-head">
     {eyebrow && <p class="eyebrow">{eyebrow}</p>}
     <h1>{title}</h1>

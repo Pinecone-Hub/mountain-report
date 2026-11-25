@@ -9,11 +9,13 @@ import Footer from "../components/Footer.astro";
 import Header from "../components/Header.astro";
 import PageScripts from "../components/PageScripts.astro";
 import TooltipDismiss from "../components/TooltipDismiss.astro";
-import { fullLanguages, languageConfig, report } from "../config/report";
+import { defaultLanguage, languageConfig, report, reportShortTitle, reportTitle } from "../config/report";
 import { t } from "../i18n/index";
 import type { Crumb } from "../lib/nav";
 import { withBase } from "../lib/paths";
-import { BASE, pageUrl } from "../lib/urls";
+import { languagesWithPage } from "../lib/page-links";
+import { absoluteUrl, articleJsonLd, breadcrumbJsonLd, otherLocales, reportJsonLd, serializeJsonLd, type ReportInfo } from "../lib/seo";
+import { BASE, pageLink, pageUrl } from "../lib/urls";
 
 interface Props {
   lang: string;
@@ -21,16 +23,58 @@ interface Props {
   title: string;
   /** Route below the language root that the language switcher keeps ("about"); empty for home. */
   switchPath?: string;
+  /** The meta description and og:description: one plain sentence. */
+  description: string;
+  /** Structured data: "report" on the Home page, "article" on chapters and the Summary. Breadcrumbs get their own list on every page that has them. */
+  schema?: "report" | "article";
+  /** Canonical path (with the base) when it is not the page itself: the root fallback names the default-language home. False on the 404 page, which has no URL of its own. */
+  canonicalPath?: string | false;
   /** Breadcrumb trail. Leave empty on the Home page. */
   breadcrumbs?: Crumb[];
   /** A page that exists in one language only (the editor guide): no language alternates, no language switcher. */
   singleLanguage?: boolean;
+  /** False on pages that are not a translated report page (404, the root fallback): no hreflang alternates. */
+  alternates?: boolean;
+  /** True on pages whose text is indexed by search (report content). */
+  indexed?: boolean;
 }
 
-const { lang, title, switchPath = "", breadcrumbs = [], singleLanguage = false } = Astro.props;
+const { lang, title, description, schema, canonicalPath, switchPath = "", breadcrumbs = [], singleLanguage = false, alternates = true, indexed = false } = Astro.props;
 const language = languageConfig(lang);
-const documentTitle = `${title} | ${report.shortTitle[lang]}`;
+const documentTitle = `${title} | ${reportShortTitle(lang)}`;
 const site = Astro.site;
+// Every language in which this page exists (the Summary also exists in the summary-scope languages).
+const alternateCodes = languagesWithPage({ base: BASE, languages: report.languages }, switchPath);
+const summaryScope = language.scope === "summary";
+
+// Search engine and link preview metadata. Absolute URLs need the configured site.
+const pagePath = canonicalPath === undefined ? Astro.url.pathname : canonicalPath;
+const canonical = site && pagePath !== false ? absoluteUrl(site.href, pagePath) : undefined;
+const reportInfo: ReportInfo | undefined = site
+  ? {
+      url: absoluteUrl(site.href, pageLink(lang).href),
+      name: reportTitle(lang),
+      inLanguage: lang,
+      authors: report.authors,
+      publisher: report.citation.publisher,
+      year: report.citation.year,
+    }
+  : undefined;
+const localeOf = (code: string) => t(code, "seo.locale");
+const otherPageLocales = singleLanguage || !alternates ? [] : otherLocales(lang, alternateCodes, localeOf);
+const trail = site
+  ? breadcrumbs.map((crumb, i) => ({
+      name: crumb.label,
+      url: crumb.href && i < breadcrumbs.length - 1 ? absoluteUrl(site.href, crumb.href) : (canonical ?? absoluteUrl(site.href, Astro.url.pathname)),
+    }))
+  : [];
+const jsonLd = [
+  schema === "report" && reportInfo ? reportJsonLd(reportInfo) : undefined,
+  schema === "article" && reportInfo && canonical ? articleJsonLd({ url: canonical, headline: title, description, inLanguage: lang, report: reportInfo }) : undefined,
+  breadcrumbJsonLd(trail),
+]
+  .filter((doc) => doc !== undefined)
+  .map((doc) => serializeJsonLd(doc));
 ---
 
 <!doctype html>
@@ -39,14 +83,28 @@ const site = Astro.site;
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{documentTitle}</title>
+    <meta name="description" content={description} />
+    {canonical && <link rel="canonical" href={canonical} />}
+    <meta property="og:type" content={schema === "article" ? "article" : "website"} />
+    <meta property="og:title" content={documentTitle} />
+    <meta property="og:description" content={description} />
+    {canonical && <meta property="og:url" content={canonical} />}
+    <meta property="og:site_name" content={reportTitle(lang)} />
+    <meta property="og:locale" content={t(lang, "seo.locale")} />
+    {otherPageLocales.map((locale) => <meta property="og:locale:alternate" content={locale} />)}
+    {jsonLd.map((json) => <script type="application/ld+json" is:inline set:html={json} />)}
     <link rel="icon" href={withBase(BASE, "favicon.svg")} type="image/svg+xml" />
     {lang === "ar" && <link rel="stylesheet" href={arabicFontsUrl} />}
     {
       site &&
         !singleLanguage &&
-        fullLanguages.map((l) => (
-          <link rel="alternate" hreflang={l.code} href={new URL(pageUrl(l.code, switchPath), site).href} />
-        ))
+        alternates &&
+        alternateCodes.map((code) => <link rel="alternate" hreflang={code} href={new URL(pageUrl(code, switchPath), site).href} />)
+    }
+    {
+      site && !singleLanguage && alternates && (
+        <link rel="alternate" hreflang="x-default" href={new URL(pageUrl(defaultLanguage.code, switchPath), site).href} />
+      )
     }
     <slot name="head" />
   </head>
@@ -57,7 +115,10 @@ const site = Astro.site;
     <main id="main">
       <div class="container">
         <Breadcrumbs lang={lang} items={breadcrumbs} />
-        <slot />
+        {summaryScope && <p class="lang-notice" role="note">{t(lang, "summary.machineTranslated")}</p>}
+        <div data-pagefind-body={indexed ? "" : undefined}>
+          <slot />
+        </div>
       </div>
     </main>
     <Footer lang={lang} />

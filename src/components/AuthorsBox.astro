@@ -9,7 +9,7 @@ interface Props {
 const { lang } = Astro.props;
 ---
 
-<details class="authors-box">
+<details class="authors-box" data-pagefind-ignore>
   <summary>{t(lang, "authors.title")}</summary>
   <ul>
     {report.authors.map((a) => <li>{tf(lang, "authors.entry", { name: a.name, affiliation: a.affiliation })}</li>)}

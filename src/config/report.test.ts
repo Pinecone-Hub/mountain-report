@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { defaultLanguage, fullLanguages, languageConfig, report, reportTitle } from "./report";
+import { defaultLanguage, fullLanguages, languageConfig, report, reportShortTitle, reportTitle } from "./report";
 
 describe("languageConfig", () => {
   it("returns the configuration of a known language", () => {
@@ -20,8 +20,13 @@ describe("reportTitle", () => {
   });
 
   it("throws when the language has no title", () => {
-    expect(() => reportTitle("ar")).toThrow(/no title for language "ar"/);
     expect(() => reportTitle("xx")).toThrow(/no title/);
+  });
+
+  it("falls back to the default language for a summary-scope language", () => {
+    expect(reportTitle("ar")).toBe(report.title.en);
+    expect(reportShortTitle("ar")).toBe(report.shortTitle.en);
+    expect(() => reportShortTitle("xx")).toThrow(/no short title/);
   });
 });
 

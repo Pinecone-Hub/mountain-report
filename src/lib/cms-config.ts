@@ -5,7 +5,7 @@
 // Content layout (see src/content.config.ts): src/content/<collection>/<lang>/<file>. With Decap's
 // i18n "multiple_folders" the locale is inserted before the file name, so the folder collection
 // "src/content/chapters" holds src/content/chapters/en/chapter-1.md, and the folder collection
-// "src/content/pages" holds src/content/pages/en/summary.md (Home, Summary, FAQ, Glossary, About).
+// "src/content/pages" holds src/content/pages/en/summary.md (Home, Summary, FAQ, Glossary, About, Accessibility).
 
 import type { ReportConfig } from "../config/validate";
 
@@ -37,6 +37,19 @@ function pageFields(): Json[] {
   return [
     { label: "Title", name: "title", widget: "string", i18n: true },
     { label: "Description", name: "description", widget: "text", i18n: true, hint: "One sentence for the page summary." },
+    {
+      label: "Video",
+      name: "video",
+      widget: "object",
+      required: false,
+      i18n: true,
+      hint: "Home page only. Leave empty on every other page. The video loads only after the visitor clicks play.",
+      fields: [
+        { label: "URL", name: "url", widget: "string", required: false, i18n: true, hint: "A YouTube address (youtube.com/watch?v=..., youtu.be/...) or a Vimeo address (vimeo.com/<number>)." },
+        { label: "Title", name: "title", widget: "string", required: false, i18n: true, hint: "The title of the video as published." },
+        { label: "Publisher", name: "publisher", widget: "string", required: false, i18n: true, hint: "Who published the video, for the credit line." },
+      ],
+    },
     { label: "Body", name: "body", widget: "markdown", modes: ["raw", "rich_text"], i18n: true, hint: BODY_HINT },
   ];
 }

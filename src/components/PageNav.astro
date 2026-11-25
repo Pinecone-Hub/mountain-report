@@ -3,7 +3,7 @@ import { report } from "../config/report";
 import { tf, t } from "../i18n/index";
 import { neighbours, pageSequence } from "../lib/pagenav";
 import { reportPageTitle } from "../lib/page-titles";
-import { pageUrl } from "../lib/urls";
+import { pageLink } from "../lib/urls";
 
 interface Props {
   lang: string;
@@ -13,19 +13,27 @@ interface Props {
 
 const { lang, slug } = Astro.props;
 const { previous, next } = neighbours(pageSequence(report.chapters.map((c) => c.id)), slug);
+// A neighbour that does not exist in this language (summary-scope languages) is the default-language page,
+// so its title is shown in that language.
+const link = (target: string) => {
+  const l = pageLink(lang, target);
+  return { ...l, title: reportPageTitle(l.hreflang ?? lang, target) };
+};
+const prev = previous ? link(previous) : undefined;
+const nxt = next ? link(next) : undefined;
 ---
 
 {
-  (previous || next) && (
-    <nav class="page-nav" aria-label={t(lang, "pagenav.label")}>
-      {previous && (
-        <a class="prev" rel="prev" href={pageUrl(lang, previous)}>
-          {tf(lang, "pagenav.previous", { title: reportPageTitle(lang, previous) })}
+  (prev || nxt) && (
+    <nav class="page-nav" aria-label={t(lang, "pagenav.label")} data-pagefind-ignore>
+      {prev && (
+        <a class="prev" rel="prev" href={prev.href} hreflang={prev.hreflang}>
+          {tf(lang, "pagenav.previous", { title: prev.title })}
         </a>
       )}
-      {next && (
-        <a class="next" rel="next" href={pageUrl(lang, next)}>
-          {tf(lang, "pagenav.next", { title: reportPageTitle(lang, next) })}
+      {nxt && (
+        <a class="next" rel="next" href={nxt.href} hreflang={nxt.hreflang}>
+          {tf(lang, "pagenav.next", { title: nxt.title })}
         </a>
       )}
     </nav>

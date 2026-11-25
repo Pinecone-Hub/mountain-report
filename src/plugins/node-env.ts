@@ -5,6 +5,7 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { report } from "../config/report";
 import { t, tf, type TranslationKey } from "../i18n/index";
+import { resolvePageLink } from "../lib/page-links";
 import { parseReferences } from "../lib/references";
 import { collectSections, glossaryEntryText, type PluginEnv } from "./support";
 
@@ -30,7 +31,9 @@ export function createNodeEnv(): PluginEnv {
     const found = new Set<string>();
     const summary = readIfExists(join(CONTENT, "pages", dir, "summary.md"));
     if (summary) for (const token of collectSections(summary)) found.add(token);
-    const chapters = join(CONTENT, "chapters", dir);
+    // A summary-scope language has no chapters: its cross-references point to the default language's.
+    const summaryOnly = report.languages.find((l) => l.code === lang)?.scope === "summary";
+    const chapters = join(CONTENT, "chapters", summaryOnly ? defaultLang : dir);
     if (existsSync(chapters)) {
       for (const name of readdirSync(chapters).filter((n) => n.endsWith(".md"))) {
         for (const token of collectSections(readFileSync(join(chapters, name), "utf8"))) found.add(token);
@@ -46,6 +49,7 @@ export function createNodeEnv(): PluginEnv {
     t: (lang, key) => t(lang, key as TranslationKey),
     tf: (lang, key, values) => tf(lang, key as TranslationKey, values),
     sections,
+    link: (lang, slug, hash) => resolvePageLink({ base, languages: report.languages }, lang, slug, hash),
     references,
     glossaryEntry(lang, heading) {
       const cacheKey = `${lang}:${heading}`;

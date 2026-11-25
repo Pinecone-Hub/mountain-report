@@ -21,7 +21,7 @@ const { lang, items } = Astro.props;
             </li>
           ) : (
             <li>
-              <a href={item.href}>{item.label}</a>
+              <a href={item.href} hreflang={item.hreflang}>{item.label}</a>
             </li>
           ),
         )}

@@ -1,5 +1,5 @@
 // IPCC calibrated language: the fixed list of terms that get a tooltip and a glossary link.
-// Only the English list exists for now; a language without a list leaves its italics plain.
+// English and French lists exist; a language without a list leaves its italics plain.
 // Plain TypeScript (no enums) so scripts/check.ts can import it under Node.
 
 export type TermKind = "likelihood" | "confidence" | "evidence" | "agreement" | "evidence-agreement";
@@ -32,18 +32,47 @@ const EN: TermLists = {
   agreement: ["low agreement", "medium agreement", "high agreement"],
 };
 
-const LISTS: Readonly<Record<string, TermLists>> = { en: EN };
+// French list: IPCC SROCC Summary for Policymakers, French edition, footnote 6
+// Source: www.ipcc.ch/site/assets/uploads/sites/3/2020/07/SROCC_SPM_fr.pdf (written without the scheme:
+// ipcc.ch is not on the external URL allowlist, which check.ts applies to source files too).
+// Stored with the straight apostrophe; normaliseTerm maps the typographic one to it.
+const FR: TermLists = {
+  likelihood: [
+    "quasiment certain",
+    "extrêmement probable",
+    "très probable",
+    "probable",
+    "plus probable qu'improbable",
+    "à peu près aussi probable qu'improbable",
+    "improbable",
+    "très improbable",
+    "extrêmement improbable",
+    "exceptionnellement improbable",
+  ],
+  confidence: ["degré de confiance très faible", "degré de confiance faible", "degré de confiance moyen", "degré de confiance élevé", "degré de confiance très élevé"],
+  evidence: ["éléments probants limités", "éléments probants moyens", "éléments probants robustes"],
+  agreement: ["degré de cohérence faible", "degré de cohérence moyen", "degré de cohérence élevé"],
+};
 
-/** Words that suggest calibrated language, for the check.ts WARN about near misses. */
-export const CALIBRATED_WORD_PATTERN = /confidence|likely|evidence|agreement/i;
+const LISTS: Readonly<Record<string, TermLists>> = { en: EN, fr: FR };
+
+const WORD_PATTERNS: Readonly<Record<string, RegExp>> = {
+  en: /confidence|likely|evidence|agreement/i,
+  fr: /confiance|probable|probants|cohérence|coherence/i,
+};
+
+/** Words that suggest calibrated language in a language, for the check.ts WARN about near misses. */
+export function calibratedWordPattern(lang: string): RegExp | undefined {
+  return Object.prototype.hasOwnProperty.call(WORD_PATTERNS, lang) ? WORD_PATTERNS[lang] : undefined;
+}
 
 export function hasTermList(lang: string): boolean {
   return Object.prototype.hasOwnProperty.call(LISTS, lang);
 }
 
-/** Lower case, single spaces, no surrounding space. */
+/** Lower case, single spaces (no-break spaces too), no surrounding space, straight apostrophe, NFC. */
 export function normaliseTerm(text: string): string {
-  return text.replace(/\s+/g, " ").trim().toLowerCase();
+  return text.normalize("NFC").replace(/[\u2019\u2018]/g, "'").replace(/\s+/g, " ").trim().toLowerCase();
 }
 
 /**

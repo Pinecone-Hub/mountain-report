@@ -1,6 +1,7 @@
 ---
-import { fullLanguages } from "../config/report";
+import { report } from "../config/report";
 import { t, type TranslationKey } from "../i18n/index";
+import { SUMMARY_SLUG } from "../lib/page-links";
 import { pageUrl } from "../lib/urls";
 
 interface Props {
@@ -10,16 +11,19 @@ interface Props {
 }
 
 const { lang, switchPath = "" } = Astro.props;
+// Full languages everywhere; the summary-scope languages only on the Summary (the one page they have).
+const choices = report.languages.filter((l) => l.scope === "full" || switchPath === SUMMARY_SLUG);
 ---
 
 <nav class="lang-switcher" aria-label={t(lang, "lang.choose")}>
   <ul>
     {
-      fullLanguages.map((language) => (
+      choices.map((language) => (
         <li>
           <a
             href={pageUrl(language.code, switchPath)}
             lang={language.code}
+            dir={language.dir}
             hreflang={language.code}
             aria-current={language.code === lang ? "true" : undefined}
           >

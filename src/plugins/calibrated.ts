@@ -14,20 +14,24 @@ export interface Tooltip {
   text: string;
 }
 
-/** Everything the tooltip shows for a category. Throws when the glossary has no such entry. */
-export function tooltipFor(category: GlossaryCategory, lang: string, env: PluginEnv): Tooltip {
-  const heading = env.t(lang, `calibrated.glossary.${category}`);
-  const text = env.glossaryEntry(lang, heading);
+/**
+ * Everything the tooltip shows for a category. Throws when the glossary has no such entry.
+ * `glossaryLang` is the language of the glossary the term links to (the default language for a
+ * summary-scope language, which has no glossary of its own).
+ */
+export function tooltipFor(category: GlossaryCategory, lang: string, env: PluginEnv, glossaryLang: string = lang): Tooltip {
+  const heading = env.t(glossaryLang, `calibrated.glossary.${category}`);
+  const text = env.glossaryEntry(glossaryLang, heading);
   if (text === undefined) {
-    throw new Error(`calibrated term: the ${lang} glossary has no entry "${heading}" for the ${category} category`);
+    throw new Error(`calibrated term: the ${glossaryLang} glossary has no entry "${heading}" for the ${category} category`);
   }
-  const name = env.t(lang, `calibrated.category.${category}`);
-  return { anchor: slugify(heading), label: env.tf(lang, "calibrated.label", { category: name }), text };
+  const name = env.t(glossaryLang, `calibrated.category.${category}`);
+  return { anchor: slugify(heading), label: env.tf(glossaryLang, "calibrated.label", { category: name }), text };
 }
 
-export function buildCalibratedTerm(termChildren: HChild[], tip: Tooltip, tipId: string, glossaryHref: string): HElement {
+export function buildCalibratedTerm(termChildren: HChild[], tip: Tooltip, tipId: string, glossaryHref: string, hreflang?: string): HElement {
   return el("span", { className: ["calibrated"] }, [
-    el("a", { href: glossaryHref, className: ["calibrated-term"], ariaDescribedBy: [tipId] }, [el("em", {}, termChildren)]),
+    el("a", { href: glossaryHref, ...(hreflang ? { hrefLang: hreflang } : {}), className: ["calibrated-term"], ariaDescribedBy: [tipId] }, [el("em", {}, termChildren)]),
     el("span", { className: ["calibrated-tip"], role: "tooltip", id: tipId, dataPagefindIgnore: "all" }, [
       el("span", { className: ["calibrated-tip-label"] }, [txt(tip.label)]),
       txt(" "),
@@ -52,10 +56,11 @@ export function calibratedPlugin(env: PluginEnv): HastPluginDefinition {
         const parent = ctx.parent(node);
         if (parent && "tagName" in parent && /^(a|h[1-6])$/.test(String(parent.tagName))) return;
         const replacement = inFile(ctx.fileURL, () => {
-          const tip = tooltipFor(glossaryCategory(kind), lang, env);
+          const glossary = env.link(lang, "glossary");
+          const tip = tooltipFor(glossaryCategory(kind), glossary.hreflang ?? lang, env);
           const c = counter(ctx.data);
           c.n += 1;
-          return buildCalibratedTerm([txt(children[0].type === "text" ? children[0].value : "")], tip, `calibrated-tip-${c.n}`, `${env.base}${lang}/glossary/#${tip.anchor}`);
+          return buildCalibratedTerm([txt(children[0].type === "text" ? children[0].value : "")], tip, `calibrated-tip-${c.n}`, env.link(lang, "glossary", tip.anchor).href, glossary.hreflang);
         });
         ctx.replaceNode(node, replacement);
       },

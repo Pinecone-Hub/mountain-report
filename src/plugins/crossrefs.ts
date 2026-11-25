@@ -43,6 +43,8 @@ export function splitCrossRefs(text: string): XrefSegment[] {
 
 export interface ResolvedXref {
   href: string;
+  /** Set when the target page is in another language than the page that holds the link (summary-scope languages). */
+  hreflang?: string;
   /** Translation key for the link's accessible name (takes {number}). */
   labelKey: "xref.section" | "xref.summary";
 }
@@ -61,8 +63,10 @@ export function resolveXref(token: string, page: { lang: string; slug: string },
   }
   if (!env.sections(page.lang).has(token)) throw new Error(`unknown section "${token}" in a cross-reference`);
   const anchor = sectionAnchor(token);
-  const href = page.slug === target ? `#${anchor}` : `${env.base}${page.lang}/${target}/#${anchor}`;
-  return { href, labelKey: summary ? "xref.summary" : "xref.section" };
+  const labelKey = summary ? "xref.summary" : "xref.section";
+  if (page.slug === target) return { href: `#${anchor}`, labelKey };
+  const link = env.link(page.lang, target, anchor);
+  return { href: link.href, hreflang: link.hreflang, labelKey };
 }
 
 export function crossRefsPlugin(env: PluginEnv): HastPluginDefinition {
@@ -76,8 +80,8 @@ export function crossRefsPlugin(env: PluginEnv): HastPluginDefinition {
         const page = pageFromFile(ctx.fileURL);
         return splitCrossRefs(node.value).map((segment): HChild => {
           if (segment.kind === "text") return txt(segment.value);
-          const { href, labelKey } = resolveXref(segment.token, page, env);
-          return el("a", { href, className: ["xref"], ariaLabel: env.tf(page.lang, labelKey, { number: segment.token }) }, [txt(segment.token)]);
+          const { href, hreflang, labelKey } = resolveXref(segment.token, page, env);
+          return el("a", { href, ...(hreflang ? { hrefLang: hreflang } : {}), className: ["xref"], ariaLabel: env.tf(page.lang, labelKey, { number: segment.token }) }, [txt(segment.token)]);
         });
       });
       ctx.replaceNode(node, nodes);

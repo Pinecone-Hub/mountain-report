@@ -2,7 +2,7 @@
 // unit-tested with plain vitest. Node strip-types friendly: no enums, no
 // parameter properties.
 
-import { CALIBRATED_WORD_PATTERN, classifyTerm, hasTermList } from "../src/lib/calibrated-terms.ts";
+import { calibratedWordPattern, classifyTerm } from "../src/lib/calibrated-terms.ts";
 import { DECAP_URL } from "../src/lib/decap.ts";
 import { CONTRAST_LARGE_OR_UI, CONTRAST_TEXT, contrastRatio } from "../src/lib/contrast.ts";
 
@@ -19,6 +19,8 @@ export interface UrlOptions {
   isAdmin: boolean;
   /** Hosts of the official source URLs listed in the references data. */
   referenceHosts: ReadonlySet<string>;
+  /** The CMS repository ("owner/name", report.config.json cms.repo): its Issues page is allowed on public pages. */
+  repo?: string;
 }
 
 const EM_DASH = "\u2014";
@@ -67,6 +69,14 @@ export function flattenKeys(value: unknown, prefix = ""): string[] {
   return out;
 }
 
+/** Keys whose value is not a non-empty string (flat or nested dictionaries). */
+export function emptyValueKeys(value: unknown, prefix = ""): string[] {
+  if (value === null || typeof value !== "object" || Array.isArray(value)) {
+    return prefix !== "" && !(typeof value === "string" && value.trim() !== "") ? [prefix] : [];
+  }
+  return Object.entries(value as Record<string, unknown>).flatMap(([k, v]) => emptyValueKeys(v, prefix === "" ? k : `${prefix}.${k}`));
+}
+
 export interface Dictionary {
   code: string;
   scope: "full" | "summary";
@@ -76,8 +86,9 @@ export interface Dictionary {
 
 /**
  * Full-scope languages must have exactly the key set of the default language.
- * Summary-scope languages may only use keys that start with "summary." and
- * exist in the default language.
+ * Summary-scope languages may hold any key that exists in the default language, with a
+ * non-empty value. Keys they lack are not reported here: t() throws at build time for a key a
+ * page needs and the language does not have.
  */
 export function compareTranslations(dictionaries: readonly Dictionary[]): string[] {
   const problems: string[] = [];
@@ -92,9 +103,9 @@ export function compareTranslations(dictionaries: readonly Dictionary[]): string
       for (const k of keys) if (!refKeys.has(k)) problems.push(`key "${k}" is in ${d.code} but missing in ${reference.code}`);
     } else {
       for (const k of keys) {
-        if (!k.startsWith("summary.")) problems.push(`${d.code} key "${k}" does not start with "summary."`);
         if (!refKeys.has(k)) problems.push(`${d.code} key "${k}" does not exist in ${reference.code}`);
       }
+      for (const k of emptyValueKeys(d.data)) problems.push(`${d.code} key "${k}" has an empty value`);
     }
   }
   return problems;
@@ -180,6 +191,8 @@ export function findHardcodedText(source: string): TextHit[] {
 const XML_NAMESPACE_URIS: RegExp[] = [
   /^http:\/\/www\.w3\.org\/(2000\/svg|1999\/xlink|1999\/xhtml)$/,
   /^http:\/\/www\.sitemaps\.org\/schemas\/sitemap\/0\.9$/,
+  // The JSON-LD vocabulary identifier (a name, not a loaded resource).
+  /^https:\/\/schema\.org\/?$/,
   /^http:\/\/www\.google\.com\/schemas\/sitemap-(news|image|video)\/\d+(\.\d+)?$/,
 ];
 
@@ -199,14 +212,33 @@ export function findExternalUrls(text: string): Array<{ url: string; index: numb
   return out;
 }
 
+/** Link-only targets: pages the visitor can follow to the original video (never loaded by the site). */
+function isVideoPageLink(parsed: URL): boolean {
+  if (parsed.protocol !== "https:") return false;
+  const host = parsed.hostname.toLowerCase();
+  if (host === "www.youtube.com") return parsed.pathname === "/watch";
+  if (host === "vimeo.com") return true;
+  return false;
+}
+
+/** The Issues page of the CMS repository, and paths below it: the only github.com URL on public pages. */
+function isRepoIssuesLink(parsed: URL, repo: string | undefined): boolean {
+  if (!repo || parsed.protocol !== "https:" || parsed.hostname.toLowerCase() !== "github.com") return false;
+  const issues = `/${repo.replace(/^\/+|\/+$/g, "")}/issues`.toLowerCase();
+  const path = parsed.pathname.toLowerCase();
+  return path === issues || path.startsWith(`${issues}/`);
+}
+
 export function isUrlAllowed(url: string, options: UrlOptions): boolean {
   if (XML_NAMESPACE_URIS.some((re) => re.test(url))) return true;
-  let host: string;
+  let parsed: URL;
   try {
-    host = new URL(url).hostname.toLowerCase();
+    parsed = new URL(url);
   } catch {
     return false;
   }
+  const host = parsed.hostname.toLowerCase();
+  if (isVideoPageLink(parsed) || isRepoIssuesLink(parsed, options.repo)) return true;
   if (ALWAYS_HOSTS.some((d) => hostMatches(host, d))) return true;
   if (options.referenceHosts.has(host)) return true;
   if (options.isAdmin && ADMIN_HOSTS.some((d) => hostMatches(host, d))) return true;
@@ -230,6 +262,12 @@ export function isAdminPath(path: string, basePath: string): boolean {
   return /(^|\/)admin(-demo)?(\/|\.|$)/.test(rest);
 }
 
+/** True for the files Pagefind generates (dist/<base>/pagefind/): third-party code, not scanned for URLs. */
+export function isPagefindOutput(path: string, basePath: string): boolean {
+  const base = basePath.replace(/^\/+|\/+$/g, "");
+  return path.startsWith(`dist/${base}/pagefind/`);
+}
+
 // ---------- calibrated language ----------
 
 export interface SuspectEmphasis {
@@ -243,13 +281,14 @@ export interface SuspectEmphasis {
  * Languages without a term list, code fences and inline code are skipped.
  */
 export function findSuspectEmphasis(markdown: string, lang: string): SuspectEmphasis[] {
-  if (!hasTermList(lang)) return [];
+  const pattern = calibratedWordPattern(lang);
+  if (!pattern) return [];
   const blank = (m: string) => m.replace(/[^\n]/g, " ");
   const text = markdown.replace(/```[\s\S]*?```/g, blank).replace(/`[^`\n]*`/g, blank);
   const out: SuspectEmphasis[] = [];
   for (const m of text.matchAll(/(?<![*\w])\*(?!\*)([^*\n]+?)\*(?!\*)/g)) {
     const inner = m[1];
-    if (CALIBRATED_WORD_PATTERN.test(inner) && classifyTerm(inner, lang) === undefined) {
+    if (pattern.test(inner) && classifyTerm(inner, lang) === undefined) {
       out.push({ text: inner, index: m.index ?? 0 });
     }
   }
@@ -364,6 +403,50 @@ export function checkDistPath(path: string, basePath: string): string[] {
     problems.push(`dist/${path} is outside ${basePath}/`);
   }
   return problems;
+}
+
+// ---------- internal links in dist/ ----------
+
+/**
+ * Paths (without #fragment and ?query) that the href and src attributes of an HTML page point to
+ * under the base path, for example "/mountain-report/en/about/". Absolute URLs on the site's own
+ * origin count too (hreflang alternates). External URLs, mailto:, relative URLs, bare fragments
+ * and the Functions path (<base>/api/) are skipped. Script, style and comment contents are ignored.
+ */
+export function internalTargets(html: string, basePath: string, site?: string): string[] {
+  const base = `/${basePath.replace(/^\/+|\/+$/g, "")}`;
+  const origin = site ? site.replace(/\/+$/, "") : undefined;
+  const clean = html.replace(/<script\b[^>]*>[\s\S]*?<\/script>|<style\b[^>]*>[\s\S]*?<\/style>|<!--[\s\S]*?-->/gi, "");
+  const out = new Set<string>();
+  for (const tag of clean.matchAll(/<[a-zA-Z][^>]*>/g)) {
+    const attrs = parseAttrs(tag[0].slice(1, -1));
+    for (const name of ["href", "src"]) {
+      let value = attrs[name];
+      if (value === undefined) continue;
+      value = value.replace(/&amp;/g, "&").trim();
+      if (origin && value.startsWith(`${origin}/`)) value = value.slice(origin.length);
+      if (!value.startsWith("/") || value.startsWith("//")) continue;
+      const path = value.split("#")[0].split("?")[0];
+      if (path !== base && !path.startsWith(`${base}/`)) continue;
+      if (path.startsWith(`${base}/api/`)) continue;
+      out.add(path);
+    }
+  }
+  return [...out];
+}
+
+/** The targets that resolve to no file. A path ending in "/" needs its index.html; others the file itself or a folder with index.html. */
+export function missingTargets(targets: readonly string[], exists: (distPath: string) => boolean): string[] {
+  return targets.filter((target) => {
+    let path: string;
+    try {
+      path = decodeURIComponent(target);
+    } catch {
+      return true;
+    }
+    if (path.endsWith("/")) return !exists(`${path}index.html`);
+    return !exists(path) && !exists(`${path}/index.html`);
+  });
 }
 
 // ---------- file size limit ----------

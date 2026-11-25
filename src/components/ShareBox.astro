@@ -16,7 +16,7 @@ const subject = tf(lang, "share.mail.subject", { title: reportPageTitle(lang, sl
 const mailto = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(url)}`;
 ---
 
-<section class="share-box" aria-labelledby="share-title">
+<section class="share-box" aria-labelledby="share-title" data-pagefind-ignore>
   <h2 id="share-title">{t(lang, "share.title")}</h2>
   <p class="share-actions">
     <a href={mailto}>{t(lang, "share.mail")}</a>

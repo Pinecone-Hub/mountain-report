@@ -2,6 +2,7 @@
 
 import { markdownToHtml, type HastPluginList, type MarkdownToHtmlResult } from "satteri";
 import { t, tf, type TranslationKey } from "../i18n/index";
+import { resolvePageLink } from "../lib/page-links";
 import { parseReferences } from "../lib/references";
 import type { PluginEnv } from "./support";
 
@@ -21,6 +22,13 @@ export function testEnv(overrides: Partial<PluginEnv> = {}): PluginEnv {
     t: (lang, key) => t(lang, key as TranslationKey),
     tf: (lang, key, values) => tf(lang, key as TranslationKey, values),
     sections: () => new Set(["1.1", "1.2", "1.3", "2.1", "A", "A.1", "B"]),
+    link: (lang, slug, hash) =>
+      resolvePageLink(
+        { base: "/mr/", languages: [{ code: "en", scope: "full", default: true }, { code: "fr", scope: "full" }, { code: "ar", scope: "summary" }] },
+        lang,
+        slug,
+        hash,
+      ),
     references: parseReferences([
       { key: "a2025", type: "article", authors: "Alpha, A.", year: 2025, title: "First", container: "Journal", doi: "10.1/a" },
       { key: "b2024", type: "report", authors: "Beta", year: 2024, title: "Second", url: "https://doi.org/10.2/b-page", accessed: "2026-11-25" },

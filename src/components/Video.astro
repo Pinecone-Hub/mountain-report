@@ -1,0 +1,147 @@
+---
+// A video that loads only after a click. Before the click nothing is requested from the video
+// host: the page shows a local placeholder, the title, a play button (shown by the script only),
+// a notice and a plain link to the original page. After the click the script swaps the
+// placeholder for the privacy-friendly player (youtube-nocookie.com, or Vimeo with dnt=1) and
+// moves focus to it. Without JavaScript the link to the original video remains.
+import { defaultLanguage } from "../config/report";
+import { t, tf, type TranslationKey } from "../i18n/index";
+import { requireVideoUrl, videoEmbedUrl, videoPageUrl } from "../lib/video";
+
+interface Props {
+  /** YouTube or Vimeo address. A bad address is a build error. */
+  url: string;
+  /** Title of the video, as published. */
+  title: string;
+  /** Language of the page. */
+  lang: string;
+  /** Who published the video, for the credit line. */
+  publisher?: string;
+  /** Language of the video itself. Defaults to the default language of the report. */
+  videoLang?: string;
+}
+
+const { url, title, lang, publisher, videoLang = defaultLanguage.code } = Astro.props;
+const ref = requireVideoUrl(url);
+const provider = t(lang, `video.provider.${ref.provider}` as TranslationKey);
+const differentLanguage = videoLang !== lang;
+const languageNote = differentLanguage ? t(lang, `video.language.${videoLang}` as TranslationKey) : undefined;
+---
+
+<div class="video" data-video data-embed={videoEmbedUrl(ref)} data-title={title}>
+  <div class="video-frame" data-video-frame>
+    <svg class="video-art" viewBox="0 0 16 9" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+      <path d="M0 9 L4 5 L6.5 7 L10 3 L16 9 Z" />
+    </svg>
+    <button type="button" class="video-play" data-video-play hidden aria-label={tf(lang, "video.play", { title })}>
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8 5 L19 12 L8 19 Z" /></svg>
+    </button>
+  </div>
+  <p class="video-title" lang={differentLanguage ? videoLang : undefined}>{title}</p>
+  {languageNote && <p class="video-meta">{languageNote}</p>}
+  {publisher && <p class="video-meta">{tf(lang, "video.credit", { publisher })}</p>}
+  <p class="video-meta" data-video-notice>{tf(lang, "video.notice", { provider })}</p>
+  <p class="video-meta"><a href={videoPageUrl(ref)} rel="noopener">{tf(lang, "video.watchOriginal", { provider })}</a></p>
+</div>
+
+<style>
+  .video {
+    max-inline-size: 48rem;
+  }
+
+  .video-frame {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    border: var(--border-width) solid var(--border-strong);
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+
+  .video-art {
+    position: absolute;
+    inset: 0;
+    inline-size: 100%;
+    block-size: 100%;
+    fill: var(--border);
+  }
+
+  .video-play {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    inline-size: 100%;
+    block-size: 100%;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--bg);
+    cursor: pointer;
+  }
+
+  .video-play[hidden] {
+    display: none;
+  }
+
+  .video-play svg {
+    box-sizing: content-box;
+    inline-size: 2.5rem;
+    block-size: 2.5rem;
+    padding: var(--space-4);
+    border-radius: 50%;
+    background: var(--accent);
+    fill: currentColor;
+  }
+
+  .video-play:hover svg {
+    background: var(--text);
+  }
+
+  .video-play:focus-visible {
+    outline-offset: calc(var(--border-width) * -3);
+  }
+
+  .video-frame :global(iframe) {
+    position: absolute;
+    inset: 0;
+    inline-size: 100%;
+    block-size: 100%;
+    border: 0;
+  }
+
+  .video-title {
+    margin-block: var(--space-3) var(--space-1);
+    font-weight: var(--font-weight-strong);
+  }
+
+  .video-meta {
+    margin-block: 0 var(--space-1);
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+  }
+</style>
+
+<script>
+  // Play: replace the placeholder with the player and move focus to it. No animation.
+  for (const root of document.querySelectorAll<HTMLElement>("[data-video]")) {
+    const button = root.querySelector<HTMLButtonElement>("[data-video-play]");
+    const frame = root.querySelector<HTMLElement>("[data-video-frame]");
+    const embed = root.dataset.embed;
+    if (!button || !frame || !embed) continue;
+    button.hidden = false;
+    button.addEventListener("click", () => {
+      const iframe = document.createElement("iframe");
+      iframe.src = embed;
+      iframe.title = root.dataset.title ?? "";
+      iframe.allow = "autoplay; fullscreen; picture-in-picture";
+      iframe.allowFullscreen = true;
+      iframe.referrerPolicy = "strict-origin-when-cross-origin";
+      frame.replaceChildren(iframe);
+      root.querySelector("[data-video-notice]")?.remove();
+      iframe.focus();
+    });
+  }
+</script>

@@ -4,6 +4,11 @@ description: "Glacier retreat, mountain hazards and adaptation: a demonstration
   report microsite built on cited sources."
 lang: en
 id: home
+video:
+  url: https://www.youtube.com/watch?v=45aV35tG6cM
+  title: What Are Climate Tipping Points? Understanding the Impacts of a Changing
+    Cryosphere
+  publisher: World Meteorological Organization (WMO)
 ---
 
 1. Glaciers lost on average 273 ± 16 Gt yr⁻¹ from 2000 to 2023, and six of the highest-loss years on record fall within the past seven years [@glambie2025; @zemp2026]. {A}

@@ -87,3 +87,25 @@ describe("crossRefsPlugin", () => {
     expect(() => render("See {1.2.", plugins(), CHAPTER_1)).toThrow(/chapter-1\.md: malformed/);
   });
 });
+
+describe("cross-references from a summary-scope language", () => {
+  const ARABIC_SUMMARY = "file:///project/src/content/pages/ar/summary.md";
+
+  it("links to the default-language chapter with hreflang", () => {
+    expect(resolveXref("1.2", { lang: "ar", slug: "summary" }, testEnv())).toEqual({ href: "/mr/en/chapter-1/#section-1-2", hreflang: "en", labelKey: "xref.section" });
+  });
+
+  it("keeps Summary references in the page and in the language", () => {
+    expect(resolveXref("A", { lang: "ar", slug: "summary" }, testEnv()).href).toBe("#a");
+  });
+
+  it("writes hreflang on the rendered link", () => {
+    const html = render("See {1.2}.", [crossRefsPlugin(testEnv())], ARABIC_SUMMARY);
+    expect(html).toContain('href="/mr/en/chapter-1/#section-1-2"');
+    expect(html).toContain('hreflang="en"');
+  });
+
+  it("still throws for an unknown section", () => {
+    expect(() => render("See {9.9}.", [crossRefsPlugin(testEnv())], ARABIC_SUMMARY)).toThrow();
+  });
+});

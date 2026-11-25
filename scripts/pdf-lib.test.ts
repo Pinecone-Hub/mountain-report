@@ -5,8 +5,14 @@ describe("pdfEscape", () => {
   it("escapes parentheses and backslashes", () => {
     expect(pdfEscape("a (b) \\ c")).toBe("a \\(b\\) \\\\ c");
   });
-  it("replaces non-ASCII and control characters", () => {
-    expect(pdfEscape("é\n")).toBe("??");
+  it("writes Latin-1 letters and typographic characters as WinAnsi octal escapes", () => {
+    expect(pdfEscape("é")).toBe("\\351");
+    expect(pdfEscape("l\u2019œ")).toBe("l\\222\\234");
+    expect(pdfEscape("a\u202fb\u00a0c")).toBe("a b c");
+  });
+  it("replaces other characters and controls", () => {
+    expect(pdfEscape("\n")).toBe("?");
+    expect(pdfEscape("\u0627\u2014")).toBe("??");
   });
 });
 

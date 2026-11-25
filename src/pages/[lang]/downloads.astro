@@ -89,7 +89,7 @@ const sections: Array<{ id: string; heading: string; items: Item[] }> = [
 const englishHasFiles = lang !== defaultLanguage.code && ((await getCollection("downloads", ({ data }) => data.lang === defaultLanguage.code)).length > 0 || (await figuresFor(defaultLanguage.code)).length > 0);
 ---
 
-<Base lang={lang} title={title} switchPath="downloads" breadcrumbs={breadcrumbs}>
+<Base lang={lang} title={title} description={t(lang, "seo.description.downloads")} switchPath="downloads" breadcrumbs={breadcrumbs} indexed>
   <h1>{title}</h1>
   {
     sections.length === 0 ? (

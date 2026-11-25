@@ -59,7 +59,7 @@ const items = figures.map((figure) => {
 const englishFigures = lang === defaultLanguage.code ? [] : await figuresFor(defaultLanguage.code);
 ---
 
-<Base lang={lang} title={title} switchPath="figures" breadcrumbs={breadcrumbs}>
+<Base lang={lang} title={title} description={t(lang, "seo.description.figures")} switchPath="figures" breadcrumbs={breadcrumbs} indexed>
   <h1>{title}</h1>
   {
     items.length === 0 ? (

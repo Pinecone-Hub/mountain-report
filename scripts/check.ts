@@ -24,11 +24,15 @@ import {
   findSuspectEmphasis,
   indexReferences,
   isAdminPath,
+  isPagefindOutput,
   isUrlAllowed,
   findOversizedFiles,
   lineAt,
+  internalTargets,
+  missingTargets,
   parseWrangler,
 } from "./check-lib.ts";
+import { headersHaveNoindex } from "./post-build-lib.ts";
 import { validateReportConfig, type ReportConfig } from "../src/config/validate.ts";
 import { parseWgmsCsv, processedCsv, selectPeriod } from "./data/wgms-lib.ts";
 
@@ -229,10 +233,11 @@ for (const problem of references.problems) report("FAIL", "citations", problem, 
 const urlFiles = [...srcFiles.filter((f) => !isTest(f)), ...publicFiles, ...distFiles];
 for (const file of urlFiles) {
   const path = rel(file);
+  if (isPagefindOutput(path, BASE_PATH)) continue;
   const isAdmin = isAdminPath(path, BASE_PATH);
   const text = read(file);
   for (const { url, index } of findExternalUrls(text)) {
-    if (!isUrlAllowed(url, { isAdmin, referenceHosts: references.hosts })) {
+    if (!isUrlAllowed(url, { isAdmin, referenceHosts: references.hosts, repo: config?.cms.repo })) {
       report("FAIL", "urls", `external URL not on the allowlist: ${url}`, at(file, text, index));
     }
   }
@@ -328,6 +333,42 @@ if (distExists && config) {
     }
     if (!Array.isArray(include) || include.length !== expected.length || include.some((v, i) => v !== expected[i])) {
       report("FAIL", "routes", `dist/_routes.json include must be exactly ${JSON.stringify(expected)}`, "dist/_routes.json");
+    }
+  }
+}
+
+// ---------- l2. dist/_headers (noindex on the pages.dev host) and the Apache .htaccess ----------
+
+if (distExists && config) {
+  const headers = join(DIST, "_headers");
+  if (!existsSync(headers)) report("FAIL", "headers", "dist/_headers is missing (the build script writes it)", "dist/_headers");
+  else if (!headersHaveNoindex(read(headers))) report("FAIL", "headers", 'dist/_headers must set "X-Robots-Tag: noindex" for "/*"', "dist/_headers");
+
+  const folder = config.basePath.replace(/^\/+|\/+$/g, "");
+  const htaccess = join(DIST, folder, ".htaccess");
+  if (!existsSync(htaccess)) report("FAIL", "htaccess", `dist/${folder}/.htaccess is missing (the build script writes it)`, `dist/${folder}/.htaccess`);
+  else if (!read(htaccess).includes(`ErrorDocument 404 /${folder}/404.html`)) report("FAIL", "htaccess", `dist/${folder}/.htaccess must set ErrorDocument 404 /${folder}/404.html`, `dist/${folder}/.htaccess`);
+  if (!existsSync(join(DIST, folder, "404.html"))) report("FAIL", "htaccess", `dist/${folder}/404.html is missing (the Apache 404 page)`, `dist/${folder}/404.html`);
+}
+
+// ---------- m. dist/_redirects and internal links ----------
+
+if (distExists && config) {
+  const redirects = join(DIST, "_redirects");
+  const defaultCode = config.languages.find((l) => l.default)?.code ?? "";
+  const expected = `${config.basePath}/ ${config.basePath}/${defaultCode}/ 301`;
+  if (!existsSync(redirects)) report("FAIL", "redirects", "dist/_redirects is missing (the build script writes it)", "dist/_redirects");
+  else if (!read(redirects).split(/\r?\n/).includes(expected)) report("FAIL", "redirects", `dist/_redirects must contain the line "${expected}"`, "dist/_redirects");
+
+  // Every href and src that points under the base must resolve to a file in dist/ (the editor pages are skipped).
+  const distPathExists = (distPath: string) => {
+    const file = join(DIST, distPath);
+    return existsSync(file) && statSync(file).isFile();
+  };
+  for (const file of distHtml) {
+    if (isAdminPath(rel(file), BASE_PATH)) continue;
+    for (const target of missingTargets(internalTargets(read(file), config.basePath, config.site), distPathExists)) {
+      report("FAIL", "links", `broken internal link ${target}`, rel(file));
     }
   }
 }

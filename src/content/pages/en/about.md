@@ -8,7 +8,7 @@ id: about
 
 ## Purpose
 
-This site is a demonstration of a report microsite template. It shows how an assessment-style report can be published on the web with numbered chapters, a summary with cross-references, citations, a glossary and versions in several languages. The topic, climate risks in high mountain regions, was chosen to give the template realistic content.
+This site is a demonstration of a report microsite template. It shows how an assessment-style report can be published on the web with numbered chapters, a summary with cross-references, citations, a glossary and versions in several languages. The topic, climate risks in high mountain regions, was chosen to give the template realistic content. Evaluators can try the content editor in a [demonstration mode](../../admin-demo/) without signing in.
 
 ## Not an official publication
 
