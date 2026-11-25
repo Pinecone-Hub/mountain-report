@@ -12,8 +12,8 @@ Read this first in a new session, then `CLAUDE.md`, `docs/brief.md` (the full br
 | 1 Design system and layout | done, pushed |
 | 2 English content | done, verified (6 rounds, nothing open), pushed |
 | 3 Report templates | done, reviewed, pushed |
-| 4 Data and figures | done, committed locally, waiting for Dan's check and "ok" before push |
-| 5 Decap CMS | next |
+| 4 Data and figures | done, verified by Dan, pushed (c5538c8), live |
+| 5 Decap CMS | next, waiting for Dan's "ok" |
 | 6 Translations, remaining pages | to do |
 | 7 QA and release | to do |
 
@@ -29,7 +29,8 @@ Deadline for the application: 30 November 2026, 23:59.
 - Never install any package, plugin or tool without Dan's consent (name, purpose, licence).
 - Fix/verify loops are bounded: after a final verification, at most one more fix round and one
   re-check; then report what remains and stop.
-- Use the agents in `.claude/agents/`: builder implements, reviewer after every builder change,
+- From stage 5 on, the builder agent writes the code again (Dan, 25 November 2026; stage 4 code
+  was written directly). Use the agents in `.claude/agents/`: builder implements, reviewer after every builder change,
   content-writer for text, source-verifier for facts (read-only), screenshot-reviewer for
   screenshots. Subagents start without context: their prompts must be self-contained.
 - Never invent facts, figures, references or DOIs. Unknown = `TODO_SOURCE`.
