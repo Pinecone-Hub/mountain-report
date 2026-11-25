@@ -3,6 +3,44 @@
 The approved plan is to be pasted here by Dan. The build brief is the source of truth where they
 differ. The changes below amend the brief and apply from now on.
 
+## Approved sources (stage 2)
+
+Only these sources, unless Dan approves more. Copied from the build brief.
+
+1. WMO, State of the Global Climate 2025 (March 2026), wmo.int.
+2. Dussaillant, I. et al. (2025), Annual mass-change estimates for the world's glaciers, WGMS,
+   doi:10.5904/wgms-amce-2025-02b. Paper: ESSD 17(5), 1977-2006, doi:10.5194/essd-17-1977-2025.
+3. The GlaMBIE Team (2025), Community estimate of global glacier mass changes from 2000 to 2023,
+   Nature 639, 382-388, doi:10.1038/s41586-024-08545-z.
+4. Zemp, M. et al. (2026), Global glacier mass change in 2025, Nature Reviews Earth &
+   Environment, doi:10.1038/s43017-026-00777-z.
+5. Hock, R., Rasul, G. et al. (2019), High Mountain Areas, IPCC SROCC Chapter 2,
+   doi:10.1017/9781009157964.004. Cite only, never reproduce text or figures.
+6. Blatten (28 May 2025): EGU General Assembly 2026 abstracts EGU26-19777 and EGU26-6599
+   (Copernicus meeting organizer).
+7. Thame GLOF (16 August 2024): ICIMOD study and press release, October 2025, icimod.org.
+
+Rules: paraphrase fully, no sentence or figure copied. Calibrated IPCC language only where the
+source itself uses it for that statement. Numbers exactly as in the source, with units and
+uncertainty. Unknown = `TODO_SOURCE`.
+
+### Source decisions (25 November 2026, Dan)
+
+The sources take priority over the brief's wording:
+
+- WGMS dataset: version 2026-02-10 (currently recommended by WGMS), author "World Glacier
+  Monitoring Service (WGMS)", DOI as given on the WGMS page. The stage 4 chart covers 1976 to
+  2025.
+- Zemp et al. (2026): author "The WGMS Network", Nature Reviews Earth & Environment 7,
+  213-215, online 7 April 2026.
+- GlaMBIE (2025): Nature 639 (8054), 382-388, online 19 February 2025.
+- SROCC Chapter 2: cited as recommended in the chapter PDF (Hock et al., 2019, pp. 131-202),
+  DOI 10.1017/9781009157964.004. Cambridge lists the 2022 edition year (noted in
+  `docs/content-notes.md`).
+- ICIMOD Thame study: 24 September 2025, ICIMOD and NDRRMA, doi:10.53055/ICIMOD.1101. The
+  press release is dated 14 October 2025.
+- Style: "%" (IPCC convention) in text and tables, no space ("41%").
+
 ## Decisions
 
 ### Fonts (stage 1, 25 November 2026)
