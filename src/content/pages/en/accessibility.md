@@ -45,4 +45,4 @@ A full manual keyboard walkthrough and testing with screen readers are planned f
 
 ## Feedback
 
-To report an accessibility problem, please open an issue in the [project's issue tracker on GitHub](https://github.com/Pinecone-Hub/mountain-report/issues).
+To report an accessibility problem, please write to [hello@pinecone.lu](mailto:hello@pinecone.lu).

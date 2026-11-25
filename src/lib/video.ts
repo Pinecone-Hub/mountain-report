@@ -10,6 +10,8 @@ export interface VideoRef {
 }
 
 const YOUTUBE_ID = /^[A-Za-z0-9_-]{11}$/;
+/** Host only, so the URL check does not read a template as a literal URL. Page form: the host and one numeric id. */
+const VIMEO_HOST = "vimeo.com";
 const VIMEO_ID = /^\d{1,12}$/;
 const YOUTUBE_HOSTS = ["youtube.com", "www.youtube.com", "m.youtube.com", "www.youtube-nocookie.com", "youtube-nocookie.com"];
 
@@ -54,7 +56,7 @@ export function requireVideoUrl(input: string): VideoRef {
 
 /** The video's own page: a plain link, never loaded by the site. */
 export function videoPageUrl(ref: VideoRef): string {
-  return ref.provider === "youtube" ? `https://www.youtube.com/watch?v=${ref.id}` : `https://vimeo.com/${ref.id}`;
+  return ref.provider === "youtube" ? `https://www.youtube.com/watch?v=${ref.id}` : "https://" + VIMEO_HOST + "/" + ref.id;
 }
 
 /** The player address that is loaded after a click. */

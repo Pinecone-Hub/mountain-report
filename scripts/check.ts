@@ -237,7 +237,7 @@ for (const file of urlFiles) {
   const isAdmin = isAdminPath(path, BASE_PATH);
   const text = read(file);
   for (const { url, index } of findExternalUrls(text)) {
-    if (!isUrlAllowed(url, { isAdmin, referenceHosts: references.hosts, repo: config?.cms.repo })) {
+    if (!isUrlAllowed(url, { isAdmin, referenceHosts: references.hosts })) {
       report("FAIL", "urls", `external URL not on the allowlist: ${url}`, at(file, text, index));
     }
   }

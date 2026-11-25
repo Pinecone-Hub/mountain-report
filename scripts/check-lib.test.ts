@@ -180,20 +180,9 @@ describe("external URLs", () => {
     expect(isUrlAllowed("https://github.com.evil.example/x", admin)).toBe(false);
   });
 
-  it("allows only the CMS repository Issues page on GitHub, on public pages", () => {
-    const opts = { isAdmin: false, referenceHosts: none, repo: "Pinecone-Hub/mountain-report" };
-    expect(isUrlAllowed("https://github.com/Pinecone-Hub/mountain-report/issues", opts)).toBe(true);
-    expect(isUrlAllowed("https://github.com/Pinecone-Hub/mountain-report/issues/", opts)).toBe(true);
-    expect(isUrlAllowed("https://github.com/Pinecone-Hub/mountain-report/issues/new?template=a", opts)).toBe(true);
-    expect(isUrlAllowed("https://github.com/Pinecone-Hub/mountain-report/issuesfoo", opts)).toBe(false);
-    expect(isUrlAllowed("https://github.com/Pinecone-Hub/mountain-report/pulls", opts)).toBe(false);
-    expect(isUrlAllowed("https://github.com/Pinecone-Hub/mountain-report", opts)).toBe(false);
-    expect(isUrlAllowed("https://github.com/Other/repo/issues", opts)).toBe(false);
-    expect(isUrlAllowed("https://github.com.evil.example/Pinecone-Hub/mountain-report/issues", opts)).toBe(false);
-    expect(isUrlAllowed("https://api.github.com/Pinecone-Hub/mountain-report/issues", opts)).toBe(false);
-    expect(isUrlAllowed("http://github.com/Pinecone-Hub/mountain-report/issues", opts)).toBe(false);
+  it("does not allow GitHub on public pages", () => {
     expect(isUrlAllowed("https://github.com/Pinecone-Hub/mountain-report/issues", site)).toBe(false);
-    expect(isUrlAllowed("https://github.com/Other/repo/pulls", { ...opts, isAdmin: true })).toBe(true);
+    expect(isUrlAllowed("https://github.com/Pinecone-Hub/mountain-report/issues", admin)).toBe(true);
   });
 
   it("allows video page links only (YouTube watch pages, vimeo.com) and the schema.org identifier", () => {
@@ -201,6 +190,11 @@ describe("external URLs", () => {
     expect(isUrlAllowed("https://vimeo.com/123456", site)).toBe(true);
     expect(isUrlAllowed("https://www.youtube.com/embed/abc", site)).toBe(false);
     expect(isUrlAllowed("https://www.youtube.com/@channel", site)).toBe(false);
+    expect(isUrlAllowed("https://vimeo.com/123456/", site)).toBe(true);
+    expect(isUrlAllowed("https://vimeo.com/channels/x", site)).toBe(false);
+    expect(isUrlAllowed("https://vimeo.com/123/abc", site)).toBe(false);
+    expect(isUrlAllowed("https://vimeo.com/", site)).toBe(false);
+    expect(isUrlAllowed("https://vimeo.com/user1", site)).toBe(false);
     expect(isUrlAllowed("https://www.vimeo.com/123456", site)).toBe(false);
     expect(isUrlAllowed("http://vimeo.com/123456", site)).toBe(false);
     expect(isUrlAllowed("https://i.ytimg.com/vi/abc/0.jpg", site)).toBe(false);

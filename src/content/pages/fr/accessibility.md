@@ -45,4 +45,4 @@ Une vérification manuelle complète au clavier et des tests avec des lecteurs d
 
 ## Signaler un problème
 
-Pour signaler un problème d'accessibilité, veuillez ouvrir un ticket dans le [suivi des tickets du projet sur GitHub](https://github.com/Pinecone-Hub/mountain-report/issues).
+Pour signaler un problème d'accessibilité, veuillez écrire à l'adresse [hello@pinecone.lu](mailto:hello@pinecone.lu).

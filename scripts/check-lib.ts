@@ -19,8 +19,6 @@ export interface UrlOptions {
   isAdmin: boolean;
   /** Hosts of the official source URLs listed in the references data. */
   referenceHosts: ReadonlySet<string>;
-  /** The CMS repository ("owner/name", report.config.json cms.repo): its Issues page is allowed on public pages. */
-  repo?: string;
 }
 
 const EM_DASH = "\u2014";
@@ -217,16 +215,8 @@ function isVideoPageLink(parsed: URL): boolean {
   if (parsed.protocol !== "https:") return false;
   const host = parsed.hostname.toLowerCase();
   if (host === "www.youtube.com") return parsed.pathname === "/watch";
-  if (host === "vimeo.com") return true;
+  if (host === "vimeo.com") return /^\/\d+\/?$/.test(parsed.pathname);
   return false;
-}
-
-/** The Issues page of the CMS repository, and paths below it: the only github.com URL on public pages. */
-function isRepoIssuesLink(parsed: URL, repo: string | undefined): boolean {
-  if (!repo || parsed.protocol !== "https:" || parsed.hostname.toLowerCase() !== "github.com") return false;
-  const issues = `/${repo.replace(/^\/+|\/+$/g, "")}/issues`.toLowerCase();
-  const path = parsed.pathname.toLowerCase();
-  return path === issues || path.startsWith(`${issues}/`);
 }
 
 export function isUrlAllowed(url: string, options: UrlOptions): boolean {
@@ -238,7 +228,7 @@ export function isUrlAllowed(url: string, options: UrlOptions): boolean {
     return false;
   }
   const host = parsed.hostname.toLowerCase();
-  if (isVideoPageLink(parsed) || isRepoIssuesLink(parsed, options.repo)) return true;
+  if (isVideoPageLink(parsed)) return true;
   if (ALWAYS_HOSTS.some((d) => hostMatches(host, d))) return true;
   if (options.referenceHosts.has(host)) return true;
   if (options.isAdmin && ADMIN_HOSTS.some((d) => hostMatches(host, d))) return true;
