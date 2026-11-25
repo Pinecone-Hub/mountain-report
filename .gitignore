@@ -10,3 +10,4 @@ playwright-report/
 .env.*
 .dev.vars
 .playwright-mcp/
+.local-sources/

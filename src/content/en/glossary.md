@@ -5,33 +5,17 @@ lang: en
 id: glossary
 ---
 
-## Ablation zone
-
-The part of a glacier where more ice is lost, by melting and other processes, than is gained from snowfall [@wmo2026sogc].
-
-## Accumulation zone
-
-The part of a glacier where the mass gained from snowfall is greater than the ice lost [@wmo2026sogc].
-
-## Albedo
-
-The share of sunlight that a glacier surface reflects. Bare ice is darker than seasonal snow, so it reflects less and melts faster, and dust, soot, algae and fire fallout can darken it further [@wmo2026sogc].
-
-## Calving
-
-The breaking off of blocks of ice where a glacier ends in a lake or in the sea [@wmo2026sogc].
-
 ## Cascading event
 
 A disaster that develops through a chain or combination of linked processes, for example a landslide into a glacial lake that sets off an outburst flood [@hock2019srocc].
 
 ## Confidence
 
-In IPCC reports, confidence in a finding is expressed with five qualifiers: *very low*, *low*, *medium*, *high* and *very high* [@hock2019srocc]. Higher levels of evidence and agreement go with higher confidence, and confidence terms are set in italics [@hock2019srocc].
+IPCC reports state their confidence in a finding on a scale of five levels, from *very low* through *low*, *medium* and *high* to *very high* [@hock2019srocc]. More evidence and greater agreement go with higher confidence, and the terms appear in italics [@hock2019srocc].
 
-## Evidence and agreement
+## Evidence
 
-IPCC summary terms that describe the available evidence as *limited*, *medium* or *robust*, and the degree of agreement as *low*, *medium* or *high* [@hock2019srocc].
+An IPCC summary term that describes the available evidence as *limited*, *medium* or *robust* [@hock2019srocc].
 
 ## Geodetic method
 
@@ -41,17 +25,9 @@ The estimation of glacier mass change from repeated measurements of glacier surf
 
 A flood caused by the outburst of a glacial lake [@hock2019srocc]. SROCC discusses lakes dammed by moraines and by glacier ice, and outbursts set off by avalanches or landslides falling into a lake [@hock2019srocc]. Such floods can travel tens to hundreds of kilometres downstream [@hock2019srocc].
 
-## Glacier collapse
-
-A rare type of glacier instability in which a large section of a low-angle valley glacier fails completely, producing a fast avalanche of ice, rock and debris [@hock2019srocc].
-
 ## Glacier mass balance
 
 The mass that a glacier gains or loses over a period, usually a year [@wmo2026sogc]. It is commonly given as the change in thickness averaged over the glacier area, in metres water equivalent [@wmo2026sogc].
-
-## Glacier surge
-
-A substantial, roughly periodic increase in glacier flow speed lasting a few months to a few years, often with an advance of the glacier front [@hock2019srocc].
 
 ## Glaciological method
 
