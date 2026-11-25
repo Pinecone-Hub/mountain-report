@@ -1,0 +1,28 @@
+---
+import { languageConfig } from "../config/report";
+import { t } from "../i18n/index";
+
+interface Props {
+  lang: string;
+  title: string;
+}
+
+const { lang, title } = Astro.props;
+---
+
+<!doctype html>
+<html lang={lang} dir={languageConfig(lang).dir}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <slot name="head" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">{t(lang, "a11y.skip")}</a>
+    <p class="demo-banner" role="note">{t(lang, "banner.demo")}</p>
+    <main id="main">
+      <slot />
+    </main>
+  </body>
+</html>

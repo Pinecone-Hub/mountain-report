@@ -1,0 +1,13 @@
+name = "mountain-report-proxy"
+main = "src/index.ts"
+compatibility_date = "2026-09-01"
+
+routes = [
+  { pattern = "pinecone.lu/mountain-report*", zone_name = "pinecone.lu" }
+]
+
+[vars]
+# Adjust to the real Pages subdomain if the project name or subdomain differs.
+PAGES_ORIGIN = "https://mountain-report.pages.dev"
+# Must equal basePath in report.config.json (npm run check compares them).
+BASE_PATH = "/mountain-report"

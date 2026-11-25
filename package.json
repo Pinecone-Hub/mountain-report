@@ -1,0 +1,26 @@
+{
+  "name": "mountain-report",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.23.4"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro check && astro build && node -e \"const fs=require('fs');const b=require('./report.config.json').basePath;fs.copyFileSync('dist'+b+'/404.html','dist/404.html')\"",
+    "preview": "astro preview",
+    "test": "tsc -p worker/tsconfig.json && vitest run",
+    "check": "node --experimental-strip-types --disable-warning=ExperimentalWarning scripts/check.ts"
+  },
+  "devDependencies": {
+    "@astrojs/check": "0.9.12",
+    "@astrojs/sitemap": "3.7.6",
+    "astro": "7.4.13",
+    "typescript": "6.0.3",
+    "vitest": "5.1.1",
+    "wrangler": "4.168.0"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true
+  }
+}
