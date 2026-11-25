@@ -1,0 +1,60 @@
+---
+// Small scripts for every page. Without JavaScript: copy buttons stay hidden (the text is
+// selectable), open details stay open, and links to a closed FAQ answer still jump to its question.
+---
+
+<script>
+  // ----- Open the <details> around a link target (hash in the URL, or a clicked in-page link). -----
+  const openAround = (id: string): boolean => {
+    let target: HTMLElement | null = null;
+    try {
+      target = id === "" ? null : document.getElementById(decodeURIComponent(id));
+    } catch {
+      target = null;
+    }
+    let changed = false;
+    for (let el = target?.parentElement ?? null; el; el = el.parentElement) {
+      if (el instanceof HTMLDetailsElement && !el.open) {
+        el.open = true;
+        changed = true;
+      }
+    }
+    if (changed) target?.scrollIntoView();
+    return changed;
+  };
+
+  openAround(location.hash.slice(1));
+  window.addEventListener("hashchange", () => openAround(location.hash.slice(1)));
+  document.addEventListener("click", (event) => {
+    const link = (event.target as Element | null)?.closest<HTMLAnchorElement>("a[href*='#']");
+    if (!link || link.origin !== location.origin || link.pathname !== location.pathname) return;
+    openAround(link.hash.slice(1));
+  });
+
+  // ----- Copy buttons. -----
+  const buttons = document.querySelectorAll<HTMLButtonElement>("button[data-copy]");
+  buttons.forEach((b) => (b.hidden = false));
+  const timers = new WeakMap<Element, number>();
+
+  const copyText = async (text: string): Promise<boolean> => {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  document.addEventListener("click", async (event) => {
+    const button = (event.target as Element | null)?.closest<HTMLButtonElement>("button[data-copy]");
+    if (!button) return;
+    const from = button.dataset.copyFrom;
+    const text = button.dataset.copyValue ?? (from ? document.getElementById(from)?.textContent ?? "" : "");
+    const ok = await copyText(text);
+    const status = button.dataset.copyStatus ? document.getElementById(button.dataset.copyStatus) : null;
+    if (!status) return;
+    status.textContent = (ok ? status.dataset.done : status.dataset.failed) ?? "";
+    window.clearTimeout(timers.get(status));
+    timers.set(status, window.setTimeout(() => (status.textContent = ""), 4000));
+  });
+</script>

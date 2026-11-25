@@ -1,6 +1,7 @@
 // Accessibility tests: serves dist/ with a tiny static server, opens every HTML page in
 // Chromium (desktop and mobile viewport) and runs axe-core with the WCAG 2.2 AA tags.
-// Also checks that the first Tab press focuses the skip link.
+// Also checks that the first Tab press focuses the skip link, and keyboard use of calibrated-term
+// tooltips (Tab shows, Esc hides) and of citations (link to the reference and back).
 // Usage: npm run test:a11y   (run `npm run build` first). Exit code 1 on any violation.
 
 import { createServer } from "node:http";
@@ -123,6 +124,15 @@ try {
           process.stdout.write(`FAIL [skip-link] first Tab does not focus the skip link (got href "${first.href}") (${where})\n`);
         }
 
+        // No sideways scrolling at the mobile width (WCAG 1.4.10 reflow).
+        if (viewport.width < 600) {
+          const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+          if (overflow > 0) {
+            failures++;
+            process.stdout.write(`FAIL [reflow] page is ${overflow}px wider than the viewport (${where})\n`);
+          }
+        }
+
         const results = await new AxeBuilder({ page }).withTags(TAGS).analyze();
         for (const violation of results.violations) {
           for (const node of violation.nodes) {
@@ -138,6 +148,193 @@ try {
       }
     }
     await context.close();
+  }
+
+  // Keyboard checks on a chapter page. Reduced motion keeps hash navigation immediate.
+  const keyboard = await browser.newContext({
+    viewport: { width: 1280, height: 800 },
+    reducedMotion: "reduce",
+    permissions: ["clipboard-read", "clipboard-write"],
+  });
+  const fail = (rule: string, message: string) => {
+    failures++;
+    process.stdout.write(`FAIL [${rule}] ${message}\n`);
+  };
+  try {
+    const kb = await keyboard.newPage();
+    const chapter = `${origin}${BASE}en/chapter-1/`;
+    await kb.goto(chapter, { waitUntil: "load" });
+    await kb.mouse.move(0, 0);
+
+    /** Presses Tab until the focused element matches the selector (at most 200 times). */
+    const tabTo = async (selector: string): Promise<boolean> => {
+      for (let i = 0; i < 200; i++) {
+        await kb.keyboard.press("Tab");
+        if (await kb.evaluate((sel) => document.activeElement?.matches(sel) ?? false, selector)) return true;
+      }
+      return false;
+    };
+
+    // Calibrated term: Tab shows the tooltip, Esc hides it, focus stays on the term.
+    if (!(await tabTo("a.calibrated-term"))) {
+      fail("tooltip", "Tab never reached a calibrated term on the chapter page");
+    } else {
+      const tipId = await kb.evaluate(() => document.activeElement?.getAttribute("aria-describedby") ?? "");
+      const tip = kb.locator(`[id="${tipId}"]`);
+      if (tipId === "" || (await tip.getAttribute("role")) !== "tooltip") fail("tooltip", "calibrated term has no aria-describedby tooltip");
+      else if (!(await tip.isVisible())) fail("tooltip", "tooltip is not visible when the term has keyboard focus");
+      else {
+        await kb.keyboard.press("Escape");
+        if (await tip.isVisible()) fail("tooltip", "Esc does not hide the tooltip");
+        const stillFocused = await kb.evaluate(() => document.activeElement?.classList.contains("calibrated-term") ?? false);
+        if (!stillFocused) fail("tooltip", "focus left the term after Esc");
+      }
+    }
+
+    // Citation: Enter moves to the reference, the back-link returns to the citation.
+    await kb.goto(chapter, { waitUntil: "load" });
+    if (!(await tabTo("a.cite-link"))) {
+      fail("citation", "Tab never reached a citation link on the chapter page");
+    } else {
+      const cite = await kb.evaluate(() => {
+        const a = document.activeElement as HTMLAnchorElement;
+        return { id: a.id, target: a.getAttribute("href") ?? "" };
+      });
+      await kb.keyboard.press("Enter");
+      const hash = await kb.evaluate(() => location.hash);
+      if (hash !== cite.target) fail("citation", `citation link went to "${hash}", expected "${cite.target}"`);
+      const entry = kb.locator(cite.target);
+      const inView = (selector: string) =>
+        kb.evaluate((sel) => {
+          const r = document.querySelector(sel)?.getBoundingClientRect();
+          return !!r && r.bottom > 0 && r.top < window.innerHeight;
+        }, selector);
+      if (!(await entry.isVisible()) || !(await inView(cite.target))) fail("citation", "reference entry is not in view after following the citation");
+      const back = kb.locator(`${cite.target} .reference-back a[href="#${cite.id}"]`);
+      if ((await back.count()) !== 1) {
+        fail("citation", `reference ${cite.target} has no back-link to #${cite.id}`);
+      } else {
+        await back.focus();
+        await kb.keyboard.press("Enter");
+        const returned = await kb.evaluate(() => location.hash);
+        if (returned !== `#${cite.id}`) fail("citation", `back-link went to "${returned}", expected "#${cite.id}"`);
+        else if (!(await inView(`[id="${cite.id}"]`))) fail("citation", "citation is not in view after the back-link");
+      }
+    }
+
+    // Copy buttons: reachable by Tab, labelled, and a press confirms in the live region.
+    await kb.goto(chapter, { waitUntil: "load" });
+    const copyButtons = await kb.locator("button[data-copy]").evaluateAll((els) =>
+      els.map((el) => ({ name: el.getAttribute("aria-label") ?? "", text: el.textContent?.trim() ?? "", visible: !(el as HTMLElement).hidden })),
+    );
+    if (copyButtons.length < 3) fail("copy", `expected at least 3 copy buttons on the chapter page, found ${copyButtons.length}`);
+    for (const b of copyButtons) {
+      if (b.name === "" || b.text === "" || !b.visible) fail("copy", `copy button without accessible name, visible text or visibility: ${JSON.stringify(b)}`);
+      else if (!b.name.toLowerCase().includes(b.text.toLowerCase())) fail("copy", `accessible name "${b.name}" does not contain the visible text "${b.text}"`);
+    }
+    if (!(await tabTo("button[data-copy]"))) {
+      fail("copy", "Tab never reached a copy button");
+    } else {
+      await kb.keyboard.press("Enter");
+      try {
+        await kb.waitForFunction(() => (document.querySelector("#cite-status")?.textContent ?? "") !== "", undefined, { timeout: 3000 });
+      } catch {
+        fail("copy", "pressing a copy button gave no confirmation in the live region");
+      }
+      const role = await kb.locator("#cite-status").getAttribute("role");
+      if (role !== "status") fail("copy", "the copy confirmation is not in a role=status live region");
+    }
+
+    // Previous and next links: Summary has only Next, a middle chapter both, the last chapter only Previous.
+    for (const [path, expected] of [
+      ["summary", ["next"]],
+      ["chapter-2", ["prev", "next"]],
+      ["chapter-3", ["prev"]],
+    ] as const) {
+      await kb.goto(`${origin}${BASE}en/${path}/`, { waitUntil: "load" });
+      const rels = await kb.locator("nav.page-nav[aria-label] a[href]").evaluateAll((els) => els.map((el) => el.getAttribute("rel") ?? ""));
+      if (rels.join(",") !== expected.join(",")) fail("pagenav", `${path}: expected links ${expected.join("+")}, found ${rels.join("+") || "none"}`);
+    }
+
+    // FAQ accordion: Enter opens, Space closes; a link into a closed answer opens it.
+    const faq = `${origin}${BASE}en/faq/`;
+    await kb.goto(faq, { waitUntil: "load" });
+    if (!(await tabTo("details.faq-item > summary"))) {
+      fail("faq", "Tab never reached a question");
+    } else {
+      const isOpen = () => kb.evaluate(() => (document.activeElement?.parentElement as HTMLDetailsElement | null)?.open ?? false);
+      await kb.keyboard.press("Enter");
+      if (!(await isOpen())) fail("faq", "Enter does not open the question");
+      await kb.keyboard.press("Space");
+      if (await isOpen()) fail("faq", "Space does not close the question");
+    }
+    await kb.goto(`${faq}#cite-1-1`, { waitUntil: "load" });
+    const opened = await kb.evaluate(() => document.getElementById("cite-1-1")?.closest("details")?.open ?? false);
+    if (!opened) fail("faq", "a hash that targets a citation inside a closed answer does not open it");
+
+    checked++;
+  } catch (error) {
+    fail("keyboard", (error as Error).message.split("\n")[0]);
+  } finally {
+    await keyboard.close();
+  }
+
+  // Narrow screen: an open tooltip stays inside the viewport.
+  const narrow = await browser.newContext({ viewport: { width: 390, height: 844 }, reducedMotion: "reduce" });
+  try {
+    const np = await narrow.newPage();
+    await np.goto(`${origin}${BASE}en/chapter-1/`, { waitUntil: "load" });
+    const terms = np.locator("a.calibrated-term");
+    const count = await terms.count();
+    if (count === 0) failures++, process.stdout.write("FAIL [tooltip] no calibrated terms on the chapter page at 390px\n");
+    for (let i = 0; i < count; i++) {
+      await terms.nth(i).focus();
+      const box = await np.evaluate(() => {
+        const tip = document.querySelector<HTMLElement>(".calibrated:focus-within .calibrated-tip");
+        const r = tip?.getBoundingClientRect();
+        return r ? { left: r.left, right: r.right, width: document.documentElement.clientWidth } : undefined;
+      });
+      if (!box || box.left < -0.5 || box.right > box.width + 0.5) {
+        failures++;
+        process.stdout.write(`FAIL [tooltip] tooltip ${i + 1} leaves the 390px viewport (${JSON.stringify(box)})\n`);
+      }
+    }
+    checked++;
+  } catch (error) {
+    failures++;
+    process.stdout.write(`FAIL [tooltip] ${(error as Error).message.split("\n")[0]}\n`);
+  } finally {
+    await narrow.close();
+  }
+
+  // Landing on #notes: the Notes heading is at the top of the screen (mobile) and the table of
+  // contents marks it (desktop). Default motion settings, so smooth scrolling would be caught.
+  for (const [name, size] of [["mobile", { width: 390, height: 844 }], ["desktop", { width: 1280, height: 800 }]] as const) {
+    const ctx = await browser.newContext({ viewport: size });
+    try {
+      const np = await ctx.newPage();
+      await np.goto(`${origin}${BASE}en/chapter-1/#notes`, { waitUntil: "load" });
+      await np.evaluate(() => document.fonts.ready);
+      await np.waitForTimeout(600);
+      const top = await np.evaluate(() => document.getElementById("notes")?.getBoundingClientRect().top ?? -1);
+      if (top < 0 || top > size.height / 2) {
+        failures++;
+        process.stdout.write(`FAIL [hash-scroll] ${name}: the Notes heading is at ${Math.round(top)}px after loading #notes, expected near the top\n`);
+      }
+      if (name === "desktop") {
+        const current = await np.evaluate(() => document.querySelector("details[data-toc] a[aria-current]")?.getAttribute("href") ?? "");
+        if (current !== "#notes") {
+          failures++;
+          process.stdout.write(`FAIL [toc] the table of contents marks "${current}" at #notes, expected "#notes"\n`);
+        }
+      }
+      checked++;
+    } catch (error) {
+      failures++;
+      process.stdout.write(`FAIL [hash-scroll] ${(error as Error).message.split("\n")[0]}\n`);
+    } finally {
+      await ctx.close();
+    }
   }
 } finally {
   await browser.close();

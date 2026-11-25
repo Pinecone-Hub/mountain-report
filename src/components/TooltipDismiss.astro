@@ -1,0 +1,40 @@
+---
+// Esc closes an open calibrated-term tooltip (WCAG 1.4.13). Without JavaScript the tooltip
+// still opens on hover and focus through CSS, and the term stays a plain glossary link.
+---
+
+<script>
+  const SELECTOR = ".calibrated";
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape") return;
+    document.querySelectorAll<HTMLElement>(`${SELECTOR}:hover, ${SELECTOR}:focus-within`).forEach((el) => {
+      el.setAttribute("data-dismissed", "");
+    });
+  });
+
+  const reopen = (event: Event, related: EventTarget | null) => {
+    const wrapper = (event.target as Element | null)?.closest<HTMLElement>(SELECTOR);
+    if (!wrapper || (related instanceof Node && wrapper.contains(related))) return;
+    wrapper.removeAttribute("data-dismissed");
+  };
+  // Keep an open tooltip inside the viewport: shift it sideways when it would overflow.
+  const MARGIN = 8;
+  const fit = (event: Event) => {
+    const wrapper = (event.target as Element | null)?.closest<HTMLElement>(SELECTOR);
+    const tip = wrapper?.querySelector<HTMLElement>(".calibrated-tip");
+    if (!tip) return;
+    tip.style.translate = "";
+    const rect = tip.getBoundingClientRect();
+    const width = document.documentElement.clientWidth;
+    let shift = 0;
+    if (rect.right > width - MARGIN) shift = width - MARGIN - rect.right;
+    if (rect.left + shift < MARGIN) shift = MARGIN - rect.left;
+    if (shift !== 0) tip.style.translate = `${shift}px 0`;
+  };
+  document.addEventListener("focusin", fit);
+  document.addEventListener("mouseover", fit);
+
+  document.addEventListener("focusout", (event) => reopen(event, event.relatedTarget));
+  document.addEventListener("mouseout", (event) => reopen(event, event.relatedTarget));
+</script>

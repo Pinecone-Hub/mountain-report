@@ -22,6 +22,19 @@ export interface ChapterConfig {
 /** Route names used by the fixed pages. A chapter id must not collide with them. */
 export const RESERVED_ROUTES: readonly string[] = ["summary", "figures", "downloads", "faq", "glossary", "about", "accessibility", "search", "admin", "admin-demo", "api", "pagefind", "_astro"];
 
+/** How to cite the report: author names as they appear in a reference ("Butuc, D."), publisher, year. */
+export interface CitationConfig {
+  authors: string[];
+  publisher: string;
+  year: number;
+}
+
+/** A person listed in the Authors box. */
+export interface AuthorConfig {
+  name: string;
+  affiliation: string;
+}
+
 export interface ReportConfig {
   id: string;
   site: string;
@@ -31,6 +44,8 @@ export interface ReportConfig {
   accentColour: string;
   languages: LanguageConfig[];
   chapters: ChapterConfig[];
+  citation: CitationConfig;
+  authors: AuthorConfig[];
 }
 
 const isRecord = (v: unknown): v is Record<string, unknown> => v !== null && typeof v === "object" && !Array.isArray(v);
@@ -172,6 +187,34 @@ export function validateReportConfig(raw: unknown, knownLanguageCodes: readonly 
     });
   }
 
+  // Citation block
+  const citation: CitationConfig = { authors: [], publisher: "", year: 0 };
+  if (!isRecord(raw.citation)) {
+    problems.push('"citation" must be an object with "authors", "publisher" and "year"');
+  } else {
+    const c = raw.citation;
+    if (!Array.isArray(c.authors) || c.authors.length === 0 || !c.authors.every(isNonEmptyString)) {
+      problems.push('"citation.authors" must be a non-empty array of non-empty strings');
+    } else citation.authors = c.authors as string[];
+    if (!isNonEmptyString(c.publisher)) problems.push('"citation.publisher" is missing or empty');
+    else citation.publisher = c.publisher;
+    if (typeof c.year !== "number" || !Number.isInteger(c.year) || c.year < 1000 || c.year > 9999) {
+      problems.push('"citation.year" must be a four-digit year');
+    } else citation.year = c.year;
+  }
+
+  // Authors box
+  const authors: AuthorConfig[] = [];
+  if (!Array.isArray(raw.authors) || raw.authors.length === 0) {
+    problems.push('"authors" must be a non-empty array');
+  } else {
+    raw.authors.forEach((item, i) => {
+      if (!isRecord(item) || !isNonEmptyString(item.name) || !isNonEmptyString(item.affiliation)) {
+        problems.push(`authors[${i}] needs a non-empty "name" and "affiliation"`);
+      } else authors.push({ name: item.name, affiliation: item.affiliation });
+    });
+  }
+
   if (problems.length > 0) {
     throw new Error(`Invalid report.config.json:\n- ${problems.join("\n- ")}`);
   }
@@ -185,5 +228,7 @@ export function validateReportConfig(raw: unknown, knownLanguageCodes: readonly 
     accentColour: raw.accentColour as string,
     languages,
     chapters,
+    citation,
+    authors,
   };
 }

@@ -1,9 +1,10 @@
 ---
+import { getCollection, render } from "astro:content";
 import Base from "../../layouts/Base.astro";
 import Contours from "../../components/Contours.astro";
 import { chapterTitle } from "../../config/pages";
 import { fullLanguages, report, reportTitle } from "../../config/report";
-import { t, tf, type TranslationKey } from "../../i18n/index";
+import { t, tf } from "../../i18n/index";
 import { pageUrl } from "../../lib/urls";
 
 export function getStaticPaths() {
@@ -12,7 +13,9 @@ export function getStaticPaths() {
 
 const { lang } = Astro.params;
 
-const keyMessages: TranslationKey[] = ["home.keyMessages.1", "home.keyMessages.2", "home.keyMessages.3"];
+// Key messages and their references come from the Home entry of the language, when it exists.
+const [entry] = await getCollection("home", ({ id }) => id === `${lang}/home`);
+const Content = entry ? (await render(entry)).Content : undefined;
 
 interface Tile {
   href: string;
@@ -45,13 +48,6 @@ const tiles: Tile[] = [
     <div class="hero-art"><Contours /></div>
   </section>
 
-  <section aria-labelledby="key-messages">
-    <h2 id="key-messages">{t(lang, "home.keyMessages.title")}</h2>
-    <ol class="messages">
-      {keyMessages.map((key) => <li>{t(lang, key)}</li>)}
-    </ol>
-  </section>
-
   <section aria-labelledby="explore">
     <h2 id="explore">{t(lang, "home.explore.title")}</h2>
     <ul class="tiles">
@@ -67,6 +63,15 @@ const tiles: Tile[] = [
       }
     </ul>
   </section>
+
+  {
+    Content && (
+      <section aria-labelledby="key-messages" class="key-messages">
+        <h2 id="key-messages">{t(lang, "home.keyMessages.title")}</h2>
+        <Content />
+      </section>
+    )
+  }
 </Base>
 
 <style>
@@ -128,11 +133,11 @@ const tiles: Tile[] = [
     text-decoration: underline;
   }
 
-  .messages {
+  .key-messages > :global(ol) {
     padding-inline-start: var(--space-5);
   }
 
-  .messages li {
+  .key-messages > :global(ol > li) {
     margin-block-end: var(--space-2);
   }
 

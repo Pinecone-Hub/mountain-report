@@ -1,0 +1,216 @@
+/* Styles for markup produced by the content plugins (src/plugins/): cross-references,
+   citations, references, notes and calibrated terms. Logical properties only. */
+
+.xref,
+.cite-link {
+  white-space: nowrap;
+}
+
+.cite {
+  font-size: var(--text-sm);
+}
+
+/* ----- References and Notes ----- */
+
+.references,
+section[data-footnotes] {
+  margin-block-start: var(--space-7);
+  padding-block-start: var(--space-4);
+  border-block-start: var(--border-width) solid var(--border);
+}
+
+.references ol,
+section[data-footnotes] ol {
+  padding-inline-start: var(--space-5);
+  font-size: var(--text-sm);
+}
+
+.references li,
+section[data-footnotes] li {
+  margin-block-end: var(--space-2);
+}
+
+.reference-link {
+  overflow-wrap: anywhere;
+}
+
+.back-start {
+  white-space: nowrap;
+}
+
+/* Back-links read like text. The 24px touch target is an invisible area around each link,
+   not a box (WCAG 2.5.8). */
+.reference-back a,
+.data-footnote-backref {
+  position: relative;
+  white-space: nowrap;
+}
+
+.reference-back a::after,
+.data-footnote-backref::after {
+  content: "";
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: 50%;
+  inline-size: 1.5rem;
+  block-size: 1.5rem;
+  margin-block-start: -0.75rem;
+  margin-inline-start: -0.75rem;
+}
+
+.reference-list > li:target,
+section[data-footnotes] li:target {
+  background: var(--surface);
+}
+
+/* ----- Calibrated terms and their tooltip ----- */
+
+.calibrated {
+  position: relative;
+}
+
+.calibrated-term {
+  color: var(--text);
+  text-decoration: underline dotted;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.25em;
+}
+
+.calibrated-tip {
+  display: none;
+  position: absolute;
+  inset-block-start: 100%;
+  inset-inline-start: 0;
+  z-index: 10;
+  inline-size: max-content;
+  max-inline-size: min(22rem, 80vw);
+  padding: var(--space-2) var(--space-3);
+  border: var(--border-width) solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--bg);
+  color: var(--text);
+  font-size: var(--text-sm);
+  font-style: normal;
+  font-weight: var(--font-weight-regular);
+  line-height: var(--leading-body);
+  text-align: start;
+  white-space: normal;
+}
+
+.calibrated:hover .calibrated-tip,
+.calibrated:focus-within .calibrated-tip {
+  display: block;
+}
+
+/* Esc dismisses the tooltip until the pointer or focus leaves the term (WCAG 1.4.13). */
+.calibrated[data-dismissed] .calibrated-tip {
+  display: none;
+}
+
+.calibrated-tip-label {
+  display: block;
+  font-weight: var(--font-weight-strong);
+}
+
+/* ----- Summary sub-points, FAQ accordion, glossary ----- */
+
+details.subpoints {
+  margin-block: var(--space-3) var(--space-5);
+  padding-inline-start: var(--space-3);
+  border-inline-start: 3px solid var(--border);
+}
+
+details.subpoints > summary {
+  font-weight: var(--font-weight-strong);
+  cursor: pointer;
+}
+
+details.faq-item {
+  margin-block-end: var(--space-2);
+  border-block-end: var(--border-width) solid var(--border);
+}
+
+details.faq-item > summary {
+  padding-block: var(--space-3);
+  cursor: pointer;
+}
+
+/* The question heading sits inside the summary so heading navigation still lists it. */
+details.faq-item > summary > h2 {
+  display: inline;
+  margin: 0;
+  font-size: var(--text-lg);
+}
+
+details.faq-item[open] > summary {
+  padding-block-end: var(--space-2);
+}
+
+.glossary-index {
+  margin-block-end: var(--space-6);
+}
+
+.glossary-index ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  max-inline-size: none;
+}
+
+.index-label {
+  margin-block-end: var(--space-2);
+  font-weight: var(--font-weight-strong);
+}
+
+.back-to-top {
+  font-size: var(--text-sm);
+}
+
+/* ----- Copy buttons ----- */
+
+button[data-copy] {
+  padding: var(--space-1) var(--space-4);
+  border: var(--border-width) solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+
+button[data-copy]:hover {
+  background: var(--surface);
+}
+
+button[data-copy][hidden] {
+  display: none;
+}
+
+.copy-status {
+  min-block-size: 1.5em;
+  margin-block: var(--space-2) 0;
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-strong);
+}
+
+/* ----- Figure placeholder ----- */
+
+.figure-placeholder {
+  margin-block: var(--space-5);
+  padding: var(--space-4);
+  border: var(--border-width) dashed var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.figure-placeholder p {
+  margin-block: 0;
+}
+
+.figure-placeholder-label {
+  font-weight: var(--font-weight-strong);
+}

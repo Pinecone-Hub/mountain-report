@@ -1,0 +1,87 @@
+---
+import { report, reportTitle } from "../config/report";
+import { t } from "../i18n/index";
+import { absoluteUrl, buildCitation } from "../lib/citation";
+import { reportPageTitle } from "../lib/page-titles";
+
+interface Props {
+  lang: string;
+  /** Route of the page ("summary", a chapter id), or "" to cite the whole report. */
+  slug: string;
+}
+
+const { lang, slug } = Astro.props;
+const citation = buildCitation(
+  {
+    authors: report.citation.authors,
+    publisher: report.citation.publisher,
+    year: report.citation.year,
+    reportId: report.id,
+    reportTitle: reportTitle(lang),
+  },
+  {
+    slug,
+    title: slug === "" ? reportTitle(lang) : reportPageTitle(lang, slug),
+    url: absoluteUrl(report.site, report.basePath, lang, slug),
+  },
+  { part: t(lang, "cite.box.template.part"), whole: t(lang, "cite.box.template.whole") },
+);
+---
+
+<section class="cite-box" aria-labelledby="how-to-cite">
+  <h2 id="how-to-cite">{t(lang, "cite.box.title")}</h2>
+  <div class="cite-item">
+    <h3>{t(lang, "cite.box.text")}</h3>
+    <p class="cite-text" id="cite-plain">{citation.text}</p>
+    <button type="button" hidden data-copy data-copy-from="cite-plain" data-copy-status="cite-status" aria-label={t(lang, "copy.text.label")}>
+      {t(lang, "copy.button")}
+    </button>
+  </div>
+  <div class="cite-item">
+    <h3>{t(lang, "cite.box.bibtex")}</h3>
+    <pre class="cite-text" id="cite-bibtex">{citation.bibtex}</pre>
+    <button type="button" hidden data-copy data-copy-from="cite-bibtex" data-copy-status="cite-status" aria-label={t(lang, "copy.bibtex.label")}>
+      {t(lang, "copy.button")}
+    </button>
+  </div>
+  <p id="cite-status" class="copy-status" role="status" data-done={t(lang, "copy.done")} data-failed={t(lang, "copy.failed")}></p>
+  <p class="cite-note">{t(lang, "cite.box.demo")}</p>
+</section>
+
+<style>
+  .cite-box {
+    margin-block-start: var(--space-7);
+    padding: var(--space-4);
+    border: var(--border-width) solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+
+  .cite-box h2 {
+    margin-block-start: 0;
+    font-size: var(--text-lg);
+  }
+
+  .cite-box h3 {
+    margin-block: var(--space-3) var(--space-1);
+    font-size: var(--text-base);
+  }
+
+  .cite-text {
+    margin-block: 0 var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    border: var(--border-width) solid var(--border);
+    background: var(--bg);
+    font-size: var(--text-sm);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    max-inline-size: none;
+    font-family: var(--font-body);
+  }
+
+  .cite-note {
+    margin-block: var(--space-2) 0;
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+  }
+</style>

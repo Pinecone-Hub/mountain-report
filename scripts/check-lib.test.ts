@@ -5,6 +5,7 @@ import {
   CONTRAST_PAIRS,
   extractStyleBlocks,
   findPhysicalCssProperties,
+  findSuspectEmphasis,
   parseCssHexVariables,
   compareTranslations,
   compareWrangler,
@@ -398,5 +399,26 @@ describe("extractStyleBlocks", () => {
   });
   it("returns nothing without a style block", () => {
     expect(extractStyleBlocks("<p>x</p>")).toEqual([]);
+  });
+});
+
+describe("findSuspectEmphasis", () => {
+  it("accepts exact terms and unrelated italics", () => {
+    expect(findSuspectEmphasis("It is *very likely* and *high confidence*, a *glacier*.", "en")).toEqual([]);
+    expect(findSuspectEmphasis("*medium evidence, high agreement*", "en")).toEqual([]);
+  });
+
+  it("warns for italics that only look like a term", () => {
+    const hits = findSuspectEmphasis("It is *very likley* and *highly likely* or *confidence*.", "en");
+    expect(hits.map((h) => h.text)).toEqual(["highly likely", "confidence"]);
+  });
+
+  it("ignores bold, code and fences", () => {
+    expect(findSuspectEmphasis("**likely** and `*likely stuff*`\n```\n*likely stuff*\n```\n", "en")).toEqual([]);
+  });
+
+  it("skips languages without a term list and empty input", () => {
+    expect(findSuspectEmphasis("*très probable*, *likely stuff*", "fr")).toEqual([]);
+    expect(findSuspectEmphasis("", "en")).toEqual([]);
   });
 });

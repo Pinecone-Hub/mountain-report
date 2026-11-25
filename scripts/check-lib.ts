@@ -2,6 +2,7 @@
 // unit-tested with plain vitest. Node strip-types friendly: no enums, no
 // parameter properties.
 
+import { CALIBRATED_WORD_PATTERN, classifyTerm, hasTermList } from "../src/lib/calibrated-terms.ts";
 import { CONTRAST_LARGE_OR_UI, CONTRAST_TEXT, contrastRatio } from "../src/lib/contrast.ts";
 
 export type Attrs = Record<string, string>;
@@ -207,6 +208,32 @@ export function isUrlAllowed(url: string, options: UrlOptions): boolean {
   if (options.referenceHosts.has(host)) return true;
   if (options.isAdmin && ADMIN_HOSTS.some((d) => hostMatches(host, d))) return true;
   return false;
+}
+
+// ---------- calibrated language ----------
+
+export interface SuspectEmphasis {
+  text: string;
+  index: number;
+}
+
+/**
+ * Italic text that looks like calibrated IPCC language (it contains "confidence", "likely",
+ * "evidence" or "agreement") but is not exactly a term on the list, so it gets no tooltip.
+ * Languages without a term list, code fences and inline code are skipped.
+ */
+export function findSuspectEmphasis(markdown: string, lang: string): SuspectEmphasis[] {
+  if (!hasTermList(lang)) return [];
+  const blank = (m: string) => m.replace(/[^\n]/g, " ");
+  const text = markdown.replace(/```[\s\S]*?```/g, blank).replace(/`[^`\n]*`/g, blank);
+  const out: SuspectEmphasis[] = [];
+  for (const m of text.matchAll(/(?<![*\w])\*(?!\*)([^*\n]+?)\*(?!\*)/g)) {
+    const inner = m[1];
+    if (CALIBRATED_WORD_PATTERN.test(inner) && classifyTerm(inner, lang) === undefined) {
+      out.push({ text: inner, index: m.index ?? 0 });
+    }
+  }
+  return out;
 }
 
 // ---------- references and citations ----------

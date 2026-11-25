@@ -1,0 +1,67 @@
+---
+import { report } from "../config/report";
+import { tf, t } from "../i18n/index";
+import { neighbours, pageSequence } from "../lib/pagenav";
+import { reportPageTitle } from "../lib/page-titles";
+import { pageUrl } from "../lib/urls";
+
+interface Props {
+  lang: string;
+  /** Route of the current page ("summary" or a chapter id). */
+  slug: string;
+}
+
+const { lang, slug } = Astro.props;
+const { previous, next } = neighbours(pageSequence(report.chapters.map((c) => c.id)), slug);
+---
+
+{
+  (previous || next) && (
+    <nav class="page-nav" aria-label={t(lang, "pagenav.label")}>
+      {previous && (
+        <a class="prev" rel="prev" href={pageUrl(lang, previous)}>
+          {tf(lang, "pagenav.previous", { title: reportPageTitle(lang, previous) })}
+        </a>
+      )}
+      {next && (
+        <a class="next" rel="next" href={pageUrl(lang, next)}>
+          {tf(lang, "pagenav.next", { title: reportPageTitle(lang, next) })}
+        </a>
+      )}
+    </nav>
+  )
+}
+
+<style>
+  .page-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    justify-content: space-between;
+    margin-block-start: var(--space-7);
+    padding-block-start: var(--space-4);
+    border-block-start: var(--border-width) solid var(--border);
+  }
+
+  .page-nav a {
+    flex: 1 1 14rem;
+    padding: var(--space-3) var(--space-4);
+    border: var(--border-width) solid var(--border-strong);
+    border-radius: var(--radius);
+    font-weight: var(--font-weight-strong);
+    text-decoration: none;
+  }
+
+  .page-nav a:hover {
+    background: var(--surface);
+    text-decoration: underline;
+  }
+
+  .next {
+    text-align: end;
+  }
+
+  .prev:only-child {
+    flex-grow: 0;
+  }
+</style>
