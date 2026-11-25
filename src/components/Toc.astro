@@ -47,13 +47,28 @@ const { lang, headings } = Astro.props;
 
     const update = () => {
       const tops = targets.map((el) => (el ? el.getBoundingClientRect().top : Number.POSITIVE_INFINITY));
-      const active = pickActiveIndex(tops, window.innerHeight * 0.25);
+      const atBottom = window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 2;
+      const hashTarget = decodeURIComponent(location.hash.slice(1));
+      const preferred = targets.findIndex((el) => el !== null && el.id === hashTarget);
+      const active = pickActiveIndex(tops, window.innerHeight * 0.25, { atBottom, preferred, viewportHeight: window.innerHeight });
       links.forEach((link, i) => {
         if (i === active) link.setAttribute("aria-current", "true");
         else link.removeAttribute("aria-current");
       });
     };
     update();
+
+    let pending = false;
+    const onScroll = () => {
+      if (pending) return;
+      pending = true;
+      requestAnimationFrame(() => {
+        pending = false;
+        update();
+      });
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("hashchange", update);
 
     const observer = new IntersectionObserver(update, { rootMargin: "0px 0px -70% 0px", threshold: [0, 1] });
     targets.forEach((el) => el && observer.observe(el));

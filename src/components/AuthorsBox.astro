@@ -1,0 +1,28 @@
+---
+import { report } from "../config/report";
+import { t, tf } from "../i18n/index";
+
+interface Props {
+  lang: string;
+}
+
+const { lang } = Astro.props;
+---
+
+<details class="authors-box">
+  <summary>{t(lang, "authors.title")}</summary>
+  <ul>
+    {report.authors.map((a) => <li>{tf(lang, "authors.entry", { name: a.name, affiliation: a.affiliation })}</li>)}
+  </ul>
+</details>
+
+<style>
+  .authors-box {
+    margin-block-start: var(--space-5);
+  }
+
+  summary {
+    font-weight: var(--font-weight-strong);
+    cursor: pointer;
+  }
+</style>

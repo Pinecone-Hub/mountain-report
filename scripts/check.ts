@@ -20,6 +20,7 @@ import {
   findHardcodedText,
   findImgsWithoutAlt,
   findMarker,
+  findSuspectEmphasis,
   indexReferences,
   isUrlAllowed,
   lineAt,
@@ -194,6 +195,16 @@ for (const file of srcFiles.filter((f) => rel(f).startsWith("src/content/") && f
       const index = text.indexOf(`@${key}`);
       report("FAIL", "citations", `unknown reference key "${key}"`, at(file, text, Math.max(0, index)));
     }
+  }
+}
+
+// ---------- g2. calibrated language: italics that nearly match a term ----------
+
+for (const file of srcFiles.filter((f) => /^src\/content\/[a-z]{2,3}\/.*\.md$/.test(rel(f)))) {
+  const lang = rel(file).split("/")[2];
+  const text = read(file);
+  for (const hit of findSuspectEmphasis(text, lang)) {
+    report("WARN", "calibrated", `italic text ${JSON.stringify(hit.text)} looks like calibrated language but is not on the list`, at(file, text, hit.index));
   }
 }
 

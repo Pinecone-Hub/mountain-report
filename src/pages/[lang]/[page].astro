@@ -1,11 +1,14 @@
 ---
+import type { MarkdownHeading } from "astro";
+import { getCollection, render } from "astro:content";
 import Base from "../../layouts/Base.astro";
 import ReportLayout from "../../layouts/ReportLayout.astro";
 import { allPageSlugs, chapterTitle, fixedPage } from "../../config/pages";
-import { fullLanguages, report } from "../../config/report";
+import { defaultLanguage, fullLanguages, report } from "../../config/report";
 import { t, tf } from "../../i18n/index";
 import type { Crumb, TocHeading } from "../../lib/nav";
 import { pageUrl } from "../../lib/urls";
+import { GLOSSARY_INDEX_ID } from "../../plugins/structure";
 
 export function getStaticPaths() {
   return fullLanguages.flatMap((language) =>
@@ -18,43 +21,83 @@ const chapter = report.chapters.find((c) => c.id === page);
 const fixed = fixedPage(page);
 if (!chapter && !fixed) throw new Error(`No page definition for route "${page}"`);
 
-const title = chapter ? chapterTitle(chapter, lang) : t(lang, fixed!.titleKey);
-const eyebrow = chapter ? tf(lang, "chapter.label", { number: chapter.number }) : undefined;
-const breadcrumbs: Crumb[] = [
-  { label: t(lang, "breadcrumb.home"), href: pageUrl(lang) },
-  { label: eyebrow ? `${eyebrow}: ${title}` : title },
-];
+// The collection entry for this page and language, when the content exists.
+async function findEntry(language: string) {
+  // getCollection with a filter: a language without content gives no entry and no warning.
+  const first = <T,>(entries: T[]): T | undefined => entries[0];
+  if (chapter) return first(await getCollection("chapters", ({ id }) => id === `${language}/chapters/${page}`));
+  const id = `${language}/${page}`;
+  if (page === "summary") return first(await getCollection("summary", (e) => e.id === id));
+  if (page === "faq") return first(await getCollection("faq", (e) => e.id === id));
+  if (page === "glossary") return first(await getCollection("glossary", (e) => e.id === id));
+  if (page === "about") return first(await getCollection("about", (e) => e.id === id));
+  return undefined;
+}
 
-// Summary and chapters use the report layout with placeholder sections until stage 2.
-const isReportPage = page === "summary" || chapter !== undefined;
-const sections = [1, 2, 3].map((number) => ({
-  id: `placeholder-section-${number}`,
-  title: tf(lang, "placeholder.section", { number }),
-}));
-const headings: TocHeading[] = sections.map((s) => ({ depth: 2, id: s.id, text: s.title }));
+const entry = await findEntry(lang);
+const rendered = entry ? await render(entry) : undefined;
+const Content = rendered?.Content;
+
+const fallbackTitle = chapter
+  ? tf(lang, "chapter.heading", { number: chapter.number, title: chapterTitle(chapter, lang) })
+  : t(lang, fixed!.titleKey);
+const title = chapter && entry
+  ? tf(lang, "chapter.heading", { number: chapter.number, title: entry.data.title })
+  : entry
+    ? entry.data.title
+    : fallbackTitle;
+const breadcrumbs: Crumb[] = [{ label: t(lang, "breadcrumb.home"), href: pageUrl(lang) }, { label: title }];
+
+const renderedHeadings: MarkdownHeading[] = rendered?.headings ?? [];
+const headings: TocHeading[] = renderedHeadings
+  // The Summary lists only its headline sections (h2), not the A.1 ... C.5 sub-points.
+  .filter((h) => h.depth === 2 || (h.depth === 3 && page !== "summary"))
+  .map((h) => ({ depth: h.depth as 2 | 3, id: h.slug, text: h.text }));
+
+// Glossary: alphabetical index of the entries (the generated Notes and References sections are not terms).
+const glossaryIndex = page === "glossary"
+  ? renderedHeadings
+      .filter((h) => h.depth === 2 && h.slug !== "notes" && h.slug !== "references")
+      .sort((a, b) => a.text.localeCompare(b.text, lang, { sensitivity: "base" }))
+  : [];
+const extras = chapter || page === "summary" ? "page" : page === "about" ? "report" : undefined;
+
+// Stub pages link to the English page when it exists.
+const englishEntry = entry || lang === defaultLanguage.code ? undefined : await findEntry(defaultLanguage.code);
 ---
 
 {
-  isReportPage ? (
-    <ReportLayout lang={lang} title={title} eyebrow={eyebrow} switchPath={page} breadcrumbs={breadcrumbs} headings={headings}>
-      {sections.map((s) => (
-        <section aria-labelledby={s.id}>
-          <h2 id={s.id}>{s.title}</h2>
-          <p>{t(lang, "placeholder.text")}</p>
-        </section>
-      ))}
+  Content ? (
+    <ReportLayout lang={lang} title={title} switchPath={page} breadcrumbs={breadcrumbs} headings={headings} extras={extras}>
+      {
+        glossaryIndex.length > 0 && (
+          <nav id={GLOSSARY_INDEX_ID} class="glossary-index" aria-label={t(lang, "glossary.index")}>
+            <p class="index-label">{t(lang, "glossary.index")}</p>
+            <ul>
+              {glossaryIndex.map((h) => (
+                <li>
+                  <a href={`#${h.slug}`}>{h.text}</a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        )
+      }
+      <Content />
     </ReportLayout>
   ) : (
     <Base lang={lang} title={title} switchPath={page} breadcrumbs={breadcrumbs}>
       <h1>{title}</h1>
-      {page === "about" ? (
-        <section id="sources" aria-labelledby="sources-title">
-          <h2 id="sources-title">{t(lang, "page.sources")}</h2>
-          <p>{t(lang, "page.inPreparation")}</p>
-        </section>
-      ) : (
-        <p>{t(lang, "page.inPreparation")}</p>
-      )}
+      <p>{t(lang, "page.inPreparation")}</p>
+      {
+        englishEntry && (
+          <p>
+            <a href={pageUrl(defaultLanguage.code, page)} hreflang={defaultLanguage.code} lang={defaultLanguage.code}>
+              {t(lang, "page.stub.english")}
+            </a>
+          </p>
+        )
+      }
     </Base>
   )
 }

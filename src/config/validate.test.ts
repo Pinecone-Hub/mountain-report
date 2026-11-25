@@ -142,4 +142,28 @@ describe("validateReportConfig", () => {
     c.chapters[0].id = "Chapter 1";
     expect(() => validateReportConfig(c, known)).toThrow(/lower-case letters/);
   });
+
+  it("exposes the citation block and the authors", () => {
+    const cfg = validateReportConfig(raw, known);
+    expect(cfg.citation).toEqual({ authors: ["Butuc, D."], publisher: "Pinecone Hub", year: 2026 });
+    expect(cfg.authors).toEqual([{ name: "Dan Butuc", affiliation: "Pinecone Hub" }]);
+  });
+
+  it("rejects a missing or malformed citation block", () => {
+    const missing = clone();
+    delete missing.citation;
+    expect(() => validateReportConfig(missing, known)).toThrow(/"citation"/);
+    const bad = clone();
+    bad.citation = { authors: [], publisher: "", year: "2026" };
+    expect(() => validateReportConfig(bad, known)).toThrow(/citation\.authors[\s\S]*citation\.publisher[\s\S]*citation\.year/);
+  });
+
+  it("rejects missing or malformed authors", () => {
+    const missing = clone();
+    delete missing.authors;
+    expect(() => validateReportConfig(missing, known)).toThrow(/"authors"/);
+    const bad = clone();
+    bad.authors = [{ name: "A" }, "B"];
+    expect(() => validateReportConfig(bad, known)).toThrow(/authors\[0\][\s\S]*authors\[1\]/);
+  });
 });

@@ -7,7 +7,7 @@
   },
   "scripts": {
     "dev": "astro dev",
-    "build": "astro check && astro build && node -e \"const fs=require('fs');const b=require('./report.config.json').basePath;fs.copyFileSync('dist'+b+'/404.html','dist/404.html')\"",
+    "build": "node -e \"for(const d of ['.astro','node_modules/.astro'])require('fs').rmSync(d,{recursive:true,force:true})\" && astro check && astro build && node -e \"const fs=require('fs');const b=require('./report.config.json').basePath;fs.copyFileSync('dist'+b+'/404.html','dist/404.html')\"",
     "preview": "astro preview",
     "test": "tsc -p worker/tsconfig.json && vitest run",
     "check": "node --experimental-strip-types --disable-warning=ExperimentalWarning scripts/check.ts",
@@ -17,6 +17,7 @@
     "@astrojs/check": "0.9.12",
     "@astrojs/sitemap": "3.7.6",
     "@axe-core/playwright": "4.14.0",
+    "@types/hast": "3.0.5",
     "astro": "7.4.13",
     "playwright": "1.64.0",
     "typescript": "6.0.3",
@@ -27,7 +28,9 @@
     "esbuild@0.28.2": true
   },
   "dependencies": {
+    "@astrojs/markdown-satteri": "0.4.10",
     "@fontsource-variable/noto-sans": "5.3.0",
-    "@fontsource-variable/noto-sans-arabic": "5.3.0"
+    "@fontsource-variable/noto-sans-arabic": "5.3.0",
+    "satteri": "0.11.7"
   }
 }

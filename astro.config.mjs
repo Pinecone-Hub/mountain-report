@@ -1,6 +1,8 @@
 import { readFileSync } from "node:fs";
 import { defineConfig } from "astro/config";
 import sitemap from "@astrojs/sitemap";
+import { satteri } from "@astrojs/markdown-satteri";
+import { contentPlugins } from "./src/plugins/index.ts";
 
 // Report identity lives in report.config.json (validated in src/config/report.ts).
 const { site: SITE, basePath: BASE } = JSON.parse(
@@ -18,6 +20,11 @@ export default defineConfig({
   prefetch: false,
   devToolbar: {
     enabled: false,
+  },
+  // Astro 7 renders Markdown with Sätteri. The content plugins (heading ids, cross-references,
+  // calibrated terms, notes, citations) are Sätteri hast plugins, see src/plugins/.
+  markdown: {
+    processor: satteri({ hastPlugins: contentPlugins() }),
   },
   integrations: [
     sitemap({

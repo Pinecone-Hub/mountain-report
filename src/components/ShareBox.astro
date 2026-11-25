@@ -1,0 +1,45 @@
+---
+import { report, reportTitle } from "../config/report";
+import { t, tf } from "../i18n/index";
+import { absoluteUrl } from "../lib/citation";
+import { reportPageTitle } from "../lib/page-titles";
+
+interface Props {
+  lang: string;
+  slug: string;
+}
+
+// Plain links only: an email link and a copy button. No third-party scripts or URLs.
+const { lang, slug } = Astro.props;
+const url = absoluteUrl(report.site, report.basePath, lang, slug);
+const subject = tf(lang, "share.mail.subject", { title: reportPageTitle(lang, slug), report: reportTitle(lang) });
+const mailto = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(url)}`;
+---
+
+<section class="share-box" aria-labelledby="share-title">
+  <h2 id="share-title">{t(lang, "share.title")}</h2>
+  <p class="share-actions">
+    <a href={mailto}>{t(lang, "share.mail")}</a>
+    <button type="button" hidden data-copy data-copy-value={url} data-copy-status="share-status" aria-label={t(lang, "copy.link.label")}>
+      {t(lang, "copy.link")}
+    </button>
+  </p>
+  <p id="share-status" class="copy-status" role="status" data-done={t(lang, "copy.done")} data-failed={t(lang, "copy.failed")}></p>
+</section>
+
+<style>
+  .share-box {
+    margin-block-start: var(--space-5);
+  }
+
+  .share-box h2 {
+    font-size: var(--text-lg);
+  }
+
+  .share-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+    align-items: center;
+  }
+</style>

@@ -1,5 +1,9 @@
 ---
 import Base from "./Base.astro";
+import AuthorsBox from "../components/AuthorsBox.astro";
+import CiteBox from "../components/CiteBox.astro";
+import PageNav from "../components/PageNav.astro";
+import ShareBox from "../components/ShareBox.astro";
 import Toc from "../components/Toc.astro";
 import type { Crumb, TocHeading } from "../lib/nav";
 
@@ -13,9 +17,11 @@ interface Props {
   breadcrumbs?: Crumb[];
   /** The page's h2 and h3 headings, for the side table of contents. */
   headings: TocHeading[];
+  /** "page": how to cite, share, authors and previous/next (Summary and chapters). "report": how to cite the whole report. */
+  extras?: "page" | "report";
 }
 
-const { lang, title, eyebrow, switchPath, breadcrumbs, headings } = Astro.props;
+const { lang, title, eyebrow, switchPath = "", breadcrumbs, headings, extras } = Astro.props;
 ---
 
 <Base lang={lang} title={title} switchPath={switchPath} breadcrumbs={breadcrumbs}>
@@ -27,6 +33,15 @@ const { lang, title, eyebrow, switchPath, breadcrumbs, headings } = Astro.props;
     <Toc lang={lang} headings={headings} />
     <article class="report-body">
       <slot />
+      {extras === "page" && (
+        <>
+          <CiteBox lang={lang} slug={switchPath} />
+          <ShareBox lang={lang} slug={switchPath} />
+          <AuthorsBox lang={lang} />
+          <PageNav lang={lang} slug={switchPath} />
+        </>
+      )}
+      {extras === "report" && <CiteBox lang={lang} slug="" />}
     </article>
   </div>
 </Base>

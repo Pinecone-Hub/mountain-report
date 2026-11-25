@@ -20,7 +20,9 @@ A second approach compares and combines many independent estimates [@glambie2025
 
 The paper describing the WGMS method reports that glaciers lost 9,179 ± 621 Gt of water between 1976 and 2024, an average of 187 ± 20 Gt yr⁻¹ [@dussaillant2025essd]. About 41% of this total loss took place in the last ten years of that record [@dussaillant2025essd]. About 6% of it took place in 2023 alone, which the authors identify as a record year for glacier mass loss [@dussaillant2025essd].
 
-The current version of the series runs to the hydrological year 2025 [@wgms2026amce; @zemp2026]. On this basis, glaciers have lost 9,583 ± 1,211 Gt since 1975 [@zemp2026].
+The current version of the series runs to the hydrological year 2025 [@wgms2026amce; @zemp2026]. On this basis, glaciers have lost 9,583 ± 1,211 Gt since 1975 [@zemp2026].[^period]
+
+[^period]: Zemp et al. give the start of the cumulative period as 1975, while their Fig. 1 of global mass change begins with the hydrological year 1976 [@zemp2026].
 
 TODO_FIGURE: Annual global glacier mass change (Gt) by hydrological year, 1976 to 2025, from the WGMS annual mass-change estimates (version 2026-02-10).
 
