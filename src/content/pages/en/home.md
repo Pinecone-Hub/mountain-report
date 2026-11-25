@@ -1,6 +1,7 @@
 ---
-title: "Climate Risks in High Mountain Regions"
-description: "Glacier retreat, mountain hazards and adaptation: a demonstration report microsite built on cited sources."
+title: Climate Risks in High Mountain Regions
+description: "Glacier retreat, mountain hazards and adaptation: a demonstration
+  report microsite built on cited sources."
 lang: en
 id: home
 ---

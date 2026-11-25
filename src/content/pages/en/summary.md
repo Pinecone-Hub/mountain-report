@@ -1,6 +1,7 @@
 ---
 title: Summary
-description: "Headline statements on glacier retreat, mountain hazards and adaptation, with links to the supporting chapter sections."
+description: Headline statements on glacier retreat, mountain hazards and
+  adaptation, with links to the supporting chapter sections.
 lang: en
 id: summary
 ---

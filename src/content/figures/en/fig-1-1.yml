@@ -9,23 +9,22 @@ series:
 source:
   - wgms2026amce
 title: Annual global glacier mass change, 1976 to 2025
-caption: >-
-  Annual mass change of the world's glaciers in gigatonnes (Gt) for each
+caption: Annual mass change of the world's glaciers in gigatonnes (Gt) for each
   hydrological year from 1976 to 2025, from the WGMS annual mass-change
-  estimates (version 2026-02-10). Bars below zero show mass loss. Whiskers
-  show the 95% interval (1.96 × the 1σ reported in the dataset).
-alt: Bar chart of annual global glacier mass change from 1976 to 2025, showing a loss in every year since 1993 and the largest loss in 2023.
-longDescription: >-
-  The horizontal axis shows hydrological years 1976 to 2025, each labelled by
-  its end year. The vertical axis shows mass change in gigatonnes (Gt), with
-  values below zero for mass loss. The central estimates show a mass gain in
-  seven years, the last in 1992: 1976, 1980, 1981, 1983, 1987, 1988 and 1992;
-  the 95% intervals of these years include zero. Losses increase
-  over the period. Ten-year means were −18.6 Gt per year for 1976 to 1985,
-  −92.3 for 1986 to 1995, −218.2 for 1996 to 2005, −239.0 for 2006 to 2015 and
-  −390.3 for 2016 to 2025. The largest loss was −555.5 Gt in 2023 (95%
+  estimates (version 2026-02-10). Bars below zero show mass loss. Whiskers show
+  the 95% interval (1.96 × the 1σ reported in the dataset).
+alt: Bar chart of annual global glacier mass change from 1976 to 2025, showing a
+  loss in every year since 1993 and the largest loss in 2023.
+longDescription: "The horizontal axis shows hydrological years 1976 to 2025,
+  each labelled by its end year. The vertical axis shows mass change in
+  gigatonnes (Gt), with values below zero for mass loss. The central estimates
+  show a mass gain in seven years, the last in 1992: 1976, 1980, 1981, 1983,
+  1987, 1988 and 1992; the 95% intervals of these years include zero. Losses
+  increase over the period. Ten-year means were −18.6 Gt per year for 1976 to
+  1985, −92.3 for 1986 to 1995, −218.2 for 1996 to 2005, −239.0 for 2006 to 2015
+  and −390.3 for 2016 to 2025. The largest loss was −555.5 Gt in 2023 (95%
   interval ± 133.3 Gt), followed by 2020 (−460.9 Gt), 2024 (−460.6 Gt), 2022
   (−457.8 Gt), 2019 (−434.0 Gt), 2025 (−408.1 Gt) and 2011 (−353.5 Gt). The
   annual values from 1976 to 2025 sum to −9,583.1 Gt. The 95% intervals are
   about ± 190 to ± 210 Gt up to 1999, drop to about ± 146 Gt in 2000 and are
-  about ± 130 Gt from 2016 to 2025. All values are listed in the data table.
+  about ± 130 Gt from 2016 to 2025. All values are listed in the data table."

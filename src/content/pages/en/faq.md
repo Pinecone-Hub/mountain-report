@@ -1,6 +1,7 @@
 ---
 title: Frequently asked questions
-description: Short answers on glacier loss, glacial lake outburst floods, glacier collapse and early warning in high mountain regions.
+description: Short answers on glacier loss, glacial lake outburst floods,
+  glacier collapse and early warning in high mountain regions.
 lang: en
 id: faq
 ---

@@ -43,6 +43,10 @@ few kilobytes each. `npm run check` fails on any file in `dist/` larger than 25 
   from a pinned version with Subresource Integrity (`src/lib/decap.ts`).
 - Placeholder PDFs for the Downloads page: `node --experimental-strip-types
   scripts/placeholder-pdfs.ts` writes them to `public/media/downloads/`.
+- File format: Decap rewrites `src/content/**`, `src/data/references.json` and `report.config.json`
+  in its own format on every save, so that format is the standard. After hand edits run
+  `npm run build && npm run cms:normalise`; `npm run test:cms` (round trip through the demo
+  editor, needs a build) fails if a save would change any file.
 - The editor guide is `<base>/admin-guide/` (`src/content/guide/en.md`).
 
 ## Licence

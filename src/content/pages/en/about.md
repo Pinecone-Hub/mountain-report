@@ -1,6 +1,7 @@
 ---
 title: About this demo
-description: Purpose of this demonstration report microsite, how its content was produced, the sources it uses and the licence of its text.
+description: Purpose of this demonstration report microsite, how its content was
+  produced, the sources it uses and the licence of its text.
 lang: en
 id: about
 ---

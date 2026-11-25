@@ -1,7 +1,4 @@
 {
-  "id": "mountain-report",
-  "site": "https://pinecone.lu",
-  "basePath": "/mountain-report",
   "title": {
     "en": "Climate Risks in High Mountain Regions",
     "fr": "Risques climatiques dans les régions de haute montagne"
@@ -11,10 +8,6 @@
     "fr": "Rapport montagne"
   },
   "accentColour": "#005A8C",
-  "cms": {
-    "repo": "Pinecone-Hub/mountain-report",
-    "branch": "main"
-  },
   "citation": {
     "authors": [
       "Butuc, D."
@@ -26,24 +19,6 @@
     {
       "name": "Dan Butuc",
       "affiliation": "Pinecone Hub"
-    }
-  ],
-  "languages": [
-    {
-      "code": "en",
-      "dir": "ltr",
-      "scope": "full",
-      "default": true
-    },
-    {
-      "code": "fr",
-      "dir": "ltr",
-      "scope": "full"
-    },
-    {
-      "code": "ar",
-      "dir": "rtl",
-      "scope": "summary"
     }
   ],
   "chapters": [
@@ -71,5 +46,30 @@
         "fr": "Impacts et adaptation"
       }
     }
-  ]
+  ],
+  "site": "https://pinecone.lu",
+  "cms": {
+    "repo": "Pinecone-Hub/mountain-report",
+    "branch": "main"
+  },
+  "basePath": "/mountain-report",
+  "languages": [
+    {
+      "code": "en",
+      "dir": "ltr",
+      "scope": "full",
+      "default": true
+    },
+    {
+      "code": "fr",
+      "dir": "ltr",
+      "scope": "full"
+    },
+    {
+      "code": "ar",
+      "dir": "rtl",
+      "scope": "summary"
+    }
+  ],
+  "id": "mountain-report"
 }

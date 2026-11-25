@@ -1,6 +1,7 @@
 ---
 title: Hazards
-description: Glacial lakes, glacial lake outburst floods and glacier collapse, with case studies from Blatten, Switzerland (2025) and Thame, Nepal (2024).
+description: Glacial lakes, glacial lake outburst floods and glacier collapse,
+  with case studies from Blatten, Switzerland (2025) and Thame, Nepal (2024).
 lang: en
 chapter: 2
 id: chapter-2
