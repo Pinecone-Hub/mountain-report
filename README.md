@@ -54,7 +54,7 @@ Checks and tests:
 | `npm test` | Type-checks the Worker and OAuth code, then runs vitest |
 | `npm run check` | Mechanical checks over the sources and `dist/` (links, base path, allowlist, em-dash, file sizes, stale data or PNGs, TODO_SOURCE) |
 | `npm run check -- --pre-release` | Same, with any `TODO_SOURCE` in `src/` or `data/` as a failure |
-| `npm run test:a11y` | axe-core on every built page at desktop and mobile size, plus keyboard checks (skip link, home tiles, table of contents, footnotes, citations, tooltips, chart slider, lightbox, FAQ, search, language switcher, video) |
+| `npm run test:a11y` | axe-core on every built page at desktop and mobile size in Chromium, Firefox and WebKit (`A11Y_BROWSERS=webkit` for one engine), plus keyboard checks (skip link, home tiles, table of contents, footnotes, citations, tooltips, chart slider, lightbox, FAQ, search, language switcher, video) |
 | `npm run test:cms` | Saves every entry through the demo editor and checks that no file changes |
 | `npm run test:apache` | Serves `dist/` with Apache (image `httpd:2.4`) using only the generated `.htaccess`; needs Docker running |
 

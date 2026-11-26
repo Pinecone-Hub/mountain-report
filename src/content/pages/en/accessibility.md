@@ -10,7 +10,7 @@ This statement was prepared on 25 November 2026 and updated on 26 November 2026.
 
 ## How the site was tested
 
-Automated tests with axe-core, run through Playwright in the Chromium browser, covered every page of the site in English and French, and the Arabic Summary. Each page was tested at a desktop viewport and at a mobile viewport, against the WCAG 2.0, 2.1 and 2.2 rules at levels A and AA. At the date of this statement, these tests found no violations.
+Automated tests with axe-core, run through Playwright in the Chromium, Firefox and WebKit browsers, covered every page of the site in English and French, and the Arabic Summary. Each page was tested at a desktop viewport and at a mobile viewport, against the WCAG 2.0, 2.1 and 2.2 rules at levels A and AA. At the date of this statement, these tests found no violations.
 
 Scripted keyboard checks confirm that:
 

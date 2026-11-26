@@ -10,7 +10,7 @@ La présente déclaration a été établie le 25 novembre 2026 et mise à jour l
 
 ## Méthode d'évaluation
 
-Des tests automatisés au moyen d'axe-core, exécutés avec Playwright dans le navigateur Chromium, ont porté sur toutes les pages du site en anglais et en français, ainsi que sur le Résumé en arabe. Chaque page a été testée dans une fenêtre d'affichage de bureau et dans une fenêtre d'affichage mobile, au regard des règles des WCAG 2.0, 2.1 et 2.2 aux niveaux A et AA. À la date de la présente déclaration, ces tests n'ont relevé aucune non-conformité.
+Des tests automatisés au moyen d'axe-core, exécutés avec Playwright dans les navigateurs Chromium, Firefox et WebKit, ont porté sur toutes les pages du site en anglais et en français, ainsi que sur le Résumé en arabe. Chaque page a été testée dans une fenêtre d'affichage de bureau et dans une fenêtre d'affichage mobile, au regard des règles des WCAG 2.0, 2.1 et 2.2 aux niveaux A et AA. À la date de la présente déclaration, ces tests n'ont relevé aucune non-conformité.
 
 Des vérifications automatisées au clavier confirment que :
 
