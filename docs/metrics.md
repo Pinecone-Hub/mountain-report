@@ -17,22 +17,20 @@ Measured on 26 November 2026. The reference columns (IPCC AR6 SYR, WMO State of 
 ## Lighthouse (mobile)
 
 Lighthouse 13.6.0 (`npx -y lighthouse@13.6.0`, not a project dependency), default mobile
-settings (Moto G Power emulation, simulated throttling), headless Chrome.
+settings (`--form-factor=mobile`, mobile emulation, simulated throttling), headless Chrome,
+against the live site on 26 November 2026 after the stage 7 release (commit 69256fb).
 
-| Page | Performance | Accessibility | Best practices | SEO |
-| --- | --- | --- | --- | --- |
-| Home (`/en/`), live | 100 | 100 | 100 | 100 |
-| Summary (`/en/summary/`), live before the font fix | 83 | 100 | 100 | 100 |
-| Chapter 1 (`/en/chapter-1/`), live before the font fix | 88 | 100 | 100 | 100 |
-| Summary, local build with the font fix | 100 | | | |
-| Chapter 1, local build with the font fix | 100 | | | |
+| Page | Performance | Accessibility | Best practices | SEO | CLS | LCP | Transfer |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Home (`/en/`) | 100 | 100 | 100 | 100 | 0 | 0.9 s | 58 KiB |
+| Summary (`/en/summary/`) | 100 | 100 | 100 | 100 | 0 | 0.9 s | 53 KiB |
+| Chapter 1 (`/en/chapter-1/`) | 100 | 100 | 100 | 100 | 0 | 0.9 s | 67 KiB |
 
-The live Summary and Chapter 1 lost points only on Cumulative Layout Shift (0.36 and 0.23),
-caused by the web font replacing the fallback font after the first paint. Stage 7 adds a
-preload for the Latin font file and a fallback face whose metrics match Noto Sans (from the
-font's own tables, and a width ratio measured in the browser). On the local build, CLS is 0 on
-both pages. The live scores will be measured again after the release push; this table will be
-updated then.
+Before the stage 7 font fix, the live Summary scored 83 and Chapter 1 88 for Performance (all
+other categories 100), lost only on Cumulative Layout Shift (0.36 and 0.23): the web font
+replaced the fallback font after the first paint. Stage 7 adds a preload for the Latin font
+file (left-to-right pages only) and a fallback face whose metrics match Noto Sans (from the
+font's own tables, and a width ratio measured in the browser).
 
 ## How each value was measured
 
@@ -45,8 +43,7 @@ updated then.
   412 x 823, `https://pinecone.lu/mountain-report/en/summary/` loaded until network idle, sum of
   `encodedDataLength` from the Chrome DevTools Protocol `Network.loadingFinished` events (bytes
   on the wire, compressed). Three runs: 52,129, 52,117 and 52,174 bytes, 3 requests. For comparison, Home 57 KB and Chapter 1 66 KB with the same method.
-- **Lighthouse:** run against the live site (`https://pinecone.lu/mountain-report/`), and for
-  the font fix against the built `dist/` served locally.
+- **Lighthouse:** run against the live site (`https://pinecone.lu/mountain-report/`).
 - **Accessibility tests:** `npm run test:a11y`: axe-core (WCAG 2.0, 2.1, 2.2, levels A and AA)
   on 28 built pages at desktop and mobile viewports, 0 violations; plus scripted keyboard checks
   of the skip link, home tiles, table of contents, footnotes, citations, tooltips, chart slider,
