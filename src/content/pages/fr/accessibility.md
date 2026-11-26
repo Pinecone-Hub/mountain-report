@@ -6,7 +6,7 @@ description: État de l'accessibilité de ce site de démonstration, méthode
 
 ## État de conformité
 
-La présente déclaration a été établie le 25 novembre 2026. Le site vise la conformité au niveau AA des Règles pour l'accessibilité des contenus Web (WCAG) 2.2. Il s'agit d'un site de démonstration et non d'un service en production. La présente déclaration décrit l'état de la démonstration à cette date.
+La présente déclaration a été établie le 25 novembre 2026 et mise à jour le 26 novembre 2026. Le site vise la conformité au niveau AA des Règles pour l'accessibilité des contenus Web (WCAG) 2.2. Il s'agit d'un site de démonstration et non d'un service en production. La présente déclaration décrit l'état de la démonstration à cette date.
 
 ## Méthode d'évaluation
 
@@ -15,13 +15,19 @@ Des tests automatisés au moyen d'axe-core, exécutés avec Playwright dans le n
 Des vérifications automatisées au clavier confirment que :
 
 - la première pression sur la touche Tab mène au lien d'évitement ;
+- les vignettes de la page d'accueil, la table des matières, les notes de bas de page et le sélecteur de langue fonctionnent avec les touches Tab et Entrée ;
 - les infobulles des termes calibrés du GIEC s'ouvrent à la prise de focus et se ferment avec la touche Échap ;
 - les liens de citation mènent à la référence et permettent de revenir au texte ;
 - le graphique peut être lu avec les touches fléchées ;
 - la visionneuse de figures s'ouvre, se ferme avec la touche Échap et rend le focus ;
-- les entrées de la FAQ s'ouvrent au clavier.
+- les entrées de la FAQ s'ouvrent au clavier ;
+- la recherche peut être utilisée au clavier, du champ de recherche jusqu'à un résultat.
 
-Une vérification manuelle complète au clavier et des tests avec des lecteurs d'écran sont prévus pour l'étape de publication. Ils n'ont pas encore été réalisés.
+Une vérification manuelle au clavier a été effectuée le 26 novembre 2026 dans Safari sous macOS. Elle a porté sur le lien d'évitement, la visibilité du focus, les vignettes de la page d'accueil, le graphique, la visionneuse de figures et le sélecteur de langue. Aucun problème n'a été relevé.
+
+Google Lighthouse (version mobile) a attribué un score d'accessibilité de 100 à la page d'accueil, au Résumé et au chapitre 1.
+
+Le site n'a pas été testé avec un lecteur d'écran. À la place, une vérification automatisée a relevé les noms et les rôles que le navigateur transmet aux technologies d'assistance pour le lien d'évitement, les repères de la page, le sélecteur de langue, les figures et leurs légendes, le graphique et l'année qu'il affiche, les liens vers les notes de bas de page et vers les citations, les infobulles des termes calibrés, la recherche et le bouton vidéo. Cette vérification ne remplace pas des tests avec un lecteur d'écran.
 
 ## Fonctions d'accessibilité
 
@@ -37,6 +43,7 @@ Une vérification manuelle complète au clavier et des tests avec des lecteurs d
 
 ## Limites connues
 
+- Le site n'a pas été testé avec un lecteur d'écran.
 - Le Résumé en arabe a été traduit automatiquement à des fins de démonstration et n'a pas été révisé par un traducteur.
 - Les fichiers PDF téléchargeables sont des fichiers provisoires et ne sont pas balisés pour l'accessibilité.
 - La recherche nécessite JavaScript.
