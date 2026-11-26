@@ -69,6 +69,8 @@ const trail = site
       url: crumb.href && i < breadcrumbs.length - 1 ? absoluteUrl(site.href, crumb.href) : (canonical ?? absoluteUrl(site.href, Astro.url.pathname)),
     }))
   : [];
+// RTL languages use the Arabic font stylesheet and do not need the Latin preload.
+const rtlScript = language.dir === "rtl";
 const jsonLd = [
   schema === "report" && reportInfo ? reportJsonLd(reportInfo) : undefined,
   schema === "article" && reportInfo && canonical ? articleJsonLd({ url: canonical, headline: title, description, inLanguage: lang, report: reportInfo }) : undefined,
@@ -94,9 +96,9 @@ const jsonLd = [
     <meta property="og:locale" content={t(lang, "seo.locale")} />
     {otherPageLocales.map((locale) => <meta property="og:locale:alternate" content={locale} />)}
     {jsonLd.map((json) => <script type="application/ld+json" is:inline set:html={json} />)}
-    <link rel="preload" as="font" type="font/woff2" href={latinFontUrl} crossorigin />
+    {!rtlScript && <link rel="preload" as="font" type="font/woff2" href={latinFontUrl} crossorigin />}
     <link rel="icon" href={withBase(BASE, "favicon.svg")} type="image/svg+xml" />
-    {lang === "ar" && <link rel="stylesheet" href={arabicFontsUrl} />}
+    {rtlScript && <link rel="stylesheet" href={arabicFontsUrl} />}
     {
       site &&
         !singleLanguage &&
