@@ -1,7 +1,7 @@
 # Metrics
 
 Measured on 26 November 2026. The reference columns (IPCC AR6 SYR, WMO State of Global Climate
-2025) are the values given in the build brief; only the Demo column was measured here.
+2025) are the reference values supplied for this comparison; only the Demo column was measured here.
 
 ## Comparison
 
