@@ -2,13 +2,14 @@
 // Chromium (desktop and mobile viewport) and runs axe-core with the WCAG 2.2 AA tags.
 // Also checks that the first Tab press focuses the skip link, and keyboard use of calibrated-term
 // tooltips (Tab shows, Esc hides) and of citations (link to the reference and back), the chart
-// slider (arrow keys), the Figures lightbox (open, Esc, focus return) and the click-to-load video.
+// slider (arrow keys), the Figures lightbox (open, Esc, focus return), the click-to-load video, and
+// keyboard-only navigation of Home tiles, table of contents, footnotes, search results and the language switcher.
 // Usage: npm run test:a11y   (run `npm run build` first). Exit code 1 on any violation.
 
 import { createServer } from "node:http";
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { extname, join, normalize, relative, resolve, sep } from "node:path";
-import { chromium } from "playwright";
+import { chromium, type Page } from "playwright";
 import AxeBuilder from "@axe-core/playwright";
 
 const ROOT = process.cwd();
@@ -580,6 +581,147 @@ try {
       checked++;
     } catch (error) {
       fail("search", (error as Error).message.split("\n")[0]);
+    } finally {
+      await ctx.close();
+    }
+  }
+  // Keyboard-only navigation: Home tiles, table of contents, footnotes, search results and the
+  // language switcher. Real key presses only, no mouse clicks.
+  {
+    const ctx = await browser.newContext({ viewport: { width: 1280, height: 800 }, reducedMotion: "reduce" });
+    const fail = (rule: string, message: string) => {
+      failures++;
+      process.stdout.write(`FAIL [${rule}] ${message}\n`);
+    };
+    const open = async (path: string) => {
+      const p = await ctx.newPage();
+      await p.goto(`${origin}${BASE}${path}`, { waitUntil: "load" });
+      await p.mouse.move(0, 0);
+      return p;
+    };
+    /** Presses Tab until the focused element matches the selector (at most 300 times). */
+    const tabTo = async (p: Page, selector: string): Promise<boolean> => {
+      for (let i = 0; i < 300; i++) {
+        await p.keyboard.press("Tab");
+        if (await p.evaluate((sel) => document.activeElement?.matches(sel) ?? false, selector)) return true;
+      }
+      return false;
+    };
+    const hasFocusIndicator = (p: Page) =>
+      p.evaluate(() => {
+        const s = getComputedStyle(document.activeElement as Element);
+        const outline = s.outlineStyle !== "none" && parseFloat(s.outlineWidth) > 0;
+        return outline || s.boxShadow !== "none";
+      });
+    try {
+      // a. Home tiles.
+      {
+        const p = await open("en/");
+        const count = await p.locator("a.tile").count();
+        if (count === 0) fail("home-tiles", "the Home page has no tile links");
+        const hrefs: string[] = [];
+        for (let i = 0; i < count; i++) {
+          if (!(await tabTo(p, "a.tile"))) {
+            fail("home-tiles", `Tab reached only ${i} of ${count} tile links`);
+            break;
+          }
+          hrefs.push((await p.evaluate(() => document.activeElement?.getAttribute("href") ?? "")) );
+          if (!(await hasFocusIndicator(p))) fail("home-tiles", `tile ${i + 1} shows no focus indicator`);
+        }
+        const distinct = new Set(hrefs);
+        if (distinct.size !== hrefs.length) fail("home-tiles", "Tab visited the same tile twice");
+        await p.reload({ waitUntil: "load" });
+        if (hrefs.length > 0 && (await tabTo(p, "a.tile"))) {
+          const first = await p.evaluate(() => (document.activeElement as HTMLAnchorElement).href);
+          await Promise.all([p.waitForURL((u) => u.href === first, { timeout: 5000 }).catch(() => fail("home-tiles", `Enter on the first tile did not go to ${first}`)), p.keyboard.press("Enter")]);
+        }
+        await p.close();
+      }
+
+      // b. Table of contents.
+      {
+        const p = await open("en/chapter-1/");
+        if (!(await tabTo(p, "nav[aria-label] a[href^='#']:not(.cite-link)")) || !(await p.evaluate(() => !!document.activeElement?.closest(".toc")))) {
+          fail("toc", "Tab never reached a table-of-contents link");
+        } else {
+          const href = await p.evaluate(() => document.activeElement?.getAttribute("href") ?? "");
+          await p.keyboard.press("Enter");
+          const hash = await p.evaluate(() => location.hash);
+          if (hash !== href) fail("toc", `Enter went to "${hash}", expected "${href}"`);
+          const target = p.locator(`[id="${decodeURIComponent(href.slice(1))}"]`);
+          if ((await target.count()) !== 1) fail("toc", `the target ${href} does not exist`);
+          else if (!(await target.evaluate((el) => { const r = el.getBoundingClientRect(); return r.bottom > 0 && r.top < window.innerHeight; }))) fail("toc", `the target ${href} is not in view after Enter`);
+        }
+        await p.close();
+      }
+
+      // c. Footnotes: reference to note and back.
+      {
+        const p = await open("en/chapter-1/");
+        if (!(await tabTo(p, "a[data-footnote-ref]"))) {
+          fail("footnote", "Tab never reached a footnote reference on the chapter page");
+        } else {
+          const ref = await p.evaluate(() => {
+            const a = document.activeElement as HTMLAnchorElement;
+            return { id: a.id, target: a.getAttribute("href") ?? "" };
+          });
+          await p.keyboard.press("Enter");
+          const hash = await p.evaluate(() => location.hash);
+          if (hash !== ref.target) fail("footnote", `reference went to "${hash}", expected "${ref.target}"`);
+          const back = p.locator(`[id="${ref.target.slice(1)}"] a[data-footnote-backref][href="#${ref.id}"]`).first();
+          if ((await back.count()) !== 1) fail("footnote", `note ${ref.target} has no back link to #${ref.id}`);
+          else {
+            await back.focus();
+            await p.keyboard.press("Enter");
+            const returned = await p.evaluate(() => location.hash);
+            if (returned !== `#${ref.id}`) fail("footnote", `back link went to "${returned}", expected "#${ref.id}"`);
+          }
+        }
+        await p.close();
+      }
+
+      // d. Search: Tab to the input, type, Tab to the first result, Enter.
+      {
+        const p = await open("en/search/");
+        if (!(await tabTo(p, "#search-input"))) {
+          fail("search-keyboard", "Tab never reached the search input");
+        } else {
+          await p.keyboard.type("glacier");
+          await p.keyboard.press("Enter");
+          await p.waitForSelector("#search-results li a", { timeout: 10000 }).catch(() => fail("search-keyboard", "typing a query gave no results"));
+          if (await p.locator("#search-results li a").count()) {
+            if (!(await tabTo(p, "#search-results a"))) fail("search-keyboard", "Tab never reached a result link");
+            else {
+              const first = await p.evaluate(() => (document.activeElement as HTMLAnchorElement).href);
+              await Promise.all([p.waitForURL((u) => u.href === first, { timeout: 5000 }).catch(() => fail("search-keyboard", `Enter on the first result did not go to ${first}`)), p.keyboard.press("Enter")]);
+              if (!new URL(p.url()).pathname.startsWith(`${BASE}en/`)) fail("search-keyboard", `the result opened ${p.url()}, outside the English pages`);
+            }
+          }
+        }
+        await p.close();
+      }
+
+      // e. Language switcher (a list of links).
+      {
+        const p = await open("en/chapter-1/");
+        if (!(await tabTo(p, ".lang-switcher a[hreflang='fr']"))) fail("lang-switcher", "Tab never reached the French option");
+        else {
+          await Promise.all([p.waitForURL(`${origin}${BASE}fr/chapter-1/`, { timeout: 5000 }).catch(() => fail("lang-switcher", `Enter on French did not go to ${BASE}fr/chapter-1/ (now ${p.url()})`)), p.keyboard.press("Enter")]);
+          if ((await p.evaluate(() => document.documentElement.lang)) !== "fr") fail("lang-switcher", "the French page does not have lang=fr");
+        }
+        await p.close();
+        const s = await open("en/summary/");
+        if (!(await tabTo(s, ".lang-switcher a[hreflang='ar']"))) fail("lang-switcher", "Tab never reached the Arabic option on the Summary");
+        else {
+          await Promise.all([s.waitForURL(`${origin}${BASE}ar/summary/`, { timeout: 5000 }).catch(() => fail("lang-switcher", `Enter on Arabic did not go to ${BASE}ar/summary/ (now ${s.url()})`)), s.keyboard.press("Enter")]);
+          const attrs = await s.evaluate(() => ({ dir: document.documentElement.dir, lang: document.documentElement.lang }));
+          if (attrs.dir !== "rtl" || attrs.lang !== "ar") fail("lang-switcher", `the Arabic page has dir="${attrs.dir}" lang="${attrs.lang}"`);
+        }
+        await s.close();
+      }
+      checked++;
+    } catch (error) {
+      fail("keyboard", (error as Error).message.split("\n")[0]);
     } finally {
       await ctx.close();
     }

@@ -16,7 +16,7 @@
   --focus: #0b5fc4;
 
   /* Type */
-  --font-body: "Noto Sans Variable", "Noto Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-body: "Noto Sans Variable", "Noto Sans Fallback", "Noto Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-weight-regular: 400;
   --font-weight-strong: 600;
   --text-sm: 0.875rem;

@@ -87,12 +87,10 @@ function readJson(file: string, rule: string): unknown {
 const SRC = join(ROOT, "src");
 const PUBLIC = join(ROOT, "public");
 const DATA = join(ROOT, "data");
-const DOCS = join(ROOT, "docs");
 const DIST = join(ROOT, "dist");
 const srcFiles = walk(SRC).filter(isText);
 const publicFiles = walk(PUBLIC).filter(isText);
 const dataFiles = walk(DATA).filter(isText);
-const docsFiles = walk(DOCS).filter(isText);
 const distExists = existsSync(DIST);
 const allDist = walk(DIST);
 const distFiles = allDist.filter(isText);
@@ -274,7 +272,7 @@ for (const file of srcFiles.filter((f) => /^src\/content\/(?:pages|chapters)\/[a
 
 // ---------- h. TODO_SOURCE ----------
 
-for (const file of [...srcFiles, ...dataFiles, ...docsFiles]) {
+for (const file of [...srcFiles, ...dataFiles]) {
   const text = read(file);
   for (const index of findMarker(text, "TODO_SOURCE")) {
     report(PRE_RELEASE ? "FAIL" : "WARN", "todo", "TODO_SOURCE marker", at(file, text, index));

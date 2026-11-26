@@ -3,6 +3,7 @@ import "../styles/tokens.css";
 import "../styles/fonts.css";
 import "../styles/global.css";
 import "../styles/content.css";
+import latinFontUrl from "@fontsource-variable/noto-sans/files/noto-sans-latin-wght-normal.woff2?url";
 import arabicFontsUrl from "../styles/fonts-arabic.css?url";
 import Breadcrumbs from "../components/Breadcrumbs.astro";
 import Footer from "../components/Footer.astro";
@@ -93,6 +94,7 @@ const jsonLd = [
     <meta property="og:locale" content={t(lang, "seo.locale")} />
     {otherPageLocales.map((locale) => <meta property="og:locale:alternate" content={locale} />)}
     {jsonLd.map((json) => <script type="application/ld+json" is:inline set:html={json} />)}
+    <link rel="preload" as="font" type="font/woff2" href={latinFontUrl} crossorigin />
     <link rel="icon" href={withBase(BASE, "favicon.svg")} type="image/svg+xml" />
     {lang === "ar" && <link rel="stylesheet" href={arabicFontsUrl} />}
     {
